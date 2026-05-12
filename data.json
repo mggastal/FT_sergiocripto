@@ -1,0 +1,14 @@
+{
+  "cliente": "Sergio Cripto",
+  "cor": "#0ea5e9",
+  "letra": "SC",
+  "lancamento": "TLC02",
+  "moeda": "EUR",
+  "moeda_simbolo": "€",
+  "atualizado": "12/05/2026",
+  "kpis": {
+    "spend": 303.64,
+    "leads": 95,
+    "cpl": 3.2
+  }
+}
