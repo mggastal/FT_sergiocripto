@@ -15,7 +15,7 @@ OUTPUT_FILE      = "index.html"
 
 NOME_CLIENTE     = "Sergio Cripto"
 LOGO_LETRA       = "SC"
-COR_ACENTO       = "#0ea5e9"
+COR_ACENTO       = "#B8860B"
 
 LANCAMENTO_COD   = "TLC02"        # filtra campanhas; "" = ver tudo
 USAR_PESQUISA    = False            # False = oculta aba Pesquisa
