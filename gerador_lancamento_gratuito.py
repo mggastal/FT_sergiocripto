@@ -9,22 +9,22 @@ from pathlib import Path
 # CONFIG
 # ══════════════════════════════════════════════════════
 
-SHEET_ID         = "14hAMhJxwTidYCidz6-JI4G4hwmMcnYNAIcaRYnez9rc"
+SHEET_ID         = "1jw5233AdiGs3FRHmG-uIQBxJpFULPFMGA0OptoVJqKk"
 TEMPLATE_FILE    = "dashboard_lancamento_gratuito.html"
 OUTPUT_FILE      = "index.html"
 
-NOME_CLIENTE     = "Olfateando"
-LOGO_LETRA       = "OL"
+NOME_CLIENTE     = "Sergio Cripto"
+LOGO_LETRA       = "SC"
 COR_ACENTO       = "#0ea5e9"
 
-LANCAMENTO_COD   = "CI02"        # filtra campanhas; "" = ver tudo
+LANCAMENTO_COD   = "TLC02"        # filtra campanhas; "" = ver tudo
 USAR_PESQUISA    = False            # False = oculta aba Pesquisa
 
 # Metas do funil — define cores (verde/amarelo/vermelho)
-CPL_BOM          = 3.0    # Custo por Lead ≤ 5 → verde | 5-10 → amarelo | acima → vermelho
-CPL_MEDIO        = 4.0
-CTR_BOM          = 1.2    # CTR ≥ 1.2% → verde | 0.8-1.2% → amarelo | abaixo → vermelho
-CTR_MEDIO        = 1.0
+CPL_BOM          = 6.0    # Custo por Lead ≤ 5 → verde | 5-10 → amarelo | acima → vermelho
+CPL_MEDIO        = 8.0
+CTR_BOM          = 1.0    # CTR ≥ 1.2% → verde | 0.8-1.2% → amarelo | abaixo → vermelho
+CTR_MEDIO        = 0.8
 CR_BOM           = 65.0   # Connect Rate ≥ 40% → verde | 25-40% → amarelo | abaixo → vermelho
 CR_MEDIO         = 60.0
 TX_CONV_BOM      = 25.0   # Taxa Conversão (Lead/PV) ≥ 30% → verde | 15-30% → amarelo | abaixo → vermelho
