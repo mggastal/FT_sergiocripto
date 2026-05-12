@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Gerador Dashboard Lançamento Gratuito v1"""
+"""Gerador Dashboard Lançamento Gratuito v2"""
 
 import pandas as pd, json, re, hashlib, requests
 from datetime import date
@@ -20,6 +20,13 @@ COR_ACENTO       = "#0ea5e9"
 LANCAMENTO_COD   = "TLC02"        # filtra campanhas; "" = ver tudo
 USAR_PESQUISA    = False            # False = oculta aba Pesquisa
 
+# ══ MOEDA ══════════════════════════════════════════════
+# Escolha a moeda do cliente:
+#   "BRL"  → R$ (Real Brasileiro)
+#   "USD"  → $ (Dólar Americano)
+#   "EUR"  → € (Euro)
+MOEDA            = "EUR"
+
 # Metas do funil — define cores (verde/amarelo/vermelho)
 CPL_BOM          = 6.0    # Custo por Lead ≤ 5 → verde | 5-10 → amarelo | acima → vermelho
 CPL_MEDIO        = 8.0
@@ -33,6 +40,17 @@ CPM_BOM          = 5.0
 CPM_MEDIO        = 12.0
 
 # ══════════════════════════════════════════════════════
+# Mapeamento de moeda → símbolo e label
+MOEDA_MAP = {
+    "BRL": {"simbolo": "R$", "label": "Real (R$)"},
+    "USD": {"simbolo": "$",  "label": "Dólar ($)"},
+    "EUR": {"simbolo": "€",  "label": "Euro (€)"},
+}
+_moeda_cfg = MOEDA_MAP.get(MOEDA, MOEDA_MAP["BRL"])
+MOEDA_SIMBOLO = _moeda_cfg["simbolo"]
+MOEDA_LABEL   = _moeda_cfg["label"]
+
+# ══════════════════════════════════════════════════════
 def sheet_url(t): return f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv&sheet={t}"
 URL_META = sheet_url("meta-ads")
 URL_PES  = sheet_url("Pesquisa")
@@ -41,7 +59,7 @@ URL_PT   = sheet_url("breakdown-platform")
 
 def to_num(s):
     if pd.api.types.is_numeric_dtype(s): return s.fillna(0)
-    clean = s.astype(str).str.strip().str.replace("R$","",regex=False).str.strip()
+    clean = s.astype(str).str.strip().str.replace("R$","",regex=False).str.replace("$","",regex=False).str.replace("€","",regex=False).str.strip()
     if clean.str.contains(r"\d,\d", regex=True).any():
         clean = clean.str.replace(".","",regex=False).str.replace(",",".",regex=False)
     return pd.to_numeric(clean, errors="coerce").fillna(0)
@@ -167,7 +185,6 @@ def meta_tables_period(df, p, img_dir):
     adsets_agg=ag(p,["campaign","adset"])
     adsets=[{"n":str(r["adset"]),"camp":str(r["campaign"]),**calc_row(r)} for _,r in adsets_agg.sort_values("leads",ascending=False).iterrows()]
 
-    # Thumbs do df completo
     df_full_thumb=df[df["thumb"].notna()&(df["thumb"].astype(str)!="nan")] if "thumb" in df.columns else pd.DataFrame()
     thumb_map={}
     for _,r in df_full_thumb.iterrows():
@@ -210,7 +227,6 @@ def meta_breakdowns(df):
         df_ga["leads"]=to_num(df_ga["Action Leads"])
         df_ga["age"]=df_ga["Age (Breakdown)"].astype(str)
         df_ga["gender"]=df_ga["Gender (Breakdown)"].astype(str)
-        # Filtrar por campanha se a coluna existir
         if "Campaign Name" in df_ga.columns and LANCAMENTO_COD:
             df_ga["is_lct"]=df_ga["Campaign Name"].str.contains(LANCAMENTO_COD,na=False,case=False)
         else:
@@ -223,7 +239,6 @@ def meta_breakdowns(df):
         df_pt["spend"]=to_num(df_pt["Spend (Cost, Amount Spent)"])
         df_pt["leads"]=to_num(df_pt["Action Leads"])
         df_pt["platform"]=df_pt["Platform Position (Breakdown)"].astype(str)
-        # Filtrar por campanha se a coluna existir
         if "Campaign Name" in df_pt.columns and LANCAMENTO_COD:
             df_pt["is_lct"]=df_pt["Campaign Name"].str.contains(LANCAMENTO_COD,na=False,case=False)
         else:
@@ -234,7 +249,6 @@ def meta_breakdowns(df):
     result={}
     for pname,n in [("1",1),("7",7),("14",14),("30",30),("all",0)]:
         start=hoje_bd-pd.Timedelta(days=n-1) if n>0 else None
-        # Aplicar filtro de lançamento em cada subset
         for lname,lct_filter in [("lct",True),("all",None)]:
             if len(df_ga)>0:
                 pga=df_ga if lct_filter is None else df_ga[df_ga["is_lct"]]
@@ -257,7 +271,6 @@ def meta_breakdowns(df):
             if lname not in result: result[lname]={}
             result[lname][pname]={"age":age_d,"gender":gen_d,"platform":plat_d}
 
-    # Raw para datas livres — incluir flag is_lct
     raw_ga=[]
     if len(df_ga)>0:
         for _,r in df_ga.iterrows():
@@ -314,33 +327,48 @@ def replace_js_const(html, name, value):
 
 def inject_all(tpl, meta_k, meta_d, meta_dc, meta_raw_c, meta_t, meta_bd, pes):
     html=Path(tpl).read_text(encoding="utf-8")
-    html=replace_js_const(html,"META_KPIS",     meta_k)
-    html=replace_js_const(html,"META_DAILY",     meta_d)
+    html=replace_js_const(html,"META_KPIS",       meta_k)
+    html=replace_js_const(html,"META_DAILY",       meta_d)
     html=replace_js_const(html,"META_DAILY_CAMPS", meta_dc)
-    html=replace_js_const(html,"META_RAW_CAMP",  meta_raw_c)
-    html=replace_js_const(html,"META_TABLES",    meta_t)
-    html=replace_js_const(html,"META_BD",        meta_bd)
-    html=replace_js_const(html,"PESQUISA", pes if USAR_PESQUISA else False)
-    from datetime import timezone, timedelta
-    html=replace_js_const(html,"DATA_GERACAO", date.today().strftime("%Y-%m-%d"))
-    # Suporte a CPL_BOM ou CPA_BOM (retrocompatibilidade)
+    html=replace_js_const(html,"META_RAW_CAMP",    meta_raw_c)
+    html=replace_js_const(html,"META_TABLES",      meta_t)
+    html=replace_js_const(html,"META_BD",          meta_bd)
+    html=replace_js_const(html,"PESQUISA",         pes if USAR_PESQUISA else False)
+    html=replace_js_const(html,"DATA_GERACAO",     date.today().strftime("%Y-%m-%d"))
+
     _cpl_bom   = globals().get("CPL_BOM",   globals().get("CPA_BOM",   5.0))
     _cpl_medio = globals().get("CPL_MEDIO", globals().get("CPA_MEDIO", 10.0))
-    for k,v in [("LANCAMENTO_COD",f"'{LANCAMENTO_COD}'"),("NOME_CLIENTE",f"'{NOME_CLIENTE}'"),
-                ("LOGO_LETRA",f"'{LOGO_LETRA}'"),("COR_ACENTO",f"'{COR_ACENTO}'"),
-                ("CPL_BOM",str(_cpl_bom)),("CPL_MEDIO",str(_cpl_medio)),
-                ("CTR_BOM",str(CTR_BOM)),("CTR_MEDIO",str(CTR_MEDIO)),
-                ("CR_BOM",str(CR_BOM)),("CR_MEDIO",str(CR_MEDIO)),
-                ("TX_CONV_BOM",str(TX_CONV_BOM)),("TX_CONV_MEDIO",str(TX_CONV_MEDIO)),
-                ("CPM_BOM",str(CPM_BOM)),("CPM_MEDIO",str(CPM_MEDIO))]:
-        html=re.sub(rf"const {k}\s*=\s*[^;]+;",f"const {k}={v};",html,count=1)
-    html=re.sub(r"\d{2}/\d{2}/\d{4} · via planilha",date.today().strftime("%d/%m/%Y")+" · via planilha",html)
+
+    for k,v in [
+        ("LANCAMENTO_COD", f"'{LANCAMENTO_COD}'"),
+        ("NOME_CLIENTE",   f"'{NOME_CLIENTE}'"),
+        ("LOGO_LETRA",     f"'{LOGO_LETRA}'"),
+        ("COR_ACENTO",     f"'{COR_ACENTO}'"),
+        # Moeda
+        ("MOEDA_SIMBOLO",  f"'{MOEDA_SIMBOLO}'"),
+        ("MOEDA_COD",      f"'{MOEDA}'"),
+        # Thresholds
+        ("CPL_BOM",        str(_cpl_bom)),
+        ("CPL_MEDIO",      str(_cpl_medio)),
+        ("CTR_BOM",        str(CTR_BOM)),
+        ("CTR_MEDIO",      str(CTR_MEDIO)),
+        ("CR_BOM",         str(CR_BOM)),
+        ("CR_MEDIO",       str(CR_MEDIO)),
+        ("TX_CONV_BOM",    str(TX_CONV_BOM)),
+        ("TX_CONV_MEDIO",  str(TX_CONV_MEDIO)),
+        ("CPM_BOM",        str(CPM_BOM)),
+        ("CPM_MEDIO",      str(CPM_MEDIO)),
+    ]:
+        html=re.sub(rf"const {k}\s*=\s*[^;]+;", f"const {k}={v};", html, count=1)
+
+    html=re.sub(r"\d{2}/\d{2}/\d{4} · via planilha", date.today().strftime("%d/%m/%Y")+" · via planilha", html)
     return html
 
 # ══ MAIN ═══════════════════════════════════════════════
 def main():
     print("="*60)
     print(f"Dashboard Lançamento Gratuito — {NOME_CLIENTE} / {LANCAMENTO_COD or 'Todos'}")
+    print(f"Moeda: {MOEDA} ({MOEDA_SIMBOLO})")
     print("="*60)
     img_dir=Path("imgs"); img_dir.mkdir(exist_ok=True)
 
@@ -353,12 +381,16 @@ def main():
     m_t=meta_tables(df_meta,img_dir)
     m_bd=meta_breakdowns(df_meta)
     total_leads=m_k["lct"]["leads"] if LANCAMENTO_COD else m_k["all"]["leads"]
-    print(f"  ✓ {total_leads} leads | R$ {m_k['lct']['spend']:,.2f} invest.")
+    print(f"  ✓ {total_leads} leads | {MOEDA_SIMBOLO} {m_k['lct']['spend']:,.2f} invest.")
 
     print("\n[PESQUISA]")
-    df_pes=load_pesquisa()
-    pes=pesquisa_process(df_pes, total_leads)
-    print(f"  ✓ {pes['total']} respostas")
+    if USAR_PESQUISA:
+        df_pes=load_pesquisa()
+        pes=pesquisa_process(df_pes, total_leads)
+        print(f"  ✓ {pes['total']} respostas")
+    else:
+        pes=None
+        print("  (desativada)")
 
     print("\n[HTML]")
     if not Path(TEMPLATE_FILE).exists():
@@ -367,9 +399,16 @@ def main():
     Path(OUTPUT_FILE).write_text(html,encoding="utf-8")
     print(f"  ✓ {OUTPUT_FILE} ({len(html)//1024}KB)")
 
-    data_json={"cliente":NOME_CLIENTE,"cor":COR_ACENTO,"letra":LOGO_LETRA,
-               "lancamento":LANCAMENTO_COD,"atualizado":date.today().strftime("%d/%m/%Y"),
-               "kpis":{"spend":m_k["lct"].get("spend"),"leads":m_k["lct"].get("leads"),"cpl":m_k["lct"].get("cpl")}}
+    data_json={
+        "cliente":NOME_CLIENTE,"cor":COR_ACENTO,"letra":LOGO_LETRA,
+        "lancamento":LANCAMENTO_COD,"moeda":MOEDA,"moeda_simbolo":MOEDA_SIMBOLO,
+        "atualizado":date.today().strftime("%d/%m/%Y"),
+        "kpis":{
+            "spend":m_k["lct"].get("spend"),
+            "leads":m_k["lct"].get("leads"),
+            "cpl":m_k["lct"].get("cpl")
+        }
+    }
     Path("data.json").write_text(json.dumps(data_json,ensure_ascii=False,indent=2),encoding="utf-8")
     print(f"  ✓ data.json\n{'='*60}")
 
