@@ -34,7 +34,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 .sb-footer{padding:10px 16px;border-top:1px solid rgba(255,255,255,.05);}
 .sb-footer span{font-size:10px;color:rgba(255,255,255,.25);}
 
-/* TOPBAR — sticky obrigatório */
+/* TOPBAR */
 .main{display:flex;flex-direction:column;overflow-x:hidden;}
 .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:9px 20px;display:flex;align-items:center;justify-content:space-between;position:fixed;top:0;left:210px;right:0;z-index:9000;box-shadow:0 2px 8px rgba(0,0,0,.12);gap:8px;flex-wrap:wrap;}
 .topbar-l{display:flex;align-items:center;gap:8px;flex-shrink:0;}
@@ -54,6 +54,9 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 .label-toggle{display:flex;align-items:center;gap:5px;padding:4px 9px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;font-size:11px;font-weight:600;color:var(--muted);user-select:none;}
 .label-toggle.on{background:var(--accent);color:#fff;border-color:var(--accent);}
 .theme-btn{padding:4px 10px;border-radius:7px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;font-size:11px;font-weight:600;color:var(--muted);font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:4px;}
+/* Lang bar */
+.lang-bar{display:flex;gap:2px;background:var(--bg);padding:3px;border-radius:8px;border:1px solid var(--border);}
+.lang-bar .pb{min-width:32px;text-align:center;}
 
 /* CONTENT */
 .content{padding:115px 22px 18px 22px;flex:1;overflow-x:hidden;}
@@ -173,12 +176,12 @@ details.desk-only{display:block!important;}
 @media(max-width:768px){.desk-only{display:none!important;}details.desk-only{display:none!important;}}
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:250;}
 .overlay.open{display:block;}
-@media(max-width:768px){.topbar{left:0;right:0;z-index:299!important;}
+@media(max-width:768px){
+  .topbar{left:0;right:0;z-index:299!important;}
   .ov-bottom{grid-template-columns:1fr!important;}
   .content{padding-top:185px!important;}
   .pz-cw canvas{max-width:100%!important;}
   .pz-card{width:100%;box-sizing:border-box;}
-
   .app{grid-template-columns:1fr;}
   .sb{display:none;position:fixed;top:0;left:0;width:240px;height:100vh;z-index:400!important;}
   .sb.open{display:flex;}
@@ -205,19 +208,18 @@ details.desk-only{display:block!important;}
 <aside class="sb" id="sidebar">
   <div class="sb-logo">
     <div class="logo-box" id="logoBox">C</div>
-    <div><div class="logo-name" id="sbNome">Dashboard</div><div class="logo-sub">Lançamento</div></div>
+    <div><div class="logo-name" id="sbNome">Dashboard</div><div class="logo-sub" data-i18n="launch">Lançamento</div></div>
   </div>
   <nav class="sb-nav">
-    <button class="sb-item active" onclick="goPage('meta',this)"><span class="ico">🎯</span>Meta Ads</button>
-    <button class="sb-item" onclick="goPage('diario',this)"><span class="ico">📈</span>Métricas Diárias</button>
-    <button class="sb-item" id="sbPesquisa" onclick="goPage('pesquisa',this)"><span class="ico">🔍</span>Pesquisa</button>
+    <button class="sb-item active" onclick="goPage('meta',this)"><span class="ico">🎯</span><span data-i18n="nav_meta">Meta Ads</span></button>
+    <button class="sb-item" onclick="goPage('diario',this)"><span class="ico">📈</span><span data-i18n="nav_diario">Métricas Diárias</span></button>
+    <button class="sb-item" id="sbPesquisa" onclick="goPage('pesquisa',this)"><span class="ico">🔍</span><span data-i18n="nav_pesquisa">Pesquisa</span></button>
   </nav>
-  <div class="sb-lct"><div class="sb-lct-lbl">Lançamento</div><div class="sb-lct-val" id="sbLct">—</div></div>
+  <div class="sb-lct"><div class="sb-lct-lbl" data-i18n="launch">Lançamento</div><div class="sb-lct-val" id="sbLct">—</div></div>
   <div class="sb-footer"><span id="sbAtual">--/--/---- · via planilha</span></div>
 </aside>
 
 <main class="main">
-  <!-- TOPBAR STICKY -->
   <div class="topbar">
     <div class="topbar-l">
       <button class="mob-menu" onclick="toggleSb()">☰</button>
@@ -231,12 +233,17 @@ details.desk-only{display:block!important;}
       </div>
     </div>
     <div class="topbar-r">
+      <!-- Seletor de idioma -->
+      <div class="lang-bar">
+        <button class="pb active" id="btnLangPT" onclick="setLang('PT',this)">PT</button>
+        <button class="pb" id="btnLangES" onclick="setLang('ES',this)">ES</button>
+      </div>
       <div class="period-bar">
-        <button class="pb" onclick="setPeriod(1,this)">Ontem</button>
+        <button class="pb" onclick="setPeriod(1,this)" data-i18n="period_ontem">Ontem</button>
         <button class="pb" onclick="setPeriod(7,this)">7d</button>
         <button class="pb" onclick="setPeriod(14,this)">14d</button>
         <button class="pb active" onclick="setPeriod(30,this)">30d</button>
-        <button class="pb" onclick="setPeriod(0,this)">Tudo</button>
+        <button class="pb" onclick="setPeriod(0,this)" data-i18n="period_tudo">Tudo</button>
       </div>
       <div class="date-range">
         <input type="date" id="dtI"><span>→</span><input type="date" id="dtF">
@@ -244,51 +251,45 @@ details.desk-only{display:block!important;}
       </div>
       <div class="lct-bar" id="lctBar">
         <button class="pb active" id="btnLctOn" onclick="setLct(true,this)">VSE02</button>
-        <button class="pb" id="btnLctOff" onclick="setLct(false,this)">Tudo</button>
+        <button class="pb" id="btnLctOff" onclick="setLct(false,this)" data-i18n="lct_tudo">Tudo</button>
       </div>
-      <div class="label-toggle on" id="labelToggle" onclick="toggleLabels(this)" title="Rótulos de dados">Rótulos</div>
-      <button class="theme-btn" onclick="toggleTheme()"><span id="themeIcon">🌙</span><span id="themeLabel">Escuro</span></button>
+      <div class="label-toggle on" id="labelToggle" onclick="toggleLabels(this)" data-i18n="rotulos">Rótulos</div>
+      <button class="theme-btn" onclick="toggleTheme()"><span id="themeIcon">🌙</span><span id="themeLabel" data-i18n="escuro">Escuro</span></button>
     </div>
   </div>
 
   <div class="content">
 
-    <!-- META ADS (aba principal) -->
+    <!-- META ADS -->
     <div class="page-section active" id="page-meta">
-      <!-- Filtro de campanha — só desktop -->
       <details style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:0;margin-bottom:14px;box-shadow:var(--sh);" id="metaCampFilterDetails" class="desk-only">
         <summary style="padding:10px 14px;cursor:pointer;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;list-style:none;display:flex;align-items:center;justify-content:space-between;user-select:none;">
-          Filtrar por campanha <span id="metaCampFilterCount" style="font-weight:400;font-size:10px"></span>
+          <span data-i18n="filtrar_camp">Filtrar por campanha</span> <span id="metaCampFilterCount" style="font-weight:400;font-size:10px"></span>
           <span style="font-size:13px;color:var(--muted2)">▾</span>
         </summary>
         <div style="padding:0 14px 12px;" id="metaCampFilter"></div>
       </details>
       <div class="krow k3 mb14" id="metaKpis"></div>
-      <!-- Funil -->
-      <div class="funnel-card mb14"><div class="funnel-title">Funil de Captação</div><div class="funnel-steps" id="funnelSteps"></div></div>
-      <!-- Gráfico Leads · Investimento · CPL -->
+      <div class="funnel-card mb14"><div class="funnel-title" data-i18n="funil_ttl">Funil de Captação</div><div class="funnel-steps" id="funnelSteps"></div></div>
       <div class="cc mb14">
-        <div class="cc-t">Leads Diários & Investimento</div>
-        <div class="cc-s">Leads (barras azuis) · Invest. (linha verde) · CPL (linha preta tracejada)</div>
+        <div class="cc-t" data-i18n="chart_leads_ttl">Leads Diários &amp; Investimento</div>
+        <div class="cc-s" data-i18n="chart_leads_sub">Leads (barras azuis) · Invest. (linha verde) · CPL (linha preta tracejada)</div>
         <div class="cw" style="height:210px"><canvas id="chMetaMain"></canvas></div>
       </div>
-      <!-- Campanhas -->
       <div class="section">
-        <div class="sec-hd">Campanhas</div>
+        <div class="sec-hd" data-i18n="campanhas">Campanhas</div>
         <div class="tc" id="tCamps"></div>
       </div>
-      <!-- Segmentação -->
       <div class="section" style="margin-top:16px">
-        <div class="sec-hd">Segmentação</div>
+        <div class="sec-hd" data-i18n="segmentacao">Segmentação</div>
         <div class="g3">
-          <div><div class="seg-ttl">Gênero</div><div class="seg-card" id="tGender"></div></div>
-          <div><div class="seg-ttl">Faixa Etária</div><div class="seg-card" id="tAge"></div></div>
-          <div><div class="seg-ttl">Posicionamento</div><div class="seg-card" id="tPlatform"></div></div>
+          <div><div class="seg-ttl" data-i18n="genero">Gênero</div><div class="seg-card" id="tGender"></div></div>
+          <div><div class="seg-ttl" data-i18n="faixa">Faixa Etária</div><div class="seg-card" id="tAge"></div></div>
+          <div><div class="seg-ttl" data-i18n="posicionamento">Posicionamento</div><div class="seg-card" id="tPlatform"></div></div>
         </div>
       </div>
-      <!-- Ranking de Criativos -->
       <div class="section" style="margin-top:16px">
-        <div class="sec-hd">Ranking de Criativos</div>
+        <div class="sec-hd" data-i18n="ranking_criativos">Ranking de Criativos</div>
         <div class="ads-grid" id="adsGrid"></div>
       </div>
     </div>
@@ -297,7 +298,7 @@ details.desk-only{display:block!important;}
     <div class="page-section" id="page-diario">
       <details style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:0;margin-bottom:14px;box-shadow:var(--sh);" id="campFilterDetails">
         <summary style="padding:10px 14px;cursor:pointer;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;list-style:none;display:flex;align-items:center;justify-content:space-between;user-select:none;">
-          Filtrar por campanha <span id="campFilterCount" style="font-weight:400;font-size:10px"></span>
+          <span data-i18n="filtrar_camp">Filtrar por campanha</span> <span id="campFilterCount" style="font-weight:400;font-size:10px"></span>
           <span style="font-size:13px;color:var(--muted2)">▾</span>
         </summary>
         <div style="padding:0 14px 12px;" id="campFilter"></div>
@@ -310,13 +311,13 @@ details.desk-only{display:block!important;}
       <div class="krow pes-kpis" id="pesKpis"></div>
       <details class="filter-box" style="padding:0">
         <summary style="padding:12px 14px;cursor:pointer;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:1px;list-style:none;display:flex;align-items:center;justify-content:space-between;user-select:none;">
-          Filtrar respostas por origem <span style="font-size:13px;color:var(--muted2)">▾</span>
+          <span data-i18n="filtrar_origem">Filtrar respostas por origem</span> <span style="font-size:13px;color:var(--muted2)">▾</span>
         </summary>
         <div style="padding:0 14px 12px;">
           <div class="utm-groups" id="utmGroups"></div>
           <div class="filter-actions">
-            <button class="fa-btn" onclick="checkAll(true)">Marcar todas</button>
-            <button class="fa-btn" onclick="checkAll(false)">Desmarcar todas</button>
+            <button class="fa-btn" onclick="checkAll(true)" data-i18n="marcar_todas">Marcar todas</button>
+            <button class="fa-btn" onclick="checkAll(false)" data-i18n="desmarcar_todas">Desmarcar todas</button>
             <span class="pes-count" id="pesCount"></span>
           </div>
         </div>
@@ -332,42 +333,236 @@ details.desk-only{display:block!important;}
 Chart.register(ChartDataLabels);
 
 // ═══ DADOS ═══
-const META_KPIS     = null;
-const META_DAILY     = null;
-const META_DAILY_CAMPS     = null;
-const META_RAW_CAMP    = null;
-const META_TABLES     = null;
-const DATA_GERACAO     = null;
-const META_BD     = null;
-const PESQUISA     = null;
+const META_KPIS         = null;
+const META_DAILY        = null;
+const META_DAILY_CAMPS  = null;
+const META_RAW_CAMP     = null;
+const META_TABLES       = null;
+const DATA_GERACAO      = null;
+const META_BD           = null;
+const PESQUISA          = null;
 
-// ═══ CONFIG ═══
-const LANCAMENTO_COD='RDC01';
-const NOME_CLIENTE='Cliente';
-const LOGO_LETRA='C';
-const COR_ACENTO='#e11d48';
-const CPL_BOM=5.0;
-const CPL_MEDIO=10.0;
-const CTR_BOM=1.2;
-const CTR_MEDIO=0.8;
-const CR_BOM=40.0;
-const CR_MEDIO=25.0;
-const TX_CONV_BOM=30.0;
-const TX_CONV_MEDIO=15.0;
-const CPM_BOM=5.0;
-const CPM_MEDIO=12.0;
+// ═══ CONFIG (injetados pelo gerador) ═══
+const LANCAMENTO_COD = 'RDC01';
+const NOME_CLIENTE   = 'Cliente';
+const LOGO_LETRA     = 'C';
+const COR_ACENTO     = '#e11d48';
+const MOEDA_SIMBOLO  = 'R$';
+const MOEDA_COD      = 'BRL';
+const CPL_BOM        = 5.0;
+const CPL_MEDIO      = 10.0;
+const CTR_BOM        = 1.2;
+const CTR_MEDIO      = 0.8;
+const CR_BOM         = 40.0;
+const CR_MEDIO       = 25.0;
+const TX_CONV_BOM    = 30.0;
+const TX_CONV_MEDIO  = 15.0;
+const CPM_BOM        = 5.0;
+const CPM_MEDIO      = 12.0;
+
+// ═══ I18N ═══════════════════════════════════════════════════
+const TRANSLATIONS = {
+  PT: {
+    launch:           'Lançamento',
+    nav_meta:         'Meta Ads',
+    nav_diario:       'Métricas Diárias',
+    nav_pesquisa:     'Pesquisa',
+    filtrar_camp:     'Filtrar por campanha',
+    filtrar_origem:   'Filtrar respostas por origem',
+    funil_ttl:        'Funil de Captação',
+    chart_leads_ttl:  'Leads Diários & Investimento',
+    chart_leads_sub:  'Leads (barras azuis) · Invest. (linha verde) · CPL (linha preta tracejada)',
+    campanhas:        'Campanhas',
+    segmentacao:      'Segmentação',
+    genero:           'Gênero',
+    faixa:            'Faixa Etária',
+    posicionamento:   'Posicionamento',
+    ranking_criativos:'Ranking de Criativos',
+    period_ontem:     'Ontem',
+    period_tudo:      'Tudo',
+    lct_tudo:         'Tudo',
+    rotulos:          'Rótulos',
+    escuro:           'Escuro',
+    claro:            'Claro',
+    marcar_todas:     'Marcar todas',
+    desmarcar_todas:  'Desmarcar todas',
+    sem_dados:        'Sem dados',
+    sem_criativos:    'Sem criativos',
+    // KPI labels
+    kpi_invest:       'Investimento',
+    kpi_leads:        'Leads',
+    kpi_cpl:          'CPL',
+    kpi_cap:          'captados no período',
+    kpi_cpl_sub:      'Custo por Lead',
+    // Tabela colunas
+    col_camp:         'Campanha',
+    col_invest:       'Invest.',
+    col_impr:         'Impr.',
+    col_cliques:      'Cliques',
+    col_leads:        'Leads',
+    col_cpl:          'CPL',
+    col_cpm:          'CPM',
+    col_total:        'Total',
+    // Funil
+    f_impressoes:     'Impressões',
+    f_link_clicks:    'Link Clicks',
+    f_page_views:     'Page Views',
+    f_leads:          'Leads',
+    f_ctr:            'CTR',
+    f_connect:        'Connect Rate',
+    f_conv:           'Taxa Conversão (Lead/PV)',
+    // Seg
+    seg_genero:       'Gênero',
+    seg_faixa:        'Faixa Etária',
+    seg_plat:         'Posicionamento',
+    // Diário
+    d_periodo:        'Período',
+    d_media:          'Média período',
+    // Pesquisa KPIs
+    p_respostas:      'Respostas',
+    p_na_pesq:        'na pesquisa',
+    p_total_leads:    'Total de Leads',
+    p_captados:       'captados no lançamento',
+    p_taxa:           'Taxa Resp./Leads',
+    p_resp_leads:     'respostas / leads',
+    p_selecionados:   'respondentes selecionados',
+    // Sub-tabela
+    st_conjuntos:     'Conjuntos',
+    st_sem_conj:      'Sem conjuntos',
+    st_sem_criat:     'Sem criativos',
+    st_criativo:      'Criativo',
+    // Ads labels
+    ad_leads:         'Leads',
+    ad_cpl:           'CPL',
+    ad_ctr:           'CTR',
+    ad_invest:        'Invest.',
+    // Filtro todas
+    todas:            'Todas',
+    // Seg tabela
+    seg_col_invest:   'Invest.',
+    seg_col_leads:    'Leads',
+    seg_col_cpl:      'CPL',
+  },
+  ES: {
+    launch:           'Lanzamiento',
+    nav_meta:         'Meta Ads',
+    nav_diario:       'Métricas Diarias',
+    nav_pesquisa:     'Encuesta',
+    filtrar_camp:     'Filtrar por campaña',
+    filtrar_origem:   'Filtrar respuestas por origen',
+    funil_ttl:        'Embudo de Captación',
+    chart_leads_ttl:  'Leads Diarios & Inversión',
+    chart_leads_sub:  'Leads (barras azules) · Inversión (línea verde) · CPL (línea negra punteada)',
+    campanhas:        'Campañas',
+    segmentacao:      'Segmentación',
+    genero:           'Género',
+    faixa:            'Rango de Edad',
+    posicionamento:   'Posicionamiento',
+    ranking_criativos:'Ranking de Creativos',
+    period_ontem:     'Ayer',
+    period_tudo:      'Todo',
+    lct_tudo:         'Todo',
+    rotulos:          'Etiquetas',
+    escuro:           'Oscuro',
+    claro:            'Claro',
+    marcar_todas:     'Marcar todas',
+    desmarcar_todas:  'Desmarcar todas',
+    sem_dados:        'Sin datos',
+    sem_criativos:    'Sin creativos',
+    kpi_invest:       'Inversión',
+    kpi_leads:        'Leads',
+    kpi_cpl:          'CPL',
+    kpi_cap:          'captados en el período',
+    kpi_cpl_sub:      'Costo por Lead',
+    col_camp:         'Campaña',
+    col_invest:       'Inversión',
+    col_impr:         'Impr.',
+    col_cliques:      'Clics',
+    col_leads:        'Leads',
+    col_cpl:          'CPL',
+    col_cpm:          'CPM',
+    col_total:        'Total',
+    f_impressoes:     'Impresiones',
+    f_link_clicks:    'Link Clicks',
+    f_page_views:     'Page Views',
+    f_leads:          'Leads',
+    f_ctr:            'CTR',
+    f_connect:        'Connect Rate',
+    f_conv:           'Tasa Conversión (Lead/PV)',
+    seg_genero:       'Género',
+    seg_faixa:        'Rango de Edad',
+    seg_plat:         'Posicionamiento',
+    d_periodo:        'Período',
+    d_media:          'Promedio período',
+    p_respostas:      'Respuestas',
+    p_na_pesq:        'en la encuesta',
+    p_total_leads:    'Total de Leads',
+    p_captados:       'captados en el lanzamiento',
+    p_taxa:           'Tasa Resp./Leads',
+    p_resp_leads:     'respuestas / leads',
+    p_selecionados:   'encuestados seleccionados',
+    st_conjuntos:     'Conjuntos',
+    st_sem_conj:      'Sin conjuntos',
+    st_sem_criat:     'Sin creativos',
+    st_criativo:      'Creativo',
+    ad_leads:         'Leads',
+    ad_cpl:           'CPL',
+    ad_ctr:           'CTR',
+    ad_invest:        'Inversión',
+    todas:            'Todas',
+    seg_col_invest:   'Inversión',
+    seg_col_leads:    'Leads',
+    seg_col_cpl:      'CPL',
+  }
+};
+
+let currentLang = localStorage.getItem('lct-lang') || 'PT';
+
+function t(key){ return (TRANSLATIONS[currentLang]||TRANSLATIONS['PT'])[key] || key; }
+
+function applyI18n(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key=el.getAttribute('data-i18n');
+    el.textContent=t(key);
+  });
+  // Atualiza título da página e topbar
+  const titles={meta:t('nav_meta'),diario:t('nav_diario'),pesquisa:t('nav_pesquisa')};
+  const activeP=document.querySelector('.page-section.active')?.id?.replace('page-','');
+  if(activeP && titles[activeP]) document.getElementById('pageTitle').textContent=titles[activeP];
+  // Atualiza themeLabel baseado no tema atual
+  const isDark=DARK();
+  const themeLbl=document.getElementById('themeLabel');
+  if(themeLbl) themeLbl.textContent=isDark?t('claro'):t('escuro');
+}
+
+function setLang(lang, btn){
+  currentLang=lang;
+  localStorage.setItem('lct-lang',lang);
+  document.querySelectorAll('.lang-bar .pb').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  applyI18n();
+  rerenderActive();
+}
+
+// ═══ FORMATAÇÃO DE MOEDA ══════════════════════════════════
+// O símbolo vem da const MOEDA_SIMBOLO (injetada pelo gerador)
+// Para EUR, o símbolo fica depois do número (padrão europeu)
+function fR(v){
+  if(v==null||isNaN(v)) return '—';
+  const n=Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  if(MOEDA_COD==='EUR') return n+'€';
+  return MOEDA_SIMBOLO+n;
+}
 
 // ═══ ESTADO ═══
 let filtroLct=true, periodDays=30, dateI=null, dateF=null, showLabels=true, labelSize=8;
 let pesFilters={};
 
 // ═══ UTILS ═══
-const fR=v=>(v==null||isNaN(v))?'—':'R$'+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const fN=v=>v==null?'—':Number(v).toLocaleString('pt-BR');
 const fP=v=>v==null?'—':Number(v).toFixed(2)+'%';
 const r2=v=>Math.round(v*100)/100;
 const avg=arr=>{const v=arr?.filter(x=>x!=null&&!isNaN(x));return v?.length?r2(v.reduce((a,b)=>a+b,0)/v.length):null;};
-// CPL: menor = melhor
 function cplCls(v){return !v?'cn':v<=CPL_BOM?'cg':v<=CPL_MEDIO?'cw2':'cr';}
 function funnelCls(v,bom,medio){
   if(v==null||isNaN(v)) return {cls:'cn',col:'var(--muted)'};
@@ -375,7 +570,6 @@ function funnelCls(v,bom,medio){
   if(v>=medio) return {cls:'cw2',col:'#d97706'};
   return {cls:'cr',col:'#dc2626'};
 }
-// CPM: menor = melhor
 function cpmCls(v){return !v?'cn':v<=CPM_BOM?'cg':v<=CPM_MEDIO?'cw2':'cr';}
 const DARK=()=>document.documentElement.getAttribute('data-theme')==='dark';
 const TXT=()=>DARK()?'#8b95a9':'#6b7280';
@@ -386,24 +580,20 @@ const bf={family:"'DM Sans',sans-serif",size:10};
 function getMK(){return filtroLct?META_KPIS?.lct:META_KPIS?.all;}
 function getMDraw(){return filtroLct?META_DAILY?.lct:META_DAILY?.all;}
 
-// Data de referência = data de geração do relatório (Brasília)
 function getHoje(){
   if(DATA_GERACAO && DATA_GERACAO !== 'null'){
     const [y,m,d] = DATA_GERACAO.split('-');
     return new Date(parseInt(y), parseInt(m)-1, parseInt(d));
   }
-  return new Date(); // fallback: hoje local
+  return new Date();
 }
 
-// Converte "dd/mm" do array de dias para Date usando ano correto
 function parseDayStr(s){
   const[dd,mm]=s.split('/');
   const hoje=getHoje();
-  // Determinar ano: se mm > mês atual, provavelmente ano anterior
   let year=hoje.getFullYear();
   const mesStr=parseInt(mm);
   const mesHoje=hoje.getMonth()+1;
-  // Se o mês do dado é maior que o mês de hoje, é do ano anterior
   if(mesStr > mesHoje + 1) year--;
   return new Date(year, mesStr-1, parseInt(dd));
 }
@@ -413,12 +603,9 @@ function applyPeriod(daily){
   const days=daily.days; if(!days?.length) return daily;
   const hoje=getHoje();
   let idxs=days.map((_,i)=>i);
-
   if(periodDays>0){
-    // periodDays=1 significa "ontem" = DATA_GERACAO - 1
-    // periodDays>1 significa "últimos N dias" incluindo hoje
     const fim=new Date(hoje);
-    if(periodDays===1) fim.setDate(fim.getDate()-1); // ontem
+    if(periodDays===1) fim.setDate(fim.getDate()-1);
     fim.setHours(23,59,59,999);
     const inicio=new Date(fim);
     inicio.setDate(inicio.getDate()-(periodDays===1?0:periodDays-1));
@@ -428,14 +615,12 @@ function applyPeriod(daily){
       return dt>=inicio && dt<=fim;
     });
   }
-
   if(dateI||dateF){
     idxs=idxs.filter(i=>{
       const dt=parseDayStr(days[i]);
       return(!dateI||dt>=dateI)&&(!dateF||dt<=dateF);
     });
   }
-
   const out={};
   Object.keys(daily).forEach(k=>{out[k]=idxs.map(i=>daily[k][i]);});
   return out;
@@ -479,22 +664,19 @@ function hexA(hex,a){return hex+Math.round(a*255).toString(16).padStart(2,'0');}
 function buildFunnel(mk){
   if(!mk) return;
   const steps=[
-    {lbl:'Impressões',  val:mk.impressions,  color:hexA(FUNIL_COLOR,1.0)},
-    {lbl:'Link Clicks', val:mk.link_clicks,  color:hexA(FUNIL_COLOR,0.75)},
-    {lbl:'Page Views',  val:mk.page_view,    color:hexA(FUNIL_COLOR,0.50)},
-    {lbl:'Leads',       val:mk.leads,        color:FUNIL_GREEN},
+    {lbl:t('f_impressoes'), val:mk.impressions,  color:hexA(FUNIL_COLOR,1.0)},
+    {lbl:t('f_link_clicks'),val:mk.link_clicks,  color:hexA(FUNIL_COLOR,0.75)},
+    {lbl:t('f_page_views'), val:mk.page_view,    color:hexA(FUNIL_COLOR,0.50)},
+    {lbl:t('f_leads'),      val:mk.leads,        color:FUNIL_GREEN},
   ];
   const rates=[
-    {lbl:'CTR',           val:mk.ctr,           bom:CTR_BOM,      medio:CTR_MEDIO},
-    {lbl:'Connect Rate',  val:mk.connect_rate,  bom:CR_BOM,       medio:CR_MEDIO},
-    {lbl:'Taxa Conversão (Lead/PV)', val:mk.tx_conv, bom:TX_CONV_BOM, medio:TX_CONV_MEDIO},
+    {lbl:t('f_ctr'),     val:mk.ctr,          bom:CTR_BOM,      medio:CTR_MEDIO},
+    {lbl:t('f_connect'), val:mk.connect_rate,  bom:CR_BOM,       medio:CR_MEDIO},
+    {lbl:t('f_conv'),    val:mk.tx_conv,       bom:TX_CONV_BOM,  medio:TX_CONV_MEDIO},
   ];
-
   const maxOther=Math.max(mk.link_clicks||1,mk.page_view||1,mk.leads||1,1);
   const widths=steps.map((s,i)=>i===0?100:Math.max(12,Math.round((s.val||0)/maxOther*88)));
-  // Garantir hierarquia visual — cada etapa menor que anterior
   for(let i=3;i>=1;i--){ if(widths[i]>=widths[i-1]) widths[i]=Math.max(12, widths[i-1]-8); }
-
   const el=document.getElementById('funnelSteps');
   let html='';
   steps.forEach((s,i)=>{
@@ -518,24 +700,22 @@ function buildFunnel(mk){
   el.innerHTML=html;
 }
 
-// ═══ META ADS (aba principal) ═══
+// ═══ META ADS ═══
 function renderMeta(){
   const mk=getMK(); const mt=getMT();
   buildMetaCampFilter();
-  const md=getMDforMeta(); // usa filtro de campanha se selecionado
+  const md=getMDforMeta();
   if(!mk||!md) return;
 
-  // KPIs filtrados pelo período + campanha
   const spMK=md?.spend?.reduce((a,b)=>a+(b||0),0)||0;
   const ldMK=md?.leads?.reduce((a,b)=>a+(b||0),0)||0;
   const cplMK=spMK>0&&ldMK>0?r2(spMK/ldMK):null;
   const cplCor=cplMK!=null?(cplMK<=CPL_BOM?'#059669':cplMK<=CPL_MEDIO?'#d97706':'#dc2626'):'var(--muted)';
   document.getElementById('metaKpis').innerHTML=`
-    <div class="kpi" style="--kc:#334155"><div class="kpi-lbl">Investimento</div><div class="kpi-val" style="font-size:16px;color:var(--text)">${fR(spMK)}</div><div class="kpi-sub">Meta Ads</div></div>
-    <div class="kpi" style="--kc:#3b82f6"><div class="kpi-lbl">Leads</div><div class="kpi-val" style="color:var(--text)">${fN(ldMK)}</div><div class="kpi-sub">captados no período</div></div>
-    <div class="kpi" style="--kc:${cplCor}"><div class="kpi-lbl">CPL</div><div class="kpi-val" style="color:${cplCor}">${fR(cplMK)}</div><div class="kpi-sub">Custo por Lead</div></div>`;
+    <div class="kpi" style="--kc:#334155"><div class="kpi-lbl">${t('kpi_invest')}</div><div class="kpi-val" style="font-size:16px;color:var(--text)">${fR(spMK)}</div><div class="kpi-sub">Meta Ads</div></div>
+    <div class="kpi" style="--kc:#3b82f6"><div class="kpi-lbl">${t('kpi_leads')}</div><div class="kpi-val" style="color:var(--text)">${fN(ldMK)}</div><div class="kpi-sub">${t('kpi_cap')}</div></div>
+    <div class="kpi" style="--kc:${cplCor}"><div class="kpi-lbl">${t('kpi_cpl')}</div><div class="kpi-val" style="color:${cplCor}">${fR(cplMK)}</div><div class="kpi-sub">${t('kpi_cpl_sub')}</div></div>`;
 
-  // Funil recalculado do período + campanha
   const funnelKpis={
     impressions: md.impressions?.reduce((a,b)=>a+(b||0),0)||0,
     link_clicks: md.link_clicks?.reduce((a,b)=>a+(b||0),0)||0,
@@ -550,31 +730,30 @@ function renderMeta(){
   funnelKpis.cpl=ld2>0?r2(spMK/ld2):null;
   setTimeout(()=>buildFunnel(funnelKpis),30);
 
-  // Gráfico Leads · Investimento · CPL
   dc('chMetaMain');
   CH['chMetaMain']=new Chart(document.getElementById('chMetaMain'),{
     data:{labels:md.days,datasets:[
-      {label:'Leads',data:md.leads,backgroundColor:'rgba(59,130,246,.7)',borderRadius:3,type:'bar',yAxisID:'y1',
+      {label:t('kpi_leads'),data:md.leads,backgroundColor:'rgba(59,130,246,.7)',borderRadius:3,type:'bar',yAxisID:'y1',
        datalabels:{...makeDatalabels('#3b82f6','',v=>v!=null?fN(v):null),display:ctx=>showLabels}},
-      {label:'Invest.',data:md.spend,borderColor:'#059669',backgroundColor:'transparent',tension:.3,pointRadius:2,borderWidth:2,type:'line',spanGaps:true,datalabels:{display:false}},
-      {label:'CPL',data:md.cpl,borderColor:'#111',borderDash:[5,3],backgroundColor:'transparent',tension:.3,pointRadius:2,borderWidth:1.5,type:'line',yAxisID:'y2',spanGaps:true,
-       datalabels:{display:ctx=>showLabels,color:'#333',font:{size:labelSize,weight:'bold'},formatter:v=>v!=null?'R$'+v.toFixed(2):null,anchor:'end',align:'top',offset:2,clip:false}},
+      {label:t('kpi_invest'),data:md.spend,borderColor:'#059669',backgroundColor:'transparent',tension:.3,pointRadius:2,borderWidth:2,type:'line',spanGaps:true,datalabels:{display:false}},
+      {label:t('kpi_cpl'),data:md.cpl,borderColor:'#111',borderDash:[5,3],backgroundColor:'transparent',tension:.3,pointRadius:2,borderWidth:1.5,type:'line',yAxisID:'y2',spanGaps:true,
+       datalabels:{display:ctx=>showLabels,color:'#333',font:{size:labelSize,weight:'bold'},formatter:v=>v!=null?fR(v):null,anchor:'end',align:'top',offset:2,clip:false}},
     ]},
     options:{...bo(),scales:{
       x:{ticks:{color:TXT(),font:bf,maxTicksLimit:14},grid:{color:GRID()}},
-      y:{ticks:{color:TXT(),font:bf,callback:v=>'R$'+v.toLocaleString()},grid:{color:GRID()},min:0},
+      y:{ticks:{color:TXT(),font:bf,callback:v=>fR(v)},grid:{color:GRID()},min:0},
       y1:{position:'right',ticks:{color:'#3b82f6',font:bf},grid:{display:false},grace:'20%'},
-      y2:{position:'right',ticks:{color:'#555',font:bf,callback:v=>'R$'+v.toFixed(0)},grid:{display:false},offset:true,min:0},
+      y2:{position:'right',ticks:{color:'#555',font:bf,callback:v=>fR(v)},grid:{display:false},offset:true,min:0},
     }}
   });
 
-  buildTable('tCamps', mt?.camps,'Campanha');
+  buildTable('tCamps', mt?.camps, t('col_camp'));
   renderAds(mt?.ads);
   renderSeg();
 }
 
 function getPeriodKey(){
-  if(dateI||dateF) return null; // datas livres
+  if(dateI||dateF) return null;
   if(periodDays===1)  return '1';
   if(periodDays===7)  return '7';
   if(periodDays===14) return '14';
@@ -582,14 +761,12 @@ function getPeriodKey(){
   return 'all';
 }
 
-// Calcular tabelas a partir do META_RAW_CAMP filtrado por data
 function calcTableFromRaw(){
   if(!META_RAW_CAMP?.length) return null;
   const hoje=getHoje();
   const fimRaw=new Date(hoje);
   if(periodDays===1) fimRaw.setDate(fimRaw.getDate()-1);
   fimRaw.setHours(23,59,59,999);
-  // Filtrar raw pelo período atual
   const filtered=META_RAW_CAMP.filter(r=>{
     if(filtroLct && !r.lct) return false;
     const dt=parseDayStr(r.d);
@@ -602,8 +779,6 @@ function calcTableFromRaw(){
     return true;
   });
   if(!filtered.length) return {camps:[],adsets:[],ads:[]};
-
-  // Agregar por campanha
   const campMap={};
   const adsetMap={};
   filtered.forEach(r=>{
@@ -616,7 +791,6 @@ function calcTableFromRaw(){
     adsetMap[ak].spend+=r.sp; adsetMap[ak].imp+=r.imp; adsetMap[ak].lc+=r.lc;
     adsetMap[ak].pv+=r.pv; adsetMap[ak].ld+=r.ld;
   });
-
   function calcRow(o){
     const sp=r2(o.spend),ld=o.ld,imp=o.imp,lc=o.lc,pv=o.pv;
     return {...o, spend:sp, ld, imp, lc, pv,
@@ -624,28 +798,22 @@ function calcTableFromRaw(){
       tx_cv:pv>0?r2(ld/pv*100):null,
       cpl:ld>0?r2(sp/ld):null, cpm:imp>0?r2(sp/imp*1000):null};
   }
-
   const camps=Object.values(campMap).map(calcRow).sort((a,b)=>b.ld-a.ld);
   const adsets=Object.values(adsetMap).map(calcRow).sort((a,b)=>b.ld-a.ld);
-  // Ads: filtrar pelos adsets/camps que têm dados no período
   const campNamesInPeriod=new Set(camps.map(c=>c.n));
   const adsetPairs=new Set(adsets.map(a=>a.camp+'|||'+a.n));
   const allAds=((filtroLct?META_TABLES?.lct:META_TABLES?.all)||{})['all']?.ads||[];
-  // Escalar métricas dos ads pelo fator do adset no período
-  // fator = spend_adset_período / spend_adset_total
   const adsetTotalMap={};
   ((filtroLct?META_TABLES?.lct:META_TABLES?.all)||{})['all']?.adsets?.forEach(a=>{
     adsetTotalMap[a.camp+'|||'+a.n]={spend:a.spend||0,pur:a.pur||0,imp:a.imp||0,lc:a.lc||0};
   });
   const adsetPeriodMap={};
   adsets.forEach(a=>{ adsetPeriodMap[a.camp+'|||'+a.n]={spend:a.spend||0,pur:a.pur||0,imp:a.imp||0,lc:a.lc||0}; });
-
   const ads=allAds
     .filter(a=>campNamesInPeriod.has(a.camp)&&adsetPairs.has(a.camp+'|||'+a.adset))
     .map(a=>{
       const key=a.camp+'|||'+a.adset;
       const tot=adsetTotalMap[key]; const per=adsetPeriodMap[key];
-      // Fator de escala: proporção do spend do adset no período vs total
       const fSp=tot?.spend>0?(per?.spend||0)/tot.spend:0;
       const fPur=tot?.pur>0?(per?.pur||0)/tot.pur:0;
       const fImp=tot?.imp>0?(per?.imp||0)/tot.imp:0;
@@ -662,9 +830,9 @@ function calcTableFromRaw(){
 }
 
 let _calcRawRunning=false;
+let base_mt=null;
 function getMT(){
   const key=getPeriodKey();
-  // Para "ontem" (key='1') sempre usar raw — garante que não inclui hoje
   if(key && key!=='1'){
     const base=filtroLct?META_TABLES?.lct:META_TABLES?.all;
     if(!base) return null;
@@ -685,11 +853,11 @@ function getMT(){
   }
   return base_mt;
 }
+
 function filterBdRaw(rawArr, keyFn){
   const hoje=getHoje();
   const filtered=(rawArr||[]).filter(r=>{
     if(filtroLct && !r.lct) return false;
-    // Filtro de campanha da aba Meta (se houver campo camp no raw)
     if(metaCampSel?.size>0 && r.camp && !metaCampSel.has(r.camp)) return false;
     const dt=parseDayStr(r.d);
     if(periodDays>0){
@@ -718,8 +886,6 @@ function getMBD(){
   const rawGa=META_BD._raw_ga;
   const rawPt=META_BD._raw_pt;
   const AGE_ORDER=["18-24","25-34","35-44","45-54","55-64","65+"];
-
-  // Sempre usar raw — garante período correto e suporta filtro de campanha
   if(rawGa||rawPt){
     const age=filterBdRaw(rawGa,r=>r.age).filter(v=>AGE_ORDER.includes(v.n))
       .sort((a,b)=>AGE_ORDER.indexOf(a.n)-AGE_ORDER.indexOf(b.n));
@@ -727,8 +893,6 @@ function getMBD(){
     const platform=filterBdRaw(rawPt,r=>r.plat).slice(0,8);
     return {age,gender,platform};
   }
-
-  // Fallback: dados pré-calculados (se raw não disponível)
   const key=getPeriodKey();
   if(key){
     const base=filtroLct?META_BD?.lct:META_BD?.all;
@@ -740,21 +904,21 @@ function getMBD(){
 }
 
 function buildTable(elId,data,mainCol){
-  if(!data?.length){document.getElementById(elId).innerHTML='<div style="padding:12px;color:var(--muted);font-size:12px">Sem dados</div>';return;}
+  if(!data?.length){document.getElementById(elId).innerHTML=`<div style="padding:12px;color:var(--muted);font-size:12px">${t('sem_dados')}</div>`;return;}
   const mt=getMT();
 
   const COLS=[
-    {k:'spend',l:'Invest.',f:fR},
-    {k:'imp',l:'Impr.',cls:'cn'},{k:'lc',l:'Cliques',cls:'cn'},{k:'pv',l:'PV',cls:'cn'},
-    {k:'ld',l:'Leads',f:fN},
+    {k:'spend',l:t('col_invest'),f:fR},
+    {k:'imp',l:t('col_impr'),cls:'cn'},{k:'lc',l:t('col_cliques'),cls:'cn'},{k:'pv',l:'PV',cls:'cn'},
+    {k:'ld',l:t('col_leads'),f:fN},
     {k:'ctr',l:'CTR',f:fP,cls2:v=>funnelCls(v,CTR_BOM,CTR_MEDIO).cls},
     {k:'cr',l:'C.Rate',f:fP,cls2:v=>funnelCls(v,CR_BOM,CR_MEDIO).cls},
     {k:'tx_cv',l:'Tx.Conv',f:fP,cls2:v=>funnelCls(v,TX_CONV_BOM,TX_CONV_MEDIO).cls},
-    {k:'cpl',l:'CPL',f:fR,cls2:cplCls},
-    {k:'cpm',l:'CPM',f:fR},  // neutro — sem cor
+    {k:'cpl',l:t('col_cpl'),f:fR,cls2:cplCls},
+    {k:'cpm',l:t('col_cpm'),f:fR},
   ];
   const head='<tr><th></th><th>'+mainCol+'</th>'+COLS.map(c=>'<th class="num">'+c.l+'</th>').join('')+'</tr>';
-  
+
   let rows='';
   data.forEach((r,i)=>{
     const cid='camp_'+elId+'_'+i;
@@ -770,24 +934,20 @@ function buildTable(elId,data,mainCol){
       <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;font-weight:600" title="${r.n}">${r.n}</td>
       ${tds}
     </tr>`;
-    // Sub-linhas: conjuntos desta campanha
-    const campAdsets=mt?.adsets?.filter(a=>a.n.includes(r.n.split('-').slice(-2).join('-'))||true)||[];
-    // Usar os anúncios agrupados por nome de campanha da tabela
-    const campName=r.n;
     rows+=`<tr id="${cid}" style="display:none"><td colspan="${COLS.length+2}" style="padding:0">
       <div style="background:var(--surface2);border-top:1px solid var(--border);padding:8px 24px">
-        <div style="font-size:10px;color:var(--muted2);font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">Conjuntos — ${campName}</div>
+        <div style="font-size:10px;color:var(--muted2);font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">${t('st_conjuntos')} — ${r.n}</div>
         <table style="width:100%;border-collapse:collapse" id="sub_${cid}"></table>
       </div>
     </td></tr>`;
   });
-  
+
   document.getElementById(elId).innerHTML=`<table style="min-width:800px">
     <thead>${head}</thead><tbody>${rows}</tbody>
     <tfoot>
       <tr style="background:var(--surface2);font-weight:700;border-top:2px solid var(--border)">
         <td></td>
-        <td style="font-size:10px;padding:6px 10px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.5px">Total</td>
+        <td style="font-size:10px;padding:6px 10px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.5px">${t('col_total')}</td>
         ${(()=>{
           const tot={spend:0,imp:0,lc:0,pv:0,ld:0};
           data.forEach(r=>{tot.spend+=r.spend||0;tot.imp+=r.imp||0;tot.lc+=r.lc||0;tot.pv+=r.pv||0;tot.ld+=r.ld||0;});
@@ -825,15 +985,15 @@ function toggleCampRow(id,rowEl){
     const adsets=mt.adsets.filter(a=>a.camp===campName);
     const tbl=document.getElementById('sub_'+id);
     if(!tbl) return;
-    if(!adsets.length){tbl.innerHTML='<tbody><tr><td style="padding:8px;color:var(--muted);font-size:11px">Sem conjuntos</td></tr></tbody>';return;}
+    if(!adsets.length){tbl.innerHTML=`<tbody><tr><td style="padding:8px;color:var(--muted);font-size:11px">${t('st_sem_conj')}</td></tr></tbody>`;return;}
     tbl.innerHTML='<thead><tr>'+
-      '<th style="font-size:9px;padding:4px 8px;text-align:left;color:var(--muted2)">Conjunto</th>'+
-      '<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">Invest.</th>'+
-      '<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">Leads</th>'+
+      `<th style="font-size:9px;padding:4px 8px;text-align:left;color:var(--muted2)">${t('st_conjuntos')}</th>`+
+      `<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">${t('col_invest')}</th>`+
+      `<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">${t('col_leads')}</th>`+
       '<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">CTR</th>'+
       '<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">C.Rate</th>'+
       '<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">Tx.Conv</th>'+
-      '<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">CPL</th>'+
+      `<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">${t('col_cpl')}</th>`+
       '</tr></thead><tbody>'+
       adsets.map(a=>`<tr onclick="toggleAdsetRow('${id}','${a.n.replace(/'/g,"\'")}','${campName.replace(/'/g,"\'")}',this)" style="cursor:pointer">
         <td style="font-size:10px;padding:5px 8px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${a.n}">▶ ${a.n}</td>
@@ -865,19 +1025,18 @@ function toggleAdsetRow(campId,adsetName,campName,rowEl){
     const ads=mt?.ads?.filter(a=>a.adset===adsetName&&a.camp===campName)||[];
     const inner=document.getElementById('ads_inner_'+campId+'_'+key);
     if(!inner) return;
-    if(!ads.length){inner.innerHTML='<div style="padding:8px;font-size:10px;color:var(--muted)">Sem criativos</div>';return;}
+    if(!ads.length){inner.innerHTML=`<div style="padding:8px;font-size:10px;color:var(--muted)">${t('st_sem_criat')}</div>`;return;}
     const isMob=window.innerWidth<=768;
     if(isMob){
-      // Mobile: mesmo padrão visual dos conjuntos — tabela compacta com scroll
       inner.innerHTML='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:400px">'+
         '<thead><tr style="background:var(--surface2)">'+
-        '<th style="font-size:9px;padding:4px 8px;text-align:left;color:var(--muted2)">Criativo</th>'+
-        '<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">Invest.</th>'+
-        '<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">Leads</th>'+
+        `<th style="font-size:9px;padding:4px 8px;text-align:left;color:var(--muted2)">${t('st_criativo')}</th>`+
+        `<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">${t('col_invest')}</th>`+
+        `<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">${t('col_leads')}</th>`+
         '<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">CTR</th>'+
         '<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">C.Rate</th>'+
         '<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">Tx.Conv</th>'+
-        '<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">CPL</th>'+
+        `<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">${t('col_cpl')}</th>`+
         '</tr></thead><tbody>'+
         ads.map(ad=>`<tr>
           <td style="font-size:10px;padding:5px 8px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${ad.n}">${ad.n}</td>
@@ -890,7 +1049,6 @@ function toggleAdsetRow(campId,adsetName,campName,rowEl){
         </tr>`).join('')+
         '</tbody></table></div>';
     } else {
-      // Desktop: grid com imagem
       inner.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;padding:10px 10px 10px 0">'+
         ads.map(ad=>{
           const img=ad.thumb?`<img src="${ad.thumb}" style="width:100%;height:100%;object-fit:contain;background:var(--surface2)" loading="lazy" onerror="this.parentElement.innerHTML='🖼️'">`:'<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:24px;color:var(--muted2)">🖼️</div>';
@@ -899,10 +1057,10 @@ function toggleAdsetRow(campId,adsetName,campName,rowEl){
             <div style="padding:6px 8px">
               <div style="font-size:9px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:4px" title="${ad.n}">${ad.n}</div>
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px">
-                <div><div style="font-size:7px;color:var(--muted2);text-transform:uppercase">Leads</div><div style="font-size:10px;font-weight:700;font-family:monospace">${fN(ad.ld)}</div></div>
-                <div><div style="font-size:7px;color:var(--muted2);text-transform:uppercase">CPL</div><div class="${cplCls(ad.cpl)}" style="font-size:10px;font-weight:700;font-family:monospace">${fR(ad.cpl)}</div></div>
-                <div><div style="font-size:7px;color:var(--muted2);text-transform:uppercase">CTR</div><div style="font-size:10px;font-weight:700;font-family:monospace">${fP(ad.ctr)}</div></div>
-                <div><div style="font-size:7px;color:var(--muted2);text-transform:uppercase">Invest.</div><div style="font-size:10px;font-weight:700;font-family:monospace">${fR(ad.spend)}</div></div>
+                <div><div style="font-size:7px;color:var(--muted2);text-transform:uppercase">${t('ad_leads')}</div><div style="font-size:10px;font-weight:700;font-family:monospace">${fN(ad.ld)}</div></div>
+                <div><div style="font-size:7px;color:var(--muted2);text-transform:uppercase">${t('ad_cpl')}</div><div class="${cplCls(ad.cpl)}" style="font-size:10px;font-weight:700;font-family:monospace">${fR(ad.cpl)}</div></div>
+                <div><div style="font-size:7px;color:var(--muted2);text-transform:uppercase">${t('ad_ctr')}</div><div style="font-size:10px;font-weight:700;font-family:monospace">${fP(ad.ctr)}</div></div>
+                <div><div style="font-size:7px;color:var(--muted2);text-transform:uppercase">${t('ad_invest')}</div><div style="font-size:10px;font-weight:700;font-family:monospace">${fR(ad.spend)}</div></div>
               </div>
             </div>
           </div>`;
@@ -913,7 +1071,7 @@ function toggleAdsetRow(campId,adsetName,campName,rowEl){
 
 function renderAds(ads){
   const el=document.getElementById('adsGrid');
-  if(!ads?.length){el.innerHTML='<div style="color:var(--muted);font-size:12px;padding:8px">Sem criativos</div>';return;}
+  if(!ads?.length){el.innerHTML=`<div style="color:var(--muted);font-size:12px;padding:8px">${t('sem_criativos')}</div>`;return;}
   el.innerHTML=ads.slice(0,24).map(ad=>{
     const img=ad.thumb?`<img src="${ad.thumb}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=ad-img-ph>🖼️</div>'">`:'<div class="ad-img-ph">🖼️</div>';
     return `<div class="ad-card"><div class="ad-img">${img}</div>
@@ -921,10 +1079,10 @@ function renderAds(ads){
         <div style="font-size:9px;color:var(--muted2);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${ad.camp||''}">${ad.camp?'📁 '+ad.camp.split('-').slice(-2).join('-'):''}</div>
         <div style="font-size:8px;color:var(--muted2);opacity:.75;margin-bottom:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${ad.adset||''}">${ad.adset?'↳ '+ad.adset:''}</div>
         <div class="ad-stats">
-          <div><div class="as-l">Leads</div><div class="as-v">${fN(ad.ld)}</div></div>
-          <div><div class="as-l">CPL</div><div class="as-v ${cplCls(ad.cpl)}">${fR(ad.cpl)}</div></div>
-          <div><div class="as-l">CTR</div><div class="as-v">${fP(ad.ctr)}</div></div>
-          <div><div class="as-l">Invest.</div><div class="as-v">${fR(ad.spend)}</div></div>
+          <div><div class="as-l">${t('ad_leads')}</div><div class="as-v">${fN(ad.ld)}</div></div>
+          <div><div class="as-l">${t('ad_cpl')}</div><div class="as-v ${cplCls(ad.cpl)}">${fR(ad.cpl)}</div></div>
+          <div><div class="as-l">${t('ad_ctr')}</div><div class="as-v">${fP(ad.ctr)}</div></div>
+          <div><div class="as-l">${t('ad_invest')}</div><div class="as-v">${fR(ad.spend)}</div></div>
         </div>
       </div></div>`;
   }).join('');
@@ -935,25 +1093,25 @@ function renderSeg(){
   if(!bd) return;
   function segTable(elId,data,lbl){
     const el=document.getElementById(elId);
-    if(!data?.length){el.innerHTML='<div style="padding:8px;font-size:11px;color:var(--muted)">Sem dados</div>';return;}
+    if(!data?.length){el.innerHTML=`<div style="padding:8px;font-size:11px;color:var(--muted)">${t('sem_dados')}</div>`;return;}
     el.innerHTML=`<table>
-      <thead><tr><th>${lbl}</th><th class="num">Invest.</th><th class="num">Leads</th><th class="num">CPL</th></tr></thead>
+      <thead><tr><th>${lbl}</th><th class="num">${t('seg_col_invest')}</th><th class="num">${t('seg_col_leads')}</th><th class="num">${t('seg_col_cpl')}</th></tr></thead>
       <tbody>${data.map(r=>`<tr>
         <td style="font-size:11px">${r.n}</td>
         <td class="num">${fR(r.spend)}</td><td class="num">${fN(r.ld)}</td>
         <td class="num ${cplCls(r.cpl)}">${fR(r.cpl)}</td>
       </tr>`).join('')}</tbody></table>`;
   }
-  segTable('tGender',  bd.gender,  'Gênero');
-  segTable('tAge',     bd.age,     'Faixa Etária');
-  segTable('tPlatform',bd.platform,'Posicionamento');
+  segTable('tGender',  bd.gender,   t('seg_genero'));
+  segTable('tAge',     bd.age,      t('seg_faixa'));
+  segTable('tPlatform',bd.platform, t('seg_plat'));
 }
 
 // ═══ MÉTRICAS DIÁRIAS ═══
-let campFilterSel=new Set(); // Set vazio = todas as campanhas
+let campFilterSel=new Set();
 
-// ═══ FILTRO CAMPANHA — ABA META ═══
-let metaCampSel=new Set(); // Set vazio = todas
+// ═══ FILTRO CAMPANHA META ═══
+let metaCampSel=new Set();
 
 function buildMetaCampFilter(){
   const el=document.getElementById('metaCampFilter');
@@ -969,19 +1127,18 @@ function buildMetaCampFilter(){
     const mt=getMT(); camps=mt?.camps?.map(c=>c.n)||[];
   }
   if(!camps.length) return;
-  // Só reconstrói se as campanhas mudaram (evita reset ao marcar/desmarcar)
   const newKey=camps.sort().join('|');
   if(el.dataset.campsKey===newKey) return;
   el.dataset.campsKey=newKey;
   el.innerHTML='<div style="display:flex;flex-direction:column;gap:3px;">'
     +'<label style="display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;background:var(--surface2);border:1px solid var(--border)">'
-    +'<input type="checkbox" id="meta_cb_todas" onchange="toggleMetaTodas(this)" checked style="accent-color:var(--accent)"> Todas</label>'
+    +'<input type="checkbox" id="meta_cb_todas" onchange="toggleMetaTodas(this)" checked style="accent-color:var(--accent)"> '+t('todas')+'</label>'
     +camps.map(c=>`<label style="display:flex;align-items:center;gap:7px;padding:4px 8px;border-radius:6px;cursor:pointer;font-size:10px;background:var(--surface);border:1px solid var(--border)" title="${c}">
       <input type="checkbox" class="meta-camp-cb" value="${c.replace(/"/g,'&quot;')}" onchange="onMetaCampCheck()" checked style="accent-color:var(--accent);flex-shrink:0"> <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c}</span>
     </label>`).join('')+'</div>';
   metaCampSel=new Set();
   const cnt=document.getElementById('metaCampFilterCount');
-  if(cnt) cnt.textContent=camps.length?`(${camps.length} campanhas)`:'';
+  if(cnt) cnt.textContent=camps.length?`(${camps.length} ${t('campanhas').toLowerCase()})`:'';
 }
 function toggleMetaTodas(cb){
   document.querySelectorAll('.meta-camp-cb').forEach(c=>{c.checked=cb.checked;});
@@ -997,7 +1154,6 @@ function onMetaCampCheck(){
   renderMeta();
 }
 function getMDforMeta(){
-  // Retorna daily filtrado pelas campanhas selecionadas no filtro da aba Meta
   const md=getMD(); if(!md) return md;
   if(!META_DAILY_CAMPS||metaCampSel.size===0) return md;
   const base=filtroLct?META_DAILY_CAMPS?.lct:META_DAILY_CAMPS?.all;
@@ -1035,14 +1191,14 @@ function buildCampFilter(){
   if(!camps.length) return;
   el.innerHTML='<div style="display:flex;flex-direction:column;gap:3px;">'
     +'<label style="display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;background:var(--surface2);border:1px solid var(--border)">'
-    +'<input type="checkbox" id="cb_todas" onchange="toggleTodas(this)" checked style="accent-color:var(--accent)"> Todas</label>'
+    +'<input type="checkbox" id="cb_todas" onchange="toggleTodas(this)" checked style="accent-color:var(--accent)"> '+t('todas')+'</label>'
     +camps.map(c=>`<label style="display:flex;align-items:center;gap:7px;padding:4px 8px;border-radius:6px;cursor:pointer;font-size:10px;background:var(--surface);border:1px solid var(--border)" title="${c}">
       <input type="checkbox" class="camp-cb" value="${c.replace(/"/g,'&quot;')}" onchange="onCampCheck()" checked style="accent-color:var(--accent);flex-shrink:0"> <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c}</span>
     </label>`).join('')
     +'</div>';
   campFilterSel=new Set();
   const cnt=document.getElementById('campFilterCount');
-  if(cnt) cnt.textContent=camps.length?`(${camps.length} campanhas)`:'';
+  if(cnt) cnt.textContent=camps.length?`(${camps.length} ${t('campanhas').toLowerCase()})`:'';
 }
 function toggleTodas(cb){
   document.querySelectorAll('.camp-cb').forEach(c=>{c.checked=cb.checked;});
@@ -1058,19 +1214,15 @@ function onCampCheck(){
   renderDiarioCharts();
 }
 
-
-
 function getDailyForCamp(){
   const md=getMD(); if(!md) return md;
-  if(!META_DAILY_CAMPS||campFilterSel.size===0) return md; // sem filtro = tudo
+  if(!META_DAILY_CAMPS||campFilterSel.size===0) return md;
   const base=filtroLct?META_DAILY_CAMPS?.lct:META_DAILY_CAMPS?.all;
   if(!base) return md;
-  // Combinar dailys de todas as campanhas selecionadas
   const selected=[...campFilterSel].map(c=>applyPeriod(base[c])).filter(Boolean);
   if(!selected.length) return md;
   if(selected.length===1) return selected[0];
-  // Somar arrays dia a dia usando as datas do getMD() como eixo
-  const ref=applyPeriod(md); // dias filtrados pelo período
+  const ref=applyPeriod(md);
   const out={days:ref.days};
   const numKeys=['spend','impressions','link_clicks','page_view','leads'];
   numKeys.forEach(k=>{
@@ -1081,7 +1233,6 @@ function getDailyForCamp(){
       },0);
     });
   });
-  // Recalcular taxas com leads
   out.ctr=out.days.map((_,i)=>out.impressions[i]>0?+(out.link_clicks[i]/out.impressions[i]*100).toFixed(2):null);
   out.connect_rate=out.days.map((_,i)=>out.link_clicks[i]>0?+(out.page_view[i]/out.link_clicks[i]*100).toFixed(2):null);
   out.tx_conv=out.days.map((_,i)=>out.page_view[i]>0?+(out.leads[i]/out.page_view[i]*100).toFixed(2):null);
@@ -1099,7 +1250,6 @@ function renderDiarioCharts(){
   const md=getDailyForCamp()||getMD();
   if(!md) return;
 
-  // Médias corretas: somar numerador/denominador, não média de taxas
   const totImp = (md.impressions||[]).reduce((a,b)=>a+(b||0),0);
   const totLc  = (md.link_clicks||[]).reduce((a,b)=>a+(b||0),0);
   const totPv  = (md.page_view||[]).reduce((a,b)=>a+(b||0),0);
@@ -1121,18 +1271,19 @@ function renderDiarioCharts(){
 
   function getMetricColor(id, val){
     const m=METAS[id]; if(!m||val==null) return '#3b82f6';
-    if(m.bom==null) return '#3b82f6'; // neutro — sem threshold definido
+    if(m.bom==null) return '#3b82f6';
     return m.inv
       ? (val<=m.bom?'#059669':val<=m.medio?'#d97706':'#dc2626')
       : (val>=m.bom?'#059669':val>=m.medio?'#d97706':'#dc2626');
   }
 
+  // Labels traduzidos para o eixo Y dos gráficos
   const METRICS=[
-    {id:'ctr',  ttl:'CTR (%)',          suffix:'%', data:()=>md.ctr},
-    {id:'cpm',  ttl:'CPM (R$)',         suffix:'',  fmt:v=>v!=null?'R$'+v.toFixed(2):null, data:()=>md.cpm},
-    {id:'cpl',  ttl:'Custo por Lead (R$)', suffix:'', fmt:v=>v!=null?'R$'+v.toFixed(2):null, data:()=>md.cpl},
-    {id:'cr',   ttl:'Connect Rate (%)', suffix:'%', data:()=>md.connect_rate},
-    {id:'tx_cv',ttl:'Taxa Conversão (%)',suffix:'%', data:()=>md.tx_conv},
+    {id:'ctr',  ttl:'CTR (%)',                                suffix:'%', data:()=>md.ctr},
+    {id:'cpm',  ttl:`CPM (${MOEDA_SIMBOLO})`,                suffix:'',  fmt:v=>v!=null?fR(v):null, data:()=>md.cpm},
+    {id:'cpl',  ttl:`${t('kpi_cpl_sub')} (${MOEDA_SIMBOLO})`,suffix:'',  fmt:v=>v!=null?fR(v):null, data:()=>md.cpl},
+    {id:'cr',   ttl:'Connect Rate (%)',                       suffix:'%', data:()=>md.connect_rate},
+    {id:'tx_cv',ttl:(currentLang==='ES'?'Tasa Conversión (%)':'Taxa Conversão (%)'), suffix:'%', data:()=>md.tx_conv},
   ];
 
   const el=document.getElementById('dailyCharts');
@@ -1141,7 +1292,7 @@ function renderDiarioCharts(){
     const col=getMetricColor(m.id,avgVal);
     return `<div class="daily-row">
       <div class="daily-side">
-        <div class="ds-lbl">Período</div>
+        <div class="ds-lbl">${t('d_periodo')}</div>
         <div class="ds-val" id="avg_${m.id}" style="color:${col}">—</div>
       </div>
       <div class="daily-main">
@@ -1172,12 +1323,12 @@ function renderDiarioCharts(){
              if(tot>18&&ctx.dataIndex%3!==0) return null;
              return m.fmt?m.fmt(v):v.toFixed(1)+m.suffix;
            },anchor:'top',align:'top',offset:2,clip:false}},
-        {label:'Média período',data:avgLine,borderColor:'#111',borderDash:[4,4],backgroundColor:'transparent',
+        {label:t('d_media'),data:avgLine,borderColor:'#111',borderDash:[4,4],backgroundColor:'transparent',
          pointRadius:0,borderWidth:1.5,spanGaps:true,datalabels:{display:false}},
       ]},
       options:{...bo(),scales:{
         x:{ticks:{color:TXT(),font:bf,maxTicksLimit:14},grid:{color:GRID()}},
-        y:{ticks:{color:TXT(),font:bf,callback:v=>m.fmt?('R$'+v.toFixed(0)):v+m.suffix},grid:{color:GRID()},min:0}
+        y:{ticks:{color:TXT(),font:bf,callback:v=>m.fmt?fR(v):v+m.suffix},grid:{color:GRID()},min:0}
       }}
     });
   });
@@ -1191,22 +1342,28 @@ function renderPesquisa(){
   const totalLeads=PESQUISA.total_leads||0; const resp=PESQUISA.total;
   const taxa=totalLeads>0?r2(resp/totalLeads*100):null;
   document.getElementById('pesKpis').innerHTML=`
-    <div class="kpi" style="--kc:#3b82f6"><div class="kpi-lbl">Respostas</div><div class="kpi-val">${fN(resp)}</div><div class="kpi-sub">na pesquisa</div></div>
-    <div class="kpi" style="--kc:#334155"><div class="kpi-lbl">Total de Leads</div><div class="kpi-val">${fN(totalLeads)}</div><div class="kpi-sub">captados no lançamento</div></div>
-    <div class="kpi" style="--kc:#059669"><div class="kpi-lbl">Taxa Resp./Leads</div><div class="kpi-val">${taxa!=null?taxa+'%':'—'}</div><div class="kpi-sub">respostas / leads</div></div>`;
-
+    <div class="kpi" style="--kc:#3b82f6"><div class="kpi-lbl">${t('p_respostas')}</div><div class="kpi-val">${fN(resp)}</div><div class="kpi-sub">${t('p_na_pesq')}</div></div>
+    <div class="kpi" style="--kc:#334155"><div class="kpi-lbl">${t('p_total_leads')}</div><div class="kpi-val">${fN(totalLeads)}</div><div class="kpi-sub">${t('p_captados')}</div></div>
+    <div class="kpi" style="--kc:#059669"><div class="kpi-lbl">${t('p_taxa')}</div><div class="kpi-val">${taxa!=null?taxa+'%':'—'}</div><div class="kpi-sub">${t('p_resp_leads')}</div></div>`;
   buildUtmFilters();
   buildPizzas();
 }
 
+const UTM_LABELS_MAP={
+  utm_source:   {PT:'Origem',   ES:'Origen'},
+  utm_medium:   {PT:'Meio',     ES:'Medio'},
+  utm_campaign: {PT:'Campanha', ES:'Campaña'},
+  utm_content:  {PT:'Conteúdo', ES:'Contenido'},
+};
+
 function buildUtmFilters(){
-  const UTM_LABELS={utm_source:'Origem',utm_medium:'Meio',utm_campaign:'Campanha',utm_content:'Conteúdo'};
   const utms=Object.keys(PESQUISA.filtros||{}).filter(k=>PESQUISA.filtros[k]?.length);
   utms.forEach(u=>{if(!pesFilters[u]) pesFilters[u]=new Set(PESQUISA.filtros[u]);});
   document.getElementById('utmGroups').innerHTML=utms.map(utm=>{
+    const lbl=(UTM_LABELS_MAP[utm]||{})[currentLang]||utm;
     const vals=PESQUISA.filtros[utm];
     return `<div>
-      <div class="utm-grp-lbl">${UTM_LABELS[utm]||utm}</div>
+      <div class="utm-grp-lbl">${lbl}</div>
       <div class="utm-list">${vals.map(v=>{
         const cnt=PESQUISA.rows.filter(r=>r[utm]===v).length;
         return `<label class="utm-item">
@@ -1224,7 +1381,6 @@ function onPesCheck(cb){
   cb.checked?pesFilters[utm].add(cb.value):pesFilters[utm].delete(cb.value);
   buildPizzas();
 }
-
 function checkAll(check){
   document.querySelectorAll('#utmGroups input[type=checkbox]').forEach(cb=>{
     cb.checked=check;
@@ -1234,7 +1390,6 @@ function checkAll(check){
   });
   buildPizzas();
 }
-
 function buildPizzas(){
   if(!PESQUISA) return;
   let rows=PESQUISA.rows;
@@ -1242,7 +1397,7 @@ function buildPizzas(){
     if(!vals||vals.size===0) return;
     rows=rows.filter(r=>vals.has(r[utm]));
   });
-  document.getElementById('pesCount').textContent=`${rows.length} respondentes selecionados`;
+  document.getElementById('pesCount').textContent=`${rows.length} ${t('p_selecionados')}`;
   const grid=document.getElementById('pizzaGrid');
   grid.innerHTML=PESQUISA.perguntas.map((p,i)=>`
     <div class="pz-card">
@@ -1263,7 +1418,7 @@ function buildPizzas(){
       options:{responsive:true,maintainAspectRatio:false,plugins:{
         legend:{display:false},
         datalabels:{display:true,color:'#fff',font:{size:9,weight:'bold'},
-          formatter:(v,ctx)=>{const t=ctx.dataset.data.reduce((a,b)=>a+b,0);return t>0&&v/t>0.05?(v/t*100).toFixed(0)+'%':null;}}
+          formatter:(v,ctx)=>{const t2=ctx.dataset.data.reduce((a,b)=>a+b,0);return t2>0&&v/t2>0.05?(v/t2*100).toFixed(0)+'%':null;}}
       }}
     });
     document.getElementById(`pzl_${i}`).innerHTML=sorted.slice(0,6).map(([k,v],j)=>`
@@ -1280,7 +1435,6 @@ function setPeriod(days,btn){
   document.getElementById('dtI').value=''; document.getElementById('dtF').value='';
   document.querySelectorAll('.period-bar .pb').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  // Resetar cache do filtro de campanhas para reconstruir com novas campanhas do período
   const mf=document.getElementById('metaCampFilter');
   if(mf) delete mf.dataset.campsKey;
   metaCampSel=new Set();
@@ -1328,6 +1482,7 @@ function rerenderActive(){
   if(p==='meta')     renderMeta();
   if(p==='diario')   renderDiario();
   if(p==='pesquisa') renderPesquisa();
+  applyI18n();
   setTimeout(()=>{Object.values({...CH,...PC}).forEach(c=>{try{c.resize();}catch(e){}});},60);
 }
 
@@ -1337,11 +1492,12 @@ function goPage(p,btn){
   document.querySelectorAll('.sb-item').forEach(e=>e.classList.remove('active'));
   document.getElementById('page-'+p).classList.add('active');
   if(btn) btn.classList.add('active');
-  const titles={meta:'Meta Ads',diario:'Métricas Diárias',pesquisa:'Pesquisa'};
+  const titles={meta:t('nav_meta'),diario:t('nav_diario'),pesquisa:t('nav_pesquisa')};
   document.getElementById('pageTitle').textContent=titles[p]||p;
   if(p==='meta')     renderMeta();
   if(p==='diario')   renderDiario();
   if(p==='pesquisa') renderPesquisa();
+  applyI18n();
   setTimeout(()=>{Object.values({...CH,...PC}).forEach(c=>{try{c.resize();}catch(e){}});},80);
   if(window.innerWidth<=768) closeSb();
 }
@@ -1351,7 +1507,7 @@ function toggleTheme(){
   const dark=DARK();
   document.documentElement.setAttribute('data-theme',dark?'light':'dark');
   document.getElementById('themeIcon').textContent=dark?'🌙':'☀️';
-  document.getElementById('themeLabel').textContent=dark?'Escuro':'Claro';
+  document.getElementById('themeLabel').textContent=dark?t('escuro'):t('claro');
   localStorage.setItem('lct-theme',dark?'light':'dark');
   rerenderActive();
 }
@@ -1370,7 +1526,6 @@ function ajustarPaddingContent(){
     if(h>0) ct.style.paddingTop=(h+10)+'px';
   }
 }
-// Rodar imediatamente + após fonts/imgs carregarem + no resize
 ajustarPaddingContent();
 document.addEventListener('DOMContentLoaded', ajustarPaddingContent);
 window.addEventListener('load', ajustarPaddingContent);
@@ -1378,29 +1533,38 @@ window.addEventListener('resize', ajustarPaddingContent);
 
 // ═══ INIT ═══
 (function(){
+  // Restaurar idioma salvo
+  const savedLang=localStorage.getItem('lct-lang');
+  if(savedLang && savedLang!=='PT'){
+    currentLang=savedLang;
+    const btnES=document.getElementById('btnLangES');
+    const btnPT=document.getElementById('btnLangPT');
+    if(btnES&&btnPT){btnPT.classList.remove('active');btnES.classList.add('active');}
+  }
+
   const lb=document.getElementById('logoBox');
   if(lb){lb.textContent=LOGO_LETRA;lb.style.background=`linear-gradient(135deg,${COR_ACENTO},${COR_ACENTO}cc)`;}
   document.getElementById('sbNome').textContent=NOME_CLIENTE;
   document.getElementById('pageTab').textContent=`${NOME_CLIENTE} — Dashboard`;
-  document.getElementById('sbLct').textContent=LANCAMENTO_COD||'Todos';
+  document.getElementById('sbLct').textContent=LANCAMENTO_COD||t('lct_tudo');
   document.documentElement.style.setProperty('--accent',COR_ACENTO);
   const badge=document.getElementById('liveBadge');
   badge.style.cssText=`background:${COR_ACENTO}15;border:1px solid ${COR_ACENTO}44;color:${COR_ACENTO};`;
   document.getElementById('livePulse').style.background=COR_ACENTO;
   if(META_DAILY?.lct?.days?.length){
-    const d=META_DAILY.lct.days; document.getElementById('liveTxt').textContent='Dados até '+d[d.length-1];
-    // Atualizar footer com data do gerador (vem como texto no span)
+    const d=META_DAILY.lct.days;
+    document.getElementById('liveTxt').textContent='Dados até '+d[d.length-1];
     const sfEl=document.getElementById('sbAtual');
     if(sfEl&&sfEl.textContent.includes('--')) sfEl.textContent='Atualizado '+d[d.length-1];
   }
   if(LANCAMENTO_COD){const lb2=document.getElementById('lctBar');if(lb2)lb2.style.display='flex';document.getElementById('btnLctOn').textContent=LANCAMENTO_COD;}
-  // Pesquisa: esconder menu e aba se PESQUISA=false
   if(PESQUISA===false||PESQUISA===null){
     const sbP=document.getElementById('sbPesquisa');
     if(sbP) sbP.style.display='none';
     const pgP=document.getElementById('page-pesquisa');
     if(pgP) pgP.style.display='none';
   }
+  applyI18n();
   renderMeta();
   ajustarPaddingContent();
 })();
