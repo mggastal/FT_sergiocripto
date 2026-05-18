@@ -7,8 +7,8 @@
   "moeda_simbolo": "€",
   "atualizado": "18/05/2026",
   "kpis": {
-    "spend": 3655.67,
-    "leads": 476,
-    "cpl": 7.68
+    "spend": 0.0,
+    "leads": 0,
+    "cpl": null
   }
 }
