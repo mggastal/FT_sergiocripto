@@ -5,10 +5,10 @@
   "lancamento": "TLC02",
   "moeda": "EUR",
   "moeda_simbolo": "€",
-  "atualizado": "17/05/2026",
+  "atualizado": "18/05/2026",
   "kpis": {
-    "spend": 3490.58,
-    "leads": 463,
-    "cpl": 7.54
+    "spend": 3630.74,
+    "leads": 473,
+    "cpl": 7.68
   }
 }
