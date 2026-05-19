@@ -28,8 +28,8 @@ USAR_PESQUISA    = False            # False = oculta aba Pesquisa
 MOEDA            = "EUR"
 
 # Metas do funil — define cores (verde/amarelo/vermelho)
-CPL_BOM          = 6.0    # Custo por Lead ≤ 5 → verde | 5-10 → amarelo | acima → vermelho
-CPL_MEDIO        = 8.0
+CPL_BOM          = 9.06    # Custo por Lead ≤ 5 → verde | 5-10 → amarelo | acima → vermelho
+CPL_MEDIO        = 11.0
 CTR_BOM          = 1.0    # CTR ≥ 1.2% → verde | 0.8-1.2% → amarelo | abaixo → vermelho
 CTR_MEDIO        = 0.8
 CR_BOM           = 65.0   # Connect Rate ≥ 40% → verde | 25-40% → amarelo | abaixo → vermelho
