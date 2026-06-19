@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vendas — Impacto Pasivo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+<style>
+  :root{
+    --bg:#0b0d12;
+    --panel:#12151c;
+    --panel-2:#171b24;
+    --border:#232834;
+    --text:#e8eaef;
+    --muted:#8a8f9c;
+    --accent:#5b8cff;
+    --accent-2:#3ddc97;
+    --accent-3:#ffb84d;
+    --accent-4:#ff6b81;
+    --accent-5:#c792ea;
+    --accent-6:#4dd0e1;
+    --dl-light:#e8eaef;
+    --dl-dark:#0b0d12;
+  }
+  html.light{
+    --bg:#f4f5f8;
+    --panel:#ffffff;
+    --panel-2:#eef0f4;
+    --border:#dde1e8;
+    --text:#1b1e27;
+    --muted:#6b7180;
+    --dl-light:#1b1e27;
+    --dl-dark:#0b0d12;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Space Grotesk',sans-serif;
+    padding:132px 24px 80px;
+    transition:background .2s ease, color .2s ease;
+  }
+  .wrap{max-width:1180px;margin:0 auto;}
+  header{margin-bottom:36px;}
+  .eyebrow{
+    color:var(--accent);
+    font-size:13px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    font-weight:600;
+    margin-bottom:8px;
+  }
+  h1{font-size:32px;margin:0 0 6px;font-weight:700;}
+  .subtitle{color:var(--muted);font-size:14px;}
+
+  .toolbar{
+    position:fixed;
+    top:0;left:0;right:0;
+    z-index:100;
+    background:var(--panel);
+    border-bottom:1px solid var(--border);
+    padding:12px 24px;
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .toggle-group{
+    display:flex;
+    background:var(--panel-2);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:3px;
+    gap:2px;
+  }
+  .toggle-group button{
+    border:none;
+    background:transparent;
+    color:var(--muted);
+    font-family:'Space Grotesk',sans-serif;
+    font-size:12px;
+    font-weight:600;
+    padding:7px 14px;
+    border-radius:7px;
+    cursor:pointer;
+    transition:background .15s ease, color .15s ease;
+  }
+  .toggle-group button.active{
+    background:var(--accent);
+    color:#fff;
+  }
+  .tabs-bar{
+    position:fixed;
+    top:49px;left:0;right:0;
+    z-index:99;
+    background:var(--bg);
+    border-bottom:1px solid var(--border);
+    padding:0 24px;
+    display:flex;
+    gap:4px;
+    overflow-x:auto;
+  }
+  .tab-btn{
+    border:none;
+    background:transparent;
+    color:var(--muted);
+    font-family:'Space Grotesk',sans-serif;
+    font-size:13px;
+    font-weight:600;
+    padding:14px 16px 12px;
+    cursor:pointer;
+    border-bottom:2px solid transparent;
+    white-space:nowrap;
+  }
+  .tab-btn.active{
+    color:var(--text);
+    border-bottom-color:var(--accent);
+  }
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+  .region-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  .region-label{
+    display:inline-block;
+    font-family:'DM Mono',monospace;
+    font-size:12px;
+    font-weight:600;
+    padding:4px 12px;
+    border-radius:20px;
+    margin-bottom:14px;
+  }
+  .region-label.esp{background:rgba(255,184,77,0.15);color:#ffb84d;border:1px solid rgba(255,184,77,0.35);}
+  .region-label.latam{background:rgba(91,140,255,0.15);color:#5b8cff;border:1px solid rgba(91,140,255,0.35);}
+  @media(max-width:900px){
+    .region-cols{grid-template-columns:1fr;}
+  }
+
+  .kpis{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:14px;
+    margin:28px 0 40px;
+  }
+  .kpi{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:18px 20px;
+  }
+  .kpi .label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;}
+  .kpi .value{font-family:'DM Mono',monospace;font-size:24px;font-weight:500;}
+  .kpi .value.accent{color:var(--accent-2);}
+
+  section{margin-bottom:48px;}
+  .section-title{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    margin-bottom:18px;
+    padding-bottom:12px;
+    border-bottom:1px solid var(--border);
+  }
+  .section-title h2{font-size:18px;margin:0;font-weight:600;}
+  .section-title .tag{
+    font-family:'DM Mono',monospace;
+    font-size:11px;
+    color:var(--accent);
+    background:rgba(91,140,255,0.1);
+    padding:3px 9px;
+    border-radius:20px;
+    border:1px solid rgba(91,140,255,0.3);
+  }
+
+  .grid-2{display:grid;grid-template-columns:1.4fr 1fr;gap:18px;}
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:22px;
+  }
+  .panel h3{margin:0 0 16px;font-size:14px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;}
+  .chart-box{position:relative;height:340px;}
+  .chart-box.tall{height:420px;}
+
+  table{width:100%;border-collapse:collapse;font-family:'DM Mono',monospace;font-size:13px;}
+  th{
+    text-align:left;
+    color:var(--muted);
+    font-weight:500;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    padding:8px 10px;
+    border-bottom:1px solid var(--border);
+  }
+  td{padding:9px 10px;border-bottom:1px solid rgba(128,128,128,0.12);color:var(--text);}
+  tr:last-child td{border-bottom:none;}
+  td.num{text-align:right;}
+
+  .divider{
+    margin:56px 0 40px;
+    text-align:center;
+    position:relative;
+    color:var(--muted);
+    font-size:12px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+  }
+  .divider::before{
+    content:'';
+    position:absolute;left:0;right:0;top:50%;
+    height:1px;background:var(--border);
+  }
+  .divider span{background:var(--bg);padding:0 16px;position:relative;}
+
+  .jan-banner{
+    background:linear-gradient(135deg, rgba(91,140,255,0.12), rgba(61,220,151,0.08));
+    border:1px solid rgba(91,140,255,0.25);
+    border-radius:16px;
+    padding:24px 28px;
+    margin-bottom:28px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:16px;
+  }
+  .jan-banner .title{font-size:20px;font-weight:700;}
+  .jan-banner .desc{color:var(--muted);font-size:13px;margin-top:4px;}
+  .jan-banner .big{font-family:'DM Mono',monospace;font-size:28px;color:var(--accent-2);font-weight:500;}
+
+  footer{
+    margin-top:60px;
+    text-align:center;
+    color:var(--muted);
+    font-size:12px;
+  }
+
+  .creatives-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));
+    gap:16px;
+  }
+  .creative-card{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:14px;
+    overflow:hidden;
+    position:relative;
+  }
+  .creative-thumb{
+    width:100%;
+    aspect-ratio:1/1;
+    object-fit:cover;
+    background:var(--panel-2);
+    display:block;
+  }
+  .creative-badge{
+    position:absolute;
+    top:10px;left:10px;
+    font-size:10px;
+    font-weight:700;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+    padding:4px 9px;
+    border-radius:20px;
+    color:#0b0d12;
+  }
+  .badge-volume{background:#3ddc97;}
+  .badge-cpl{background:#5b8cff;color:#fff;}
+  .creative-body{padding:14px 16px 16px;}
+  .creative-name{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;margin-bottom:10px;word-break:break-word;}
+  .creative-stats{display:flex;flex-direction:column;gap:5px;font-size:12px;}
+  .creative-stats .row{display:flex;justify-content:space-between;color:var(--muted);}
+  .creative-stats .row b{color:var(--text);font-family:'DM Mono',monospace;}
+
+  @media(max-width:900px){
+    .kpis{grid-template-columns:repeat(2,1fr);}
+    .grid-2{grid-template-columns:1fr;}
+    .toolbar{justify-content:center;}
+  }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="toggle-group" id="langToggle">
+    <button data-lang="pt" class="active">Português</button>
+    <button data-lang="es">Español</button>
+  </div>
+  <div class="toggle-group" id="themeToggle">
+    <button data-theme="dark" class="active">Escuro</button>
+    <button data-theme="light">Claro</button>
+  </div>
+</div>
+
+<div class="tabs-bar" id="tabsBar">
+  <button class="tab-btn active" data-tab="tabVendas" data-i18n="tabVendas">Vendas & Investimento</button>
+  <button class="tab-btn" data-tab="tabAds" data-i18n="tabAds">Melhores Públicos e Anúncios</button>
+  <button class="tab-btn" data-tab="tabPesquisa" data-i18n="tabPesquisa">Pesquisa do Evento</button>
+</div>
+
+<div id="tabVendas" class="tab-panel active">
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow" data-i18n="eyebrow">Relatório de Vendas</div>
+    <h1 data-i18n="h1">Impacto Pasivo — Visão Geral</h1>
+    <div class="subtitle" data-i18n="subtitle">Período: jul/2025 a jun/2026 · Valores em Facturación Bruta · 212 transações</div>
+  </header>
+
+  <div class="kpis">
+    <div class="kpi">
+      <div class="label" data-i18n="kpiTotalLabel">Faturamento Total</div>
+      <div class="value accent" id="kpiTotal">—</div>
+    </div>
+    <div class="kpi">
+      <div class="label" data-i18n="kpiCountLabel">Total de Vendas</div>
+      <div class="value" id="kpiCount">—</div>
+    </div>
+    <div class="kpi">
+      <div class="label" data-i18n="kpiAvgLabel">Ticket Médio</div>
+      <div class="value" id="kpiAvg">—</div>
+    </div>
+    <div class="kpi">
+      <div class="label" data-i18n="kpiCountriesLabel">Países Atendidos</div>
+      <div class="value" id="kpiCountries">—</div>
+    </div>
+  </div>
+
+  <section>
+    <div class="section-title">
+      <h2 data-i18n="s1h2">Vendas por Mês</h2>
+      <span class="tag" data-i18n="s1tag">por país</span>
+    </div>
+    <div class="panel">
+      <div class="chart-box tall"><canvas id="monthChart"></canvas></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title">
+      <h2 data-i18n="s2h2">Vendas por País</h2>
+      <span class="tag" data-i18n="s2tag">total geral</span>
+    </div>
+    <div class="grid-2">
+      <div class="panel">
+        <h3 data-i18n="faturamentoPorPais">Faturamento por País</h3>
+        <div class="chart-box"><canvas id="countryChart"></canvas></div>
+      </div>
+      <div class="panel">
+        <h3 data-i18n="ranking">Ranking</h3>
+        <table>
+          <thead><tr><th data-i18n="thPais">País</th><th class="num" data-i18n="thVendas">Vendas</th><th class="num" data-i18n="thFaturamento">Faturamento</th><th class="num">%</th></tr></thead>
+          <tbody id="countryTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><span data-i18n="recorteEspecial">Recorte Especial</span></div>
+
+  <div class="jan-banner">
+    <div>
+      <div class="title" data-i18n="janTitle">Janeiro de 2026</div>
+      <div class="desc" id="janDesc">—</div>
+    </div>
+    <div class="big" id="janTotal">—</div>
+  </div>
+
+  <section>
+    <div class="section-title">
+      <h2 data-i18n="s3h2">Vendas por Dia — Janeiro/2026</h2>
+    </div>
+    <div class="panel">
+      <div class="chart-box tall"><canvas id="janDayChart"></canvas></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title">
+      <h2 data-i18n="s4h2">Vendas por País — Janeiro/2026</h2>
+    </div>
+    <div class="grid-2">
+      <div class="panel">
+        <h3 data-i18n="faturamentoPorPais">Faturamento por País</h3>
+        <div class="chart-box"><canvas id="janCountryChart"></canvas></div>
+      </div>
+      <div class="panel">
+        <h3 data-i18n="ranking">Ranking</h3>
+        <table>
+          <thead><tr><th data-i18n="thPais">País</th><th class="num" data-i18n="thVendas">Vendas</th><th class="num" data-i18n="thFaturamento">Faturamento</th><th class="num">%</th></tr></thead>
+          <tbody id="janCountryTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <footer data-i18n="footer1">Relatório gerado a partir do histórico de vendas Hotmart · Impacto Pasivo</footer>
+</div>
+
+<div class="wrap" id="generalAdsWrap" style="display:none;">
+  <div class="divider"><span data-i18n="dividerGeneral">Meta Ads — Investimento Geral</span></div>
+
+  <div class="kpis" id="generalKpis"></div>
+
+  <section>
+    <div class="section-title">
+      <h2 data-i18n="ginvDiario">Investimento Diário</h2>
+      <span class="tag" data-i18n="jan2026tag">Janeiro/2026</span>
+    </div>
+    <div class="panel">
+      <div class="chart-box tall"><canvas id="generalSpendChart"></canvas></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title">
+      <h2 data-i18n="cplDiario">CPL Diário</h2>
+      <span class="tag" data-i18n="jan2026tag">Janeiro/2026</span>
+    </div>
+    <div class="panel">
+      <div class="chart-box tall"><canvas id="generalCplChart"></canvas></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title">
+      <h2 data-i18n="invPorFrente">Investimento por Frente</h2>
+      <span class="tag">ESP x LATAM</span>
+    </div>
+    <div class="grid-2">
+      <div class="panel">
+        <h3 data-i18n="distribInv">Distribuição do Investimento</h3>
+        <div class="chart-box"><canvas id="investSplitChart"></canvas></div>
+      </div>
+      <div class="panel">
+        <h3 data-i18n="roasPorFrente">ROAS por Frente</h3>
+        <div class="chart-box"><canvas id="roasCompareChart"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title">
+      <h2 data-i18n="invRetGeral">Investimento x Retorno — Geral</h2>
+      <span class="tag" data-i18n="jan2026tag">Janeiro/2026</span>
+    </div>
+    <div class="grid-2">
+      <div class="panel">
+        <h3 data-i18n="invVsFat">Investido vs Faturado</h3>
+        <div class="chart-box"><canvas id="generalRoasChart"></canvas></div>
+      </div>
+      <div class="panel">
+        <h3 data-i18n="resumo">Resumo</h3>
+        <table>
+          <thead><tr><th data-i18n="thMetrica">Métrica</th><th class="num" data-i18n="thValor">Valor</th></tr></thead>
+          <tbody id="generalRoasTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <footer data-i18n="footer2">Investimento referente a todas as campanhas (ESP + LATAM) · Meta Ads · Janeiro/2026</footer>
+</div>
+
+<div class="wrap" id="latamWrap" style="display:none;">
+  <div class="divider"><span>Meta Ads — LATAM</span></div>
+
+  <section>
+    <div class="section-title">
+      <h2 data-i18n="estrategiaPublicos">Estratégia de Públicos — LATAM (Janeiro/2026)</h2>
+    </div>
+    <div class="grid-2">
+      <div class="panel">
+        <h3 data-i18n="publicoFrio">Público Frio</h3>
+        <div style="font-size:14px;color:var(--text);line-height:1.6;" data-i18n="publicoFrioDesc">
+          Localização — Inclusão: <strong>Argentina, Colômbia</strong>
+        </div>
+      </div>
+      <div class="panel">
+        <h3 data-i18n="publicoQuente">Público Quente</h3>
+        <div style="font-size:14px;color:var(--text);line-height:1.6;" data-i18n="publicoQuenteDesc">
+          Toda a <strong>América do Sul</strong>, exceto Venezuela
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title">
+      <h2 data-i18n="invDiarioLatam">Investimento Diário — LATAM</h2>
+      <span class="tag" data-i18n="frioQuenteTag">Frio x Quente</span>
+    </div>
+    <div class="panel">
+      <div class="chart-box tall"><canvas id="latamSpendChart"></canvas></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title">
+      <h2 data-i18n="cplDiarioLatam">CPL Diário — LATAM</h2>
+      <span class="tag" data-i18n="frioQuenteTag">Frio x Quente</span>
+    </div>
+    <div class="panel">
+      <div class="chart-box tall"><canvas id="latamCplChart"></canvas></div>
+    </div>
+  </section>
+
+  <div class="kpis" id="latamKpis"></div>
+
+  <section>
+    <div class="section-title">
+      <h2 data-i18n="invRetLatam">Investimento x Retorno — LATAM</h2>
+      <span class="tag" data-i18n="jan2026tag">Janeiro/2026</span>
+    </div>
+    <div class="grid-2">
+      <div class="panel">
+        <h3 data-i18n="invVsFat">Investido vs Faturado</h3>
+        <div class="chart-box"><canvas id="latamRoasChart"></canvas></div>
+      </div>
+      <div class="panel">
+        <h3 data-i18n="resumo">Resumo</h3>
+        <table>
+          <thead><tr><th data-i18n="thMetrica">Métrica</th><th class="num" data-i18n="thValor">Valor</th></tr></thead>
+          <tbody id="latamRoasTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <footer data-i18n="footer3">Investimento referente apenas às campanhas LATAM (Frio + Quente) · Meta Ads · Janeiro/2026</footer>
+</div>
+</div>
+
+<div id="tabAds" class="tab-panel">
+<div class="wrap" id="creativesWrap" style="display:none;">
+  <div class="divider"><span data-i18n="dividerCreatives">Melhores Públicos e Anúncios</span></div>
+
+  <section>
+    <div class="section-title">
+      <h2 data-i18n="audiencesTitle">Ranking de Públicos</h2>
+      <span class="tag" data-i18n="creativesTag">Volume x CPL</span>
+    </div>
+    <div class="region-cols">
+      <div>
+        <span class="region-label esp">España</span>
+        <div class="panel">
+          <div class="chart-box tall"><canvas id="audienceChart-ESP"></canvas></div>
+        </div>
+      </div>
+      <div>
+        <span class="region-label latam">LATAM</span>
+        <div class="panel">
+          <div class="chart-box tall"><canvas id="audienceChart-LATAM"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title">
+      <h2 data-i18n="creativesTitle">Ranking de Criativos</h2>
+      <span class="tag" data-i18n="creativesTag">Volume x CPL</span>
+    </div>
+    <div class="region-cols">
+      <div>
+        <span class="region-label esp">España</span>
+        <div id="creativesGrid-ESP" class="creatives-grid"></div>
+      </div>
+      <div>
+        <span class="region-label latam">LATAM</span>
+        <div id="creativesGrid-LATAM" class="creatives-grid"></div>
+      </div>
+    </div>
+  </section>
+</div>
+</div>
+
+<div id="tabPesquisa" class="tab-panel">
+<div class="wrap" id="pesquisaWrap" style="display:none;">
+  <header>
+    <div class="eyebrow" data-i18n="pesquisaEyebrow">Pesquisa do Evento</div>
+    <h1 data-i18n="pesquisaH1">Evento de Janeiro/2026 — Perfil dos Inscritos</h1>
+    <div class="subtitle" id="pesquisaSubtitle">—</div>
+  </header>
+
+  <div class="kpis" id="pesquisaKpis"></div>
+
+  <section>
+    <div class="section-title">
+      <h2 data-i18n="paisPesquisa">País dos Respondentes</h2>
+    </div>
+    <div class="panel">
+      <div class="chart-box"><canvas id="pesquisaPaisChart"></canvas></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title">
+      <h2 data-i18n="faixaEtaria">Faixa Etária</h2>
+    </div>
+    <div class="panel">
+      <div class="chart-box"><canvas id="pesquisaEdadChart"></canvas></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title">
+      <h2 data-i18n="rendaMensal">Renda Mensal</h2>
+    </div>
+    <div class="panel">
+      <div class="chart-box tall"><canvas id="pesquisaIngresosChart"></canvas></div>
+    </div>
+  </section>
+
+  <div class="grid-2">
+    <section>
+      <div class="section-title">
+        <h2 data-i18n="tempoCripto">Tempo no Mundo Cripto</h2>
+      </div>
+      <div class="panel">
+        <div class="chart-box"><canvas id="pesquisaTempoChart"></canvas></div>
+      </div>
+    </section>
+    <section>
+      <div class="section-title">
+        <h2 data-i18n="comoConheceu">Como Conheceu o Evento</h2>
+      </div>
+      <div class="panel">
+        <div class="chart-box"><canvas id="pesquisaComoChart"></canvas></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="grid-2">
+    <section>
+      <div class="section-title">
+        <h2 data-i18n="ocupacao">Ocupação</h2>
+      </div>
+      <div class="panel">
+        <div class="chart-box tall"><canvas id="pesquisaOcupChart"></canvas></div>
+      </div>
+    </section>
+    <section>
+      <div class="section-title">
+        <h2 data-i18n="temFilhos">Tem Filhos</h2>
+      </div>
+      <div class="panel">
+        <div class="chart-box"><canvas id="pesquisaFilhosChart"></canvas></div>
+      </div>
+    </section>
+  </div>
+
+  <section>
+    <div class="section-title">
+      <h2 data-i18n="situacaoAtual">Situação Atual (Jornada em Cripto)</h2>
+    </div>
+    <div class="panel">
+      <div class="chart-box"><canvas id="pesquisaSituacaoChart"></canvas></div>
+    </div>
+  </section>
+
+  <footer data-i18n="pesquisaFooter">Dados agregados a partir das respostas do formulário do evento · Sem informações identificáveis</footer>
+</div>
+</div>
+
+
+<script>
+const DATA = {"overall": {"months": ["2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06"], "country_order": ["España", "Argentina", "Colombia", "México", "Noruega", "Australia", "Estados Unidos", "Canadá", "Luxemburgo", "Italia"], "pivot": {"España": [8017.51, 693.84, 17373.78, 861.46, 256.31, 1457.07, 11572.79, 815.79, 386.7, 6731.81, 432.29, 257.8], "Argentina": [708.79, 0.0, 503.46, 0.0, 142.71, 0.0, 358.81, 0.0, 0.0, 352.28, 0.0, 0.0], "Colombia": [0.0, 0.0, 711.08, 0.0, 0.0, 0.0, 1219.13, 0.0, 0.0, 0.0, 0.0, 0.0], "México": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 709.99, 0.0, 0.0, 0.0, 0.0, 0.0], "Noruega": [159.08, 160.83, 160.83, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "Australia": [0.0, 0.0, 374.63, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "Estados Unidos": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 374.43, 0.0, 0.0, 0.0, 0.0], "Canadá": [0.0, 0.0, 357.08, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "Luxemburgo": [0.0, 0.0, 301.83, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "Italia": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 300.19, 0.0, 0.0]}, "country_totals": {"España": 48857.15, "Argentina": 2066.05, "Colombia": 1930.21, "México": 709.99, "Noruega": 480.74, "Australia": 374.63, "Estados Unidos": 374.43, "Canadá": 357.08, "Luxemburgo": 301.83, "Italia": 300.19}, "country_counts": {"España": 189, "Argentina": 7, "Colombia": 6, "Noruega": 3, "México": 2, "Italia": 1, "Estados Unidos": 1, "Luxemburgo": 1, "Australia": 1, "Canadá": 1}, "month_totals": {"2025-07": 8885.38, "2025-08": 854.67, "2025-09": 19782.69, "2025-10": 861.46, "2025-11": 399.02, "2025-12": 1457.07, "2026-01": 13860.72, "2026-02": 1190.22, "2026-03": 386.7, "2026-04": 7384.28, "2026-05": 432.29, "2026-06": 257.8}, "month_counts": {"2025-07": 35, "2025-08": 6, "2025-09": 69, "2025-10": 4, "2025-11": 3, "2025-12": 6, "2026-01": 49, "2026-02": 6, "2026-03": 3, "2026-04": 26, "2026-05": 3, "2026-06": 2}}, "jan": {"days": ["2026-01-22", "2026-01-23", "2026-01-24", "2026-01-25", "2026-01-26", "2026-01-27", "2026-01-29", "2026-01-30", "2026-01-31"], "day_totals": [4056.74, 3302.09, 656.01, 600.38, 1684.17, 427.6, 2645.65, 359.18, 128.9], "day_counts": [15, 11, 2, 2, 6, 2, 9, 1, 1], "countries": ["España", "Colombia", "México", "Argentina"], "country_totals": [11572.79, 1219.13, 709.99, 358.81], "country_counts": [42, 4, 2, 1], "total": 13860.72, "count": 49, "day_country_order": ["España", "Colombia", "México", "Argentina"], "day_pivot": {"España": [3556.91, 3302.09, 300.19, 600.38, 1328.17, 427.6, 1928.55, 0.0, 128.9], "Colombia": [149.02, 0.0, 355.82, 0.0, 356.0, 0.0, 358.29, 0.0, 0.0], "México": [350.81, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 359.18, 0.0], "Argentina": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 358.81, 0.0, 0.0]}}, "total_all": 55752.3, "count_all": 212};
+const LATAM = {"dates": ["2026-01-10", "2026-01-11", "2026-01-12", "2026-01-13", "2026-01-14", "2026-01-15", "2026-01-16", "2026-01-17", "2026-01-18", "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22"], "frio_spend": [32.85, 22.89, 21.68, 66.8, 43.92, 35.15, 33.14, 19.38, 22.01, 27.03, 29.53, 17.43, 24.57], "frio_leads": [30, 36, 26, 60, 54, 39, 37, 27, 23, 36, 23, 18, 19], "quente_spend": [12.2, 17.69, 14.77, 49.98, 34.56, 28.63, 23.29, 13.09, 15.08, 20.0, 24.71, 11.55, 12.8], "quente_leads": [15, 16, 9, 21, 19, 20, 14, 7, 6, 2, 8, 9, 4], "total_spend": 674.73, "total_leads": 578, "frio_total_spend": 396.38, "frio_total_leads": 428, "quente_total_spend": 278.35, "quente_total_leads": 150, "sales_return": 2287.93};
+const GENERAL = {"dates": ["2026-01-10", "2026-01-11", "2026-01-12", "2026-01-13", "2026-01-14", "2026-01-15", "2026-01-16", "2026-01-17", "2026-01-18", "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-26", "2026-01-27", "2026-01-28"], "spend": [160.44, 294.82, 272.04, 603.07, 543.81, 461.52, 376.63, 225.88, 253.3, 367.14, 569.29, 567.62, 776.32, 67.76, 62.9, 25.24], "leads": [64, 99, 80, 156, 135, 120, 79, 59, 51, 77, 77, 87, 104, 0, 0, 0], "total_spend": 5627.78, "total_leads": 1188, "outro_spend": 13.12, "esp_return": 11572.79, "sales_return_total": 13860.72};
+const GSPLIT = {"dates": ["2026-01-10", "2026-01-11", "2026-01-12", "2026-01-13", "2026-01-14", "2026-01-15", "2026-01-16", "2026-01-17", "2026-01-18", "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-26", "2026-01-27", "2026-01-28"], "esp_spend": [115.39, 254.24, 235.59, 486.29, 465.33, 397.74, 320.2, 193.41, 216.21, 320.11, 515.05, 538.64, 738.95, 67.76, 62.9, 25.24], "esp_leads": [19, 47, 45, 75, 62, 61, 28, 25, 22, 39, 46, 60, 81, 0, 0, 0], "latam_spend": [45.05, 40.58, 36.45, 116.78, 78.48, 63.78, 56.43, 32.47, 37.09, 47.03, 54.24, 28.98, 37.37, 0.0, 0.0, 0.0], "latam_leads": [45, 52, 35, 81, 73, 59, 51, 34, 29, 38, 31, 27, 23, 0, 0, 0], "esp_total_spend": 4953.05, "esp_total_leads": 610};
+const CREATIVES = [{"name": "IP01-VIDEO-01", "spend": 1395.26, "leads": 453, "cpl": 3.08, "impressions": 95491, "clicks": 2985, "thumb": "https://scontent.xx.fbcdn.net/v/t15.5256-10/612127924_1640910097323901_6784643504265286530_n.jpg?_nc_cat=110&ccb=1-7&_nc_eui2=AeH6qeHpD7TO31r-g0vev8H9o4MobxamzDGjgyhvFqbMMdv7Cfo9W_SunYm5ZciIA-pOMt4CoPIsOgFMfnIlfEJ8&_nc_ohc=CUpfI0L5liYQ7kNvwHb-oGQ&_nc_oc=Adr6r5wk2LbPon2c_Q5dwpC_SV1enwcDme3RPFeshbsNwm8fjnbEgSf_qDczrwpmaIw&_nc_zt=23&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=4OmhSfHAfSI2DjmGu15SNA&_nc_tpa=Q5bMBQF5VD_ABupAMqI_qMSGbDtYqTspbxKZ53zWTrl1mGdg7pvUL7WOxYPiCPUFsZSS0Vjj9BQu793q&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=b696e2&_nc_sid=58080a&oh=00_Af8ERrlMc0jAB1DLHgnp_SVXxxIDHbApCPaOs9cOM0Md1Q&oe=6A3AF03E"}, {"name": "IP01-VIDEO-03", "spend": 571.09, "leads": 182, "cpl": 3.14, "impressions": 56760, "clicks": 1092, "thumb": "https://scontent.xx.fbcdn.net/v/t15.5256-10/614705679_1562450878431412_5799556894008999968_n.jpg?_nc_cat=111&ccb=1-7&_nc_eui2=AeGeUBXYS4oSvxgaVljRvaB0gaJxjzc_NyCBonGPNz83ICXWtAQodnoYZJIZnwHLgp3bRsm2mmdB2N2Vgpf_pn7O&_nc_ohc=OB0uT2GOrTAQ7kNvwHR1EXX&_nc_oc=Adpi1Ns6fQ8-CjXp_rPCTo5PhVYimTjMoUMTDSqygYjhzJHihGZxGEq5QXm2eQHHxak&_nc_zt=23&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=4OmhSfHAfSI2DjmGu15SNA&_nc_tpa=Q5bMBQElBu1iWkjPPJ4csdQvd-p6oiVslE-MGLcp1Uc7O4aDnjwaOFWAuYdJ7UrGEYUkKgdaqRFxh2R6&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=b696e2&_nc_sid=58080a&oh=00_Af_N6IjyoxCxpahD8vCI-qVVJh_6NbfbL8-EJGXKAX2TpQ&oe=6A3AF9E5"}, {"name": "IP01-IMG-03", "spend": 1156.47, "leads": 157, "cpl": 7.37, "impressions": 50121, "clicks": 1455, "thumb": "https://scontent.xx.fbcdn.net/v/t45.1600-4/612886119_33324366353845327_4160190152067772078_n.png?_nc_cat=106&ccb=1-7&_nc_eui2=AeHPxxH8s5lWQGaStQNASXuAg1F-F9W2PPiDUX4X1bY8-PZSip1o-ywpUDP0gy3V7n4ttuZJP2OEPznPY2QfmwIf&_nc_ohc=PuYJrnQchQgQ7kNvwFezrvS&_nc_oc=AdqY_Xj0m1JolLaPBRiYCvoJvo7LW9V4cVg-fFL2n-dHG_wOnG7GnSaFhIgoY-8YXXQ&_nc_zt=1&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=4OmhSfHAfSI2DjmGu15SNA&_nc_tpa=Q5bMBQHVWbg7X4x_PKDs_bl3A-R7fFewGIZJ3pOrBykheVSndm0phWBu-Xud2pN2gNHzb1RoEf6dbHZm&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=52f3c4&_nc_sid=58080a&oh=00_Af8jtSF_RmMyYa9M2ePAG01IfcsaParcNZVTaTVvtUDN2A&oe=6A3B14E9"}, {"name": "IP01-VIDEO-02", "spend": 594.59, "leads": 134, "cpl": 4.44, "impressions": 39778, "clicks": 818, "thumb": "https://scontent.xx.fbcdn.net/v/t15.5256-10/612450337_3804851566489480_3410308970737278977_n.jpg?_nc_cat=101&ccb=1-7&_nc_eui2=AeEoZVctIcSbOjcNCfX5VdmpcP84dFbGefVw_zh0VsZ59STKwWUwNqEB5xbRZ9mBk8U_mKYWsBitdcJ77ARu4UIX&_nc_ohc=ybpksCI3GM4Q7kNvwFAhWOX&_nc_oc=Adr5e3VybS8HHlfkPM6K5FkKkZ-bQ5nSjy6qaPxR7BOY69xC5EgeYB8vAhsVnyllM3A&_nc_zt=23&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=4OmhSfHAfSI2DjmGu15SNA&_nc_tpa=Q5bMBQFyrRvDHAC8dKci6b9ryEnr8xiHjv9PHS_V58_FzfAgXIjnPGVNsCPLWeJeDgf7JHX-_KNeOwuM&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=b696e2&_nc_sid=58080a&oh=00_Af9g2guf3z0qtZkIZ9zNOclv9StxMW-cQSpcQIMRUPrzgA&oe=6A3B04C5"}, {"name": "IP01-IMG-02", "spend": 580.6, "leads": 81, "cpl": 7.17, "impressions": 45197, "clicks": 607, "thumb": "https://scontent.xx.fbcdn.net/v/t45.1600-4/613073541_33324367837178512_5940826558567336917_n.png?_nc_cat=106&ccb=1-7&_nc_eui2=AeFb4uh0RYleaoeGmoDAqGqn6HEpT8DzRdLocSlPwPNF0ttIuleXunC2Hed2-rAlXZlcKA0Nz1EKzh_lKWFAf6uC&_nc_ohc=20m595op4xQQ7kNvwE06TMK&_nc_oc=AdoUvmWABURkbjLQHU8TntrZ5kgU2kd71yY1cnLzqRo91fE3PTtBdYmZ5oQ5ANaUKCM&_nc_zt=1&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=4OmhSfHAfSI2DjmGu15SNA&_nc_tpa=Q5bMBQEWdebjfyeauXUgpyHxRJPh5A-6cLX_pdnPvu9UGFq2w_ln-yrzB_MlP5jlCIqZl04_Kv4xkcwV&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=52f3c4&_nc_sid=58080a&oh=00_Af9DCY2QjnSGtYXRZ4wm_fh_mUZJkwPGBJAUU9gbxgliKA&oe=6A3B12F7"}, {"name": "IP01-VIDEO-04", "spend": 330.91, "leads": 76, "cpl": 4.35, "impressions": 21689, "clicks": 1335, "thumb": "https://scontent.xx.fbcdn.net/v/t15.5256-10/612940564_2165531230933621_4043140227195527406_n.jpg?_nc_cat=111&ccb=1-7&_nc_eui2=AeEnLRH5w1RaJRuqWNSMeFwQ4FT_Jte2bVTgVP8m17ZtVJhmRNeSsRqaQS_-GqT6ceHxPpwcN_gfJZCJ8eTTF2kf&_nc_ohc=DlTe_Uo4gDAQ7kNvwGzUOTf&_nc_oc=Adr5JIXnQ0wxCmmzJ1Bszlf_4giOm5vySrMFT48BF_asGo9Hde3VL73Dkd5qjI6i3TY&_nc_zt=23&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=4OmhSfHAfSI2DjmGu15SNA&_nc_tpa=Q5bMBQERQFxJ1YsJIDfDy-LByN7Y5d1LfV0T-Y6XDXjvy1uj7Wrp_ur5Nh8gyZBDz661uYm2sFavCybu&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=b696e2&_nc_sid=58080a&oh=00_Af_eDdX4YNZ91GgqPFv6O6yBb4cqCLntBH4z1vNSGjhCGQ&oe=6A3B08AA"}, {"name": "IP01-VIDEO-05", "spend": 194.98, "leads": 34, "cpl": 5.73, "impressions": 14188, "clicks": 354, "thumb": "https://scontent.xx.fbcdn.net/v/t15.5256-10/612784877_1441102597530909_1181439268716516813_n.jpg?_nc_cat=104&ccb=1-7&_nc_eui2=AeHKV5lYHMiVwvnv3zNxx8xVcgygVgvZQDlyDKBWC9lAOXWz0YDYyU5kmqVgZNOM8DvGP54ppkSyBt3lC-P9IS27&_nc_ohc=2uGAj3wyIEAQ7kNvwEw8zpz&_nc_oc=AdoMU1NLbITRGboAW5Grp65_yHwym83IS7JB4CG7efs6eZZnQcSu993fd4cGN9LFC6I&_nc_zt=23&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=4OmhSfHAfSI2DjmGu15SNA&_nc_tpa=Q5bMBQE2VReEtser3bdwDQCetcWHWQdGb0NYWykdoFnlKGD9WHZw_sCEeV_1VTkz9-_O_UVuWwYVhZMb&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=b696e2&_nc_sid=58080a&oh=00_Af8nea9Sqh3K4HIr9d0JfgD93D0Xkyd28qusacd_HkDXMw&oe=6A3B06CA"}, {"name": "IP01-IMG-01", "spend": 457.97, "leads": 28, "cpl": 16.36, "impressions": 28018, "clicks": 398, "thumb": "https://scontent.xx.fbcdn.net/v/t45.1600-4/613891505_33324311230517506_265072963602539449_n.png?_nc_cat=102&ccb=1-7&_nc_eui2=AeFjzvRI-_1xAQB9IYMNtOS0jx9vqiWqJ06PH2-qJaonTlLlVOlMLTLezs5StprCtaBuWGsWOFgLhgYaVjIOLzeS&_nc_ohc=xK-5WOZaKKYQ7kNvwFVrHZt&_nc_oc=AdqjLt1SdWK-mbtbNN4VCIHbo5hIy0m1Cib-QoxPzTX7UUceNTcGxn7brC9homr1AoQ&_nc_zt=1&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=4OmhSfHAfSI2DjmGu15SNA&_nc_tpa=Q5bMBQG4Rq6TP0okPmC-GTSLg85II2gmcjYeQDvJi-92dlTJMeVihomjrep4hqyeDSdReJYMve_tBR9d&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=52f3c4&_nc_sid=58080a&oh=00_Af9WKmBKMy_dSAdUXFvqwUFGjR1N7EAEqSqyOFO9naPExg&oe=6A3B063A"}, {"name": "IP01-VIDEO-06", "spend": 116.63, "leads": 27, "cpl": 4.32, "impressions": 12944, "clicks": 221, "thumb": "https://scontent.xx.fbcdn.net/v/t15.5256-10/613497966_1184971783812298_4647962512331186411_n.jpg?_nc_cat=100&ccb=1-7&_nc_eui2=AeF59cKEY7_WpCgajYPwsDTfoON58CiK6iWg43nwKIrqJZ9MgNpOpvtrxVudbMyDRJ7ZX5njI_iDzje5sz_Omn3U&_nc_ohc=8A89cBZfR1wQ7kNvwGnomdx&_nc_oc=AdopLGV7liy3_zVo3sxPdQ2TT5spjJU81qIpkz_k3Ws4dKR_uZY29SD9PZ8QfzqQCz4&_nc_zt=23&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=4OmhSfHAfSI2DjmGu15SNA&_nc_tpa=Q5bMBQHIjB3wMF4jOuFpEuVxOZzoYuVafMNdPDZROvU5jYq9fT1SpRGhNWALcy3OofMXY57zUIZKq0jr&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=b696e2&_nc_sid=58080a&oh=00_Af8S_KyTKzje4oFMDPTODRCpsIY7oCXBPqLOHP6IU-PnLQ&oe=6A3B0E4D"}, {"name": "IP01-VIDEO-07", "spend": 60.26, "leads": 16, "cpl": 3.77, "impressions": 8003, "clicks": 1070, "thumb": "https://scontent.xx.fbcdn.net/v/t15.5256-10/614374151_4019522161516757_1992595373473909285_n.jpg?_nc_cat=111&ccb=1-7&_nc_eui2=AeHYLWvBMRdwxRQ32uNd2g0mZrUNJIi9pu5mtQ0kiL2m7kS8La2SXOS3lWZnBZn8xlvNvqxv6hw0oWy_Fn5pdQzL&_nc_ohc=Hfd7dJh2rrEQ7kNvwFyjIA8&_nc_oc=Adqsoy1dQOaSUrQoRNYSlLCQeNH_V0tuXFQSbJ3ZB9BOF30TGMsRfmhXV2bbxo5XY2E&_nc_zt=23&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=4OmhSfHAfSI2DjmGu15SNA&_nc_tpa=Q5bMBQGOtjrE7_v_M_nEXwBmCnWvNC2l3PvSD84XCELqpMgZPFEOOP0Al8PmsazGKVuAOCRxcZlBzfMi&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=b696e2&_nc_sid=58080a&oh=00_Af-p3JE9hEIY6eNbnIvRT2H4cKVuFg47vdUcerGr46qE9A&oe=6A3B16E5"}];
+const AUDIENCES = [{"name": "03-TF-30_55_MERCADO-LATAM", "spend": 133.53, "leads": 180, "cpl": 0.74, "impressions": 20671}, {"name": "03-TF-30_55_TRADING-LATAM", "spend": 131.74, "leads": 135, "cpl": 0.98, "impressions": 23625}, {"name": "03-TF-30_55_FINANZAS-LATAM", "spend": 73.14, "leads": 69, "cpl": 1.06, "impressions": 10465}, {"name": "03-TF-30_55_ADVANTAGE_AVATAR-LATAM", "spend": 57.97, "leads": 44, "cpl": 1.32, "impressions": 8121}, {"name": "02-TT-INTERACCION-180D-LATAM", "spend": 96.47, "leads": 61, "cpl": 1.58, "impressions": 13803}, {"name": "00-TT-LEADS_ACTIVE-LATAM", "spend": 97.72, "leads": 58, "cpl": 1.68, "impressions": 6591}, {"name": "01-TT-SEGUIDORES-LATAM", "spend": 84.16, "leads": 31, "cpl": 2.71, "impressions": 17231}, {"name": "00-TT-LEADS_ACTIVE-ESP", "spend": 667.0, "leads": 119, "cpl": 5.61, "impressions": 31670}, {"name": "03-TF-30_55_FINANZAS-ESP", "spend": 924.07, "leads": 121, "cpl": 7.64, "impressions": 45336}, {"name": "03-TF-30_55_ADVANTAGE_AVATAR-ESP", "spend": 740.88, "leads": 97, "cpl": 7.64, "impressions": 29427}, {"name": "03-TF-30_55_ADVANTAGE-ESP", "spend": 208.14, "leads": 26, "cpl": 8.01, "impressions": 9698}, {"name": "03-TF-30_55_TRADING-ESP", "spend": 814.05, "leads": 100, "cpl": 8.14, "impressions": 42354}, {"name": "03-TF-30_55_MERCADO-ESP", "spend": 852.13, "leads": 99, "cpl": 8.61, "impressions": 44710}, {"name": "01-TT-SEGUIDORES-ESP", "spend": 496.32, "leads": 45, "cpl": 11.03, "impressions": 59643}, {"name": "02-TT-INTERACCION-180D-ESP", "spend": 81.44, "leads": 3, "cpl": 27.15, "impressions": 8844}];
+const AUDIENCES_REGION = {"ESP": [{"name": "03-TF-30_55_FINANZAS-ESP", "leads": 121, "cpl": 7.64, "spend": 924.07}, {"name": "00-TT-LEADS_ACTIVE-ESP", "leads": 119, "cpl": 5.61, "spend": 667.0}, {"name": "03-TF-30_55_TRADING-ESP", "leads": 100, "cpl": 8.14, "spend": 814.05}, {"name": "03-TF-30_55_MERCADO-ESP", "leads": 99, "cpl": 8.61, "spend": 852.13}, {"name": "03-TF-30_55_ADVANTAGE_AVATAR-ESP", "leads": 97, "cpl": 7.64, "spend": 740.88}, {"name": "01-TT-SEGUIDORES-ESP", "leads": 45, "cpl": 11.03, "spend": 496.32}, {"name": "03-TF-30_55_ADVANTAGE-ESP", "leads": 26, "cpl": 8.01, "spend": 208.14}, {"name": "02-TT-INTERACCION-180D-ESP", "leads": 3, "cpl": 27.15, "spend": 81.44}], "LATAM": [{"name": "03-TF-30_55_MERCADO-LATAM", "leads": 180, "cpl": 0.74, "spend": 133.53}, {"name": "03-TF-30_55_TRADING-LATAM", "leads": 135, "cpl": 0.98, "spend": 131.74}, {"name": "03-TF-30_55_FINANZAS-LATAM", "leads": 69, "cpl": 1.06, "spend": 73.14}, {"name": "02-TT-INTERACCION-180D-LATAM", "leads": 61, "cpl": 1.58, "spend": 96.47}, {"name": "00-TT-LEADS_ACTIVE-LATAM", "leads": 58, "cpl": 1.68, "spend": 97.72}, {"name": "03-TF-30_55_ADVANTAGE_AVATAR-LATAM", "leads": 44, "cpl": 1.32, "spend": 57.97}, {"name": "01-TT-SEGUIDORES-LATAM", "leads": 31, "cpl": 2.71, "spend": 84.16}]};
+const CREATIVES_REGION = {"ESP": [{"name": "IP01-VIDEO-01", "leads": 158, "cpl": 6.85, "spend": 1082.27, "impressions": 53240, "thumb": "https://scontent.xx.fbcdn.net/v/t15.5256-10/612127924_1640910097323901_6784643504265286530_n.jpg?_nc_cat=110&ccb=1-7&_nc_eui2=AeH6qeHpD7TO31r-g0vev8H9o4MobxamzDGjgyhvFqbMMdv7Cfo9W_SunYm5ZciIA-pOMt4CoPIsOgFMfnIlfEJ8&_nc_ohc=CUpfI0L5liYQ7kNvwHb-oGQ&_nc_oc=Adr6r5wk2LbPon2c_Q5dwpC_SV1enwcDme3RPFeshbsNwm8fjnbEgSf_qDczrwpmaIw&_nc_zt=23&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=4OmhSfHAfSI2DjmGu15SNA&_nc_tpa=Q5bMBQF5VD_ABupAMqI_qMSGbDtYqTspbxKZ53zWTrl1mGdg7pvUL7WOxYPiCPUFsZSS0Vjj9BQu793q&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=b696e2&_nc_sid=58080a&oh=00_Af8ERrlMc0jAB1DLHgnp_SVXxxIDHbApCPaOs9cOM0Md1Q&oe=6A3AF03E"}, {"name": "IP01-IMG-03", "leads": 157, "cpl": 7.37, "spend": 1156.47, "impressions": 50121, "thumb": "https://scontent.xx.fbcdn.net/v/t45.1600-4/612886119_33324366353845327_4160190152067772078_n.png?_nc_cat=106&ccb=1-7&_nc_eui2=AeHPxxH8s5lWQGaStQNASXuAg1F-F9W2PPiDUX4X1bY8-PZSip1o-ywpUDP0gy3V7n4ttuZJP2OEPznPY2QfmwIf&_nc_ohc=PuYJrnQchQgQ7kNvwFezrvS&_nc_oc=AdqY_Xj0m1JolLaPBRiYCvoJvo7LW9V4cVg-fFL2n-dHG_wOnG7GnSaFhIgoY-8YXXQ&_nc_zt=1&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=4OmhSfHAfSI2DjmGu15SNA&_nc_tpa=Q5bMBQHVWbg7X4x_PKDs_bl3A-R7fFewGIZJ3pOrBykheVSndm0phWBu-Xud2pN2gNHzb1RoEf6dbHZm&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=52f3c4&_nc_sid=58080a&oh=00_Af8jtSF_RmMyYa9M2ePAG01IfcsaParcNZVTaTVvtUDN2A&oe=6A3B14E9"}, {"name": "IP01-IMG-02", "leads": 81, "cpl": 7.17, "spend": 580.6, "impressions": 45197, "thumb": "https://scontent.xx.fbcdn.net/v/t45.1600-4/613073541_33324367837178512_5940826558567336917_n.png?_nc_cat=106&ccb=1-7&_nc_eui2=AeFb4uh0RYleaoeGmoDAqGqn6HEpT8DzRdLocSlPwPNF0ttIuleXunC2Hed2-rAlXZlcKA0Nz1EKzh_lKWFAf6uC&_nc_ohc=20m595op4xQQ7kNvwE06TMK&_nc_oc=AdoUvmWABURkbjLQHU8TntrZ5kgU2kd71yY1cnLzqRo91fE3PTtBdYmZ5oQ5ANaUKCM&_nc_zt=1&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=4OmhSfHAfSI2DjmGu15SNA&_nc_tpa=Q5bMBQEWdebjfyeauXUgpyHxRJPh5A-6cLX_pdnPvu9UGFq2w_ln-yrzB_MlP5jlCIqZl04_Kv4xkcwV&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=52f3c4&_nc_sid=58080a&oh=00_Af9DCY2QjnSGtYXRZ4wm_fh_mUZJkwPGBJAUU9gbxgliKA&oe=6A3B12F7"}, {"name": "IP01-VIDEO-02", "leads": 69, "cpl": 7.24, "spend": 499.3, "impressions": 24740, "thumb": "https://scontent.xx.fbcdn.net/v/t15.5256-10/612450337_3804851566489480_3410308970737278977_n.jpg?_nc_cat=101&ccb=1-7&_nc_eui2=AeEoZVctIcSbOjcNCfX5VdmpcP84dFbGefVw_zh0VsZ59STKwWUwNqEB5xbRZ9mBk8U_mKYWsBitdcJ77ARu4UIX&_nc_ohc=ybpksCI3GM4Q7kNvwFAhWOX&_nc_oc=Adr5e3VybS8HHlfkPM6K5FkKkZ-bQ5nSjy6qaPxR7BOY69xC5EgeYB8vAhsVnyllM3A&_nc_zt=23&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=4OmhSfHAfSI2DjmGu15SNA&_nc_tpa=Q5bMBQFyrRvDHAC8dKci6b9ryEnr8xiHjv9PHS_V58_FzfAgXIjnPGVNsCPLWeJeDgf7JHX-_KNeOwuM&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=b696e2&_nc_sid=58080a&oh=00_Af9g2guf3z0qtZkIZ9zNOclv9StxMW-cQSpcQIMRUPrzgA&oe=6A3B04C5"}, {"name": "IP01-VIDEO-03", "leads": 45, "cpl": 9.73, "spend": 437.97, "impressions": 33230, "thumb": "https://scontent.xx.fbcdn.net/v/t15.5256-10/614705679_1562450878431412_5799556894008999968_n.jpg?_nc_cat=111&ccb=1-7&_nc_eui2=AeGeUBXYS4oSvxgaVljRvaB0gaJxjzc_NyCBonGPNz83ICXWtAQodnoYZJIZnwHLgp3bRsm2mmdB2N2Vgpf_pn7O&_nc_ohc=OB0uT2GOrTAQ7kNvwHR1EXX&_nc_oc=Adpi1Ns6fQ8-CjXp_rPCTo5PhVYimTjMoUMTDSqygYjhzJHihGZxGEq5QXm2eQHHxak&_nc_zt=23&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=4OmhSfHAfSI2DjmGu15SNA&_nc_tpa=Q5bMBQElBu1iWkjPPJ4csdQvd-p6oiVslE-MGLcp1Uc7O4aDnjwaOFWAuYdJ7UrGEYUkKgdaqRFxh2R6&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=b696e2&_nc_sid=58080a&oh=00_Af_N6IjyoxCxpahD8vCI-qVVJh_6NbfbL8-EJGXKAX2TpQ&oe=6A3AF9E5"}, {"name": "IP01-VIDEO-04", "leads": 38, "cpl": 7.45, "spend": 283.2, "impressions": 15430, "thumb": "https://scontent.xx.fbcdn.net/v/t15.5256-10/612940564_2165531230933621_4043140227195527406_n.jpg?_nc_cat=111&ccb=1-7&_nc_eui2=AeEnLRH5w1RaJRuqWNSMeFwQ4FT_Jte2bVTgVP8m17ZtVJhmRNeSsRqaQS_-GqT6ceHxPpwcN_gfJZCJ8eTTF2kf&_nc_ohc=DlTe_Uo4gDAQ7kNvwGzUOTf&_nc_oc=Adr5JIXnQ0wxCmmzJ1Bszlf_4giOm5vySrMFT48BF_asGo9Hde3VL73Dkd5qjI6i3TY&_nc_zt=23&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=4OmhSfHAfSI2DjmGu15SNA&_nc_tpa=Q5bMBQERQFxJ1YsJIDfDy-LByN7Y5d1LfV0T-Y6XDXjvy1uj7Wrp_ur5Nh8gyZBDz661uYm2sFavCybu&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=b696e2&_nc_sid=58080a&oh=00_Af_eDdX4YNZ91GgqPFv6O6yBb4cqCLntBH4z1vNSGjhCGQ&oe=6A3B08AA"}, {"name": "IP01-IMG-01", "leads": 28, "cpl": 16.36, "spend": 457.97, "impressions": 28018, "thumb": "https://scontent.xx.fbcdn.net/v/t45.1600-4/613891505_33324311230517506_265072963602539449_n.png?_nc_cat=102&ccb=1-7&_nc_eui2=AeFjzvRI-_1xAQB9IYMNtOS0jx9vqiWqJ06PH2-qJaonTlLlVOlMLTLezs5StprCtaBuWGsWOFgLhgYaVjIOLzeS&_nc_ohc=xK-5WOZaKKYQ7kNvwFVrHZt&_nc_oc=AdqjLt1SdWK-mbtbNN4VCIHbo5hIy0m1Cib-QoxPzTX7UUceNTcGxn7brC9homr1AoQ&_nc_zt=1&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=4OmhSfHAfSI2DjmGu15SNA&_nc_tpa=Q5bMBQG4Rq6TP0okPmC-GTSLg85II2gmcjYeQDvJi-92dlTJMeVihomjrep4hqyeDSdReJYMve_tBR9d&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=52f3c4&_nc_sid=58080a&oh=00_Af9WKmBKMy_dSAdUXFvqwUFGjR1N7EAEqSqyOFO9naPExg&oe=6A3B063A"}, {"name": "IP01-VIDEO-05", "leads": 19, "cpl": 8.68, "spend": 164.94, "impressions": 10502, "thumb": "https://scontent.xx.fbcdn.net/v/t15.5256-10/612784877_1441102597530909_1181439268716516813_n.jpg?_nc_cat=104&ccb=1-7&_nc_eui2=AeHKV5lYHMiVwvnv3zNxx8xVcgygVgvZQDlyDKBWC9lAOXWz0YDYyU5kmqVgZNOM8DvGP54ppkSyBt3lC-P9IS27&_nc_ohc=2uGAj3wyIEAQ7kNvwEw8zpz&_nc_oc=AdoMU1NLbITRGboAW5Grp65_yHwym83IS7JB4CG7efs6eZZnQcSu993fd4cGN9LFC6I&_nc_zt=23&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=4OmhSfHAfSI2DjmGu15SNA&_nc_tpa=Q5bMBQE2VReEtser3bdwDQCetcWHWQdGb0NYWykdoFnlKGD9WHZw_sCEeV_1VTkz9-_O_UVuWwYVhZMb&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=b696e2&_nc_sid=58080a&oh=00_Af8nea9Sqh3K4HIr9d0JfgD93D0Xkyd28qusacd_HkDXMw&oe=6A3B06CA"}, {"name": "IP01-VIDEO-06", "leads": 13, "cpl": 6.85, "spend": 89.02, "impressions": 7861, "thumb": "https://scontent.xx.fbcdn.net/v/t15.5256-10/613497966_1184971783812298_4647962512331186411_n.jpg?_nc_cat=100&ccb=1-7&_nc_eui2=AeF59cKEY7_WpCgajYPwsDTfoON58CiK6iWg43nwKIrqJZ9MgNpOpvtrxVudbMyDRJ7ZX5njI_iDzje5sz_Omn3U&_nc_ohc=8A89cBZfR1wQ7kNvwGnomdx&_nc_oc=AdopLGV7liy3_zVo3sxPdQ2TT5spjJU81qIpkz_k3Ws4dKR_uZY29SD9PZ8QfzqQCz4&_nc_zt=23&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=4OmhSfHAfSI2DjmGu15SNA&_nc_tpa=Q5bMBQHIjB3wMF4jOuFpEuVxOZzoYuVafMNdPDZROvU5jYq9fT1SpRGhNWALcy3OofMXY57zUIZKq0jr&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=b696e2&_nc_sid=58080a&oh=00_Af8S_KyTKzje4oFMDPTODRCpsIY7oCXBPqLOHP6IU-PnLQ&oe=6A3B0E4D"}, {"name": "IP01-VIDEO-07", "leads": 2, "cpl": 16.14, "spend": 32.29, "impressions": 3343, "thumb": "https://scontent.xx.fbcdn.net/v/t15.5256-10/614374151_4019522161516757_1992595373473909285_n.jpg?_nc_cat=111&ccb=1-7&_nc_eui2=AeHYLWvBMRdwxRQ32uNd2g0mZrUNJIi9pu5mtQ0kiL2m7kS8La2SXOS3lWZnBZn8xlvNvqxv6hw0oWy_Fn5pdQzL&_nc_ohc=Hfd7dJh2rrEQ7kNvwFyjIA8&_nc_oc=Adqsoy1dQOaSUrQoRNYSlLCQeNH_V0tuXFQSbJ3ZB9BOF30TGMsRfmhXV2bbxo5XY2E&_nc_zt=23&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=4OmhSfHAfSI2DjmGu15SNA&_nc_tpa=Q5bMBQGOtjrE7_v_M_nEXwBmCnWvNC2l3PvSD84XCELqpMgZPFEOOP0Al8PmsazGKVuAOCRxcZlBzfMi&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=b696e2&_nc_sid=58080a&oh=00_Af-p3JE9hEIY6eNbnIvRT2H4cKVuFg47vdUcerGr46qE9A&oe=6A3B16E5"}], "LATAM": [{"name": "IP01-VIDEO-01", "leads": 295, "cpl": 1.06, "spend": 312.99, "impressions": 42251, "thumb": "https://scontent.xx.fbcdn.net/v/t15.5256-10/612127924_1640910097323901_6784643504265286530_n.jpg?_nc_cat=110&ccb=1-7&_nc_eui2=AeH6qeHpD7TO31r-g0vev8H9o4MobxamzDGjgyhvFqbMMdv7Cfo9W_SunYm5ZciIA-pOMt4CoPIsOgFMfnIlfEJ8&_nc_ohc=CUpfI0L5liYQ7kNvwHb-oGQ&_nc_oc=Adr6r5wk2LbPon2c_Q5dwpC_SV1enwcDme3RPFeshbsNwm8fjnbEgSf_qDczrwpmaIw&_nc_zt=23&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=4OmhSfHAfSI2DjmGu15SNA&_nc_tpa=Q5bMBQFlaW_BeMDuJqJLomTiDs4bGZZxdTt8VGesXL2kbHKoNQN2Lf5ZUabF-Uz-5NWztehUpEr3r2Fp&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=b696e2&_nc_sid=58080a&oh=00_Af8nuj-uIgADis5PE-Zwee1Hjpj9TqPNUaJC1WFlvewtUQ&oe=6A3AF03E"}, {"name": "IP01-VIDEO-03", "leads": 137, "cpl": 0.97, "spend": 133.12, "impressions": 23530, "thumb": "https://scontent.xx.fbcdn.net/v/t15.5256-10/611247156_25977075705211923_5768715951883931472_n.jpg?_nc_cat=109&ccb=1-7&_nc_eui2=AeGXz9XqFDlhgBIYwcPF2d8Bld0vXa6OeeOV3S9dro554xS_oUJzmeaasbiKeHxj1PoM2-kzSk74SkZSMKVhzRKP&_nc_ohc=DmjM-VBOio8Q7kNvwGmfInX&_nc_oc=AdoMFxAaHgPyeHApcDbCb-cCR2UW1Qim6MFJ5a4ZiyQA1aSQ04K0vqBWCLObxBycGMY&_nc_zt=23&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=4OmhSfHAfSI2DjmGu15SNA&_nc_tpa=Q5bMBQE8SKU5EMHamzJ9o6moxVa5dyM2jSycAS511ER8N9418Y1IzpsJOC_dGv2ACGAMrJLZWvk9KOhR&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=b696e2&_nc_sid=58080a&oh=00_Af_CA5FyhKuoe-SRDWslJIx-cUVa0WL9jV0wnJxS7XbkFg&oe=6A3B136B"}, {"name": "IP01-VIDEO-02", "leads": 65, "cpl": 1.47, "spend": 95.29, "impressions": 15038, "thumb": "https://scontent.xx.fbcdn.net/v/t15.5256-10/612450337_3804851566489480_3410308970737278977_n.jpg?_nc_cat=101&ccb=1-7&_nc_eui2=AeEoZVctIcSbOjcNCfX5VdmpcP84dFbGefVw_zh0VsZ59STKwWUwNqEB5xbRZ9mBk8U_mKYWsBitdcJ77ARu4UIX&_nc_ohc=ybpksCI3GM4Q7kNvwFAhWOX&_nc_oc=Adr5e3VybS8HHlfkPM6K5FkKkZ-bQ5nSjy6qaPxR7BOY69xC5EgeYB8vAhsVnyllM3A&_nc_zt=23&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=4OmhSfHAfSI2DjmGu15SNA&_nc_tpa=Q5bMBQG0ZEdQl5UenGA9JgDbvu5xy6nXtrEoB3BBAAzV04AkO_oz8AZi7O3dNTZFmZGCWqxV6RSiySJ8&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=b696e2&_nc_sid=58080a&oh=00_Af_cwPn4mb-cTDJcF_zWNdUdASHgtZIUGJFODiOCmvYS-g&oe=6A3B04C5"}, {"name": "IP01-VIDEO-04", "leads": 38, "cpl": 1.26, "spend": 47.71, "impressions": 6259, "thumb": "https://scontent.xx.fbcdn.net/v/t15.5256-10/612940564_2165531230933621_4043140227195527406_n.jpg?_nc_cat=111&ccb=1-7&_nc_eui2=AeEnLRH5w1RaJRuqWNSMeFwQ4FT_Jte2bVTgVP8m17ZtVJhmRNeSsRqaQS_-GqT6ceHxPpwcN_gfJZCJ8eTTF2kf&_nc_ohc=DlTe_Uo4gDAQ7kNvwGzUOTf&_nc_oc=Adr5JIXnQ0wxCmmzJ1Bszlf_4giOm5vySrMFT48BF_asGo9Hde3VL73Dkd5qjI6i3TY&_nc_zt=23&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=4OmhSfHAfSI2DjmGu15SNA&_nc_tpa=Q5bMBQGHaLf2R-LODQZ-Ot-UVG6LaSgyWIfFnH1R3Z-iTgsql1p94_dVeHZEsAse1yrI7HkjPbjadjIb&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=b696e2&_nc_sid=58080a&oh=00_Af_lYVpjOUvLISPSdvNm6xaAkJj43CAsTA6w2b-U9aRmLQ&oe=6A3B08AA"}, {"name": "IP01-VIDEO-05", "leads": 15, "cpl": 2.0, "spend": 30.04, "impressions": 3686, "thumb": "https://scontent.xx.fbcdn.net/v/t15.5256-10/612227158_1531131228159347_594981722457065821_n.jpg?_nc_cat=110&ccb=1-7&_nc_eui2=AeG3_OGZ2YbG7LBVAko9EVXBvY7r6rIOeEm9juvqsg54Se96RJLYQwDW705HbAUOrZCIJOAPYX3foVURKxSACa-1&_nc_ohc=MEFtqcJajaEQ7kNvwELGGZh&_nc_oc=AdpeXMJYmlFOCQ1IYCwGk9Qs1J4hLhpRpF7gPdM1UpIXryyBBIHz-XdxRmm5In9C7eY&_nc_zt=23&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=4OmhSfHAfSI2DjmGu15SNA&_nc_tpa=Q5bMBQG9-C2R30cwsRGa09B5pdsP27rbNsYiCD8jBKtzKdc2ZINTX1bOsEC78OgVt0G8Ls6NiDV1kNqo&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=b696e2&_nc_sid=58080a&oh=00_Af-iw1ty5y9Q9ycKDv3dc6OLoSqQ2xt6fQNRQbpZtNpZwQ&oe=6A3AFA8C"}, {"name": "IP01-VIDEO-06", "leads": 14, "cpl": 1.97, "spend": 27.61, "impressions": 5083, "thumb": "https://scontent.xx.fbcdn.net/v/t15.5256-10/613497966_1184971783812298_4647962512331186411_n.jpg?_nc_cat=100&ccb=1-7&_nc_eui2=AeF59cKEY7_WpCgajYPwsDTfoON58CiK6iWg43nwKIrqJZ9MgNpOpvtrxVudbMyDRJ7ZX5njI_iDzje5sz_Omn3U&_nc_ohc=8A89cBZfR1wQ7kNvwGnomdx&_nc_oc=AdopLGV7liy3_zVo3sxPdQ2TT5spjJU81qIpkz_k3Ws4dKR_uZY29SD9PZ8QfzqQCz4&_nc_zt=23&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=4OmhSfHAfSI2DjmGu15SNA&_nc_tpa=Q5bMBQFS2DXl6Xg70Ca0dvKTkd2lRmRv_wYbOTIb44kPet-c3dvgpUgcWDZhHViA3G3uU6f1rGcIvOEu&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=b696e2&_nc_sid=58080a&oh=00_Af_VUgbmvUl5nWkyNjiBlYTImof3UlFVDpSfUYJYNUNiVw&oe=6A3B0E4D"}, {"name": "IP01-VIDEO-07", "leads": 14, "cpl": 2.0, "spend": 27.97, "impressions": 4660, "thumb": "https://scontent.xx.fbcdn.net/v/t15.5256-10/612391380_1545465143336735_7478696049515921142_n.jpg?_nc_cat=108&ccb=1-7&_nc_eui2=AeFIK5_WzFsUNjKDUPRkv9qhDjbcpbqmW6wONtyluqZbrPYt_XA6U9TRKhGM328heMCpVoziqym9lGPEI3TSWDsS&_nc_ohc=2fpX0FbeGEwQ7kNvwGIdk1c&_nc_oc=AdqPEL63MQVk9S5CC-G8xBJgMhyE4dl6jz_X1-1RP5pkZDUCsmvV_3VAZXqrMCXZdHc&_nc_zt=23&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=4OmhSfHAfSI2DjmGu15SNA&_nc_tpa=Q5bMBQG5KzL-TQ4cKXKKlrZysSlh0C_Fl2bSr9OosLJ4AQhaj5l_ugUA5WlWIhPGrT1N36MUf0I5U2Lq&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=b696e2&_nc_sid=58080a&oh=00_Af80WN-7PROrWkVMojm0ii6aJTqvB_JWOLdLktLXpCvXwg&oe=6A3B0D61"}]};
+const SURVEY = {"total": 337, "country_labels": ["España", "Argentina", "Colombia", "Otros", "Venezuela", "México", "Chile"], "country_values": [234, 44, 30, 13, 8, 5, 3], "edad_labels": ["Menos de 18 años", "18 - 24 años", "25 - 30 años", "31 - 35 años", "36 - 44 años", "45 - 54 años", "55 - 64 años", "65 años o más"], "edad_values": [2, 8, 23, 48, 105, 113, 34, 4], "ingresos_labels": ["No tengo ingresos", "Menos de 499€ mes", "500€ mes a 999€ mes", "1000€ mes a 1499€ mes", "1500€ mes a 2499€ mes", "2500€ mes a 3499€ mes", "3500€ mes a 4999€ mes", "5000€ mes a 10.000€ mes", "Mas de 10.000€ mes", "Prefiero no decirlo"], "ingresos_values": [17, 23, 45, 72, 106, 28, 9, 5, 2, 30], "tempo_labels": ["Todavía no he empezado", "< 3 meses", "Entre 3 - 12 meses", "Más de 1 año", "Más de 2 años"], "tempo_values": [62, 30, 52, 59, 134], "como_labels": ["Instagram", "WhatsApp (ya en el grupo)", "YouTube", "Anuncio (no recuerda dónde)", "Recomendación", "Facebook", "Otro", "TikTok"], "como_values": [163, 113, 27, 17, 8, 7, 1, 1], "hijos_labels": ["Sí", "No"], "hijos_values": [214, 123], "occ_labels": ["Trabajador en sector de servicios (restauración, hospitalidad, transporte)", "Emprendedor/a o propietario/a de negocio", "Profesional en el sector de la salud (médicos, enfermeros)", "Sin empleo o en búsqueda de oportunidades laborales", "Trabajador independiente o freelance", "Docente", "Arquitecto/a o ingeniero/a civil", "Profesional en marketing, ventas o comercialización", "Otros"], "occ_values": [33, 31, 24, 22, 21, 20, 12, 11, 163], "sit_labels": ["Ya invierto, conozco lo básico", "Aún no he invertido", "Recién empecé, invertí algo", "Invierto, busco estrategias avanzadas", "Otros"], "sit_values": [154, 65, 61, 43, 14]};
+
+const palette = ['#5b8cff','#3ddc97','#ffb84d','#ff6b81','#c792ea','#4dd0e1','#f06292','#aed581','#9575cd','#ffd54f'];
+
+function fmtEUR(v, lang){
+  const locale = lang==='es' ? 'es-ES' : 'pt-BR';
+  return new Intl.NumberFormat(locale,{style:'currency',currency:'EUR'}).format(v);
+}
+function fmtNum(v, lang){
+  const locale = lang==='es' ? 'es-ES' : 'pt-BR';
+  return new Intl.NumberFormat(locale).format(v);
+}
+
+const I18N = {
+  pt:{
+    eyebrow:'Relatório de Vendas',
+    h1:'Impacto Pasivo — Visão Geral',
+    subtitle:'Período: jul/2025 a jun/2026 · Valores em Facturación Bruta · 212 transações',
+    kpiTotalLabel:'Faturamento Total',
+    kpiCountLabel:'Total de Vendas',
+    kpiAvgLabel:'Ticket Médio',
+    kpiCountriesLabel:'Países Atendidos',
+    s1h2:'Vendas por Mês', s1tag:'por país',
+    s2h2:'Vendas por País', s2tag:'total geral',
+    faturamentoPorPais:'Faturamento por País', ranking:'Ranking',
+    thPais:'País', thVendas:'Vendas', thFaturamento:'Faturamento',
+    recorteEspecial:'Recorte Especial',
+    janTitle:'Janeiro de 2026',
+    s3h2:'Vendas por Dia — Janeiro/2026',
+    s4h2:'Vendas por País — Janeiro/2026',
+    footer1:'Relatório gerado a partir do histórico de vendas Hotmart · Impacto Pasivo',
+    dividerGeneral:'Meta Ads — Investimento Geral',
+    ginvDiario:'Investimento Diário', cplDiario:'CPL Diário',
+    jan2026tag:'Janeiro/2026',
+    invPorFrente:'Investimento por Frente',
+    distribInv:'Distribuição do Investimento', roasPorFrente:'ROAS por Frente',
+    invRetGeral:'Investimento x Retorno — Geral',
+    invVsFat:'Investido vs Faturado', resumo:'Resumo',
+    thMetrica:'Métrica', thValor:'Valor',
+    footer2:'Investimento referente a todas as campanhas (ESP + LATAM) · Meta Ads · Janeiro/2026',
+    estrategiaPublicos:'Estratégia de Públicos — LATAM (Janeiro/2026)',
+    publicoFrio:'Público Frio',
+    publicoFrioDesc:'Localização — Inclusão: <strong>Argentina, Colômbia</strong>',
+    publicoQuente:'Público Quente',
+    publicoQuenteDesc:'Toda a <strong>América do Sul</strong>, exceto Venezuela',
+    invDiarioLatam:'Investimento Diário — LATAM',
+    cplDiarioLatam:'CPL Diário — LATAM',
+    frioQuenteTag:'Frio x Quente',
+    invRetLatam:'Investimento x Retorno — LATAM',
+    footer3:'Investimento referente apenas às campanhas LATAM (Frio + Quente) · Meta Ads · Janeiro/2026',
+    janVendas:'vendas', janPaises:'países',
+    kpiInvTotal:'Investimento Total', kpiCplGeral:'CPL Geral', kpiCplEsp:'CPL Espanha', kpiCplLatam:'CPL LATAM',
+    kpiInvTotalLatam:'Investimento Total LATAM', kpiLeadsTotais:'Leads Totais', kpiCplFrioQuente:'CPL Frio / Quente',
+    rowInvestidoGeral:'Investido (Geral)', rowFaturadoTotalJan:'Faturado (Total Janeiro)',
+    rowRoasGeral:'ROAS Geral', rowRoasEsp:'ROAS ESP', rowRoasLatam:'ROAS LATAM',
+    rowLucroBruto:'Lucro Bruto', rowCplGeral:'CPL Geral', rowPctInvLatam:'% Investido em LATAM',
+    rowInvestidoLatam:'Investido (LATAM)', rowFaturadoLatamPaises:'Faturado (Argentina + Colômbia + México)',
+    rowRoas:'ROAS',
+    legGeral:'Geral', legEsp:'ESP', legLatam:'LATAM',
+    legInvestido:'Investido', legFaturado:'Faturado',
+    legCplGeral:'CPL Geral', legCplEsp:'CPL ESP', legCplLatam:'CPL LATAM',
+    legFrio:'Frio', legQuente:'Quente', legCplFrio:'CPL Frio', legCplQuente:'CPL Quente',
+    geralJan:'Geral — Janeiro/2026', latamJan:'LATAM — Janeiro/2026',
+    dividerCreatives:'Melhores Públicos e Anúncios',
+    audiencesTitle:'Ranking de Públicos', cplPorPublico:'CPL por Público', thPublico:'Público',
+    creativesTitle:'Ranking de Criativos', creativesTag:'Volume x CPL',
+    badgeVolume:'Melhor Volume', badgeCpl:'Melhor CPL',
+    creativeLeads:'Leads', creativeCpl:'CPL', creativeSpend:'Investido', creativeImpr:'Impressões',
+    tabVendas:'Vendas & Investimento', tabAds:'Melhores Públicos e Anúncios', tabPesquisa:'Pesquisa do Evento',
+    pesquisaEyebrow:'Pesquisa do Evento',
+    pesquisaH1:'Evento de Janeiro/2026 — Perfil dos Inscritos',
+    paisPesquisa:'País dos Respondentes', faixaEtaria:'Faixa Etária', rendaMensal:'Renda Mensal',
+    tempoCripto:'Tempo no Mundo Cripto', comoConheceu:'Como Conheceu o Evento',
+    pesquisaFooter:'Dados agregados a partir das respostas do formulário do evento · Sem informações identificáveis',
+    kpiTotalRespostas:'Total de Respostas', kpiPctEspanha:'% Espanha', kpiPctComFilhos:'Tem Filhos', kpiPctExperientes:'Mais de 2 Anos em Cripto',
+    ocupacao:'Ocupação', temFilhos:'Tem Filhos', situacaoAtual:'Situação Atual (Jornada em Cripto)'
+  },
+  es:{
+    eyebrow:'Informe de Ventas',
+    h1:'Impacto Pasivo — Visión General',
+    subtitle:'Período: jul/2025 a jun/2026 · Valores en Facturación Bruta · 212 transacciones',
+    kpiTotalLabel:'Facturación Total',
+    kpiCountLabel:'Total de Ventas',
+    kpiAvgLabel:'Ticket Promedio',
+    kpiCountriesLabel:'Países Atendidos',
+    s1h2:'Ventas por Mes', s1tag:'por país',
+    s2h2:'Ventas por País', s2tag:'total general',
+    faturamentoPorPais:'Facturación por País', ranking:'Ranking',
+    thPais:'País', thVendas:'Ventas', thFaturamento:'Facturación',
+    recorteEspecial:'Recorte Especial',
+    janTitle:'Enero de 2026',
+    s3h2:'Ventas por Día — Enero/2026',
+    s4h2:'Ventas por País — Enero/2026',
+    footer1:'Informe generado a partir del historial de ventas de Hotmart · Impacto Pasivo',
+    dividerGeneral:'Meta Ads — Inversión General',
+    ginvDiario:'Inversión Diaria', cplDiario:'CPL Diario',
+    jan2026tag:'Enero/2026',
+    invPorFrente:'Inversión por Frente',
+    distribInv:'Distribución de la Inversión', roasPorFrente:'ROAS por Frente',
+    invRetGeral:'Inversión x Retorno — General',
+    invVsFat:'Invertido vs Facturado', resumo:'Resumen',
+    thMetrica:'Métrica', thValor:'Valor',
+    footer2:'Inversión referente a todas las campañas (ESP + LATAM) · Meta Ads · Enero/2026',
+    estrategiaPublicos:'Estrategia de Públicos — LATAM (Enero/2026)',
+    publicoFrio:'Público Frío',
+    publicoFrioDesc:'Ubicación — Inclusión: <strong>Argentina, Colombia</strong>',
+    publicoQuente:'Público Cálido',
+    publicoQuenteDesc:'Toda <strong>Sudamérica</strong>, excepto Venezuela',
+    invDiarioLatam:'Inversión Diaria — LATAM',
+    cplDiarioLatam:'CPL Diario — LATAM',
+    frioQuenteTag:'Frío x Cálido',
+    invRetLatam:'Inversión x Retorno — LATAM',
+    footer3:'Inversión referente solo a las campañas LATAM (Frío + Cálido) · Meta Ads · Enero/2026',
+    janVendas:'ventas', janPaises:'países',
+    kpiInvTotal:'Inversión Total', kpiCplGeral:'CPL General', kpiCplEsp:'CPL España', kpiCplLatam:'CPL LATAM',
+    kpiInvTotalLatam:'Inversión Total LATAM', kpiLeadsTotais:'Leads Totales', kpiCplFrioQuente:'CPL Frío / Cálido',
+    rowInvestidoGeral:'Invertido (General)', rowFaturadoTotalJan:'Facturado (Total Enero)',
+    rowRoasGeral:'ROAS General', rowRoasEsp:'ROAS ESP', rowRoasLatam:'ROAS LATAM',
+    rowLucroBruto:'Beneficio Bruto', rowCplGeral:'CPL General', rowPctInvLatam:'% Invertido en LATAM',
+    rowInvestidoLatam:'Invertido (LATAM)', rowFaturadoLatamPaises:'Facturado (Argentina + Colombia + México)',
+    rowRoas:'ROAS',
+    legGeral:'General', legEsp:'ESP', legLatam:'LATAM',
+    legInvestido:'Invertido', legFaturado:'Facturado',
+    legCplGeral:'CPL General', legCplEsp:'CPL ESP', legCplLatam:'CPL LATAM',
+    legFrio:'Frío', legQuente:'Cálido', legCplFrio:'CPL Frío', legCplQuente:'CPL Cálido',
+    geralJan:'General — Enero/2026', latamJan:'LATAM — Enero/2026',
+    dividerCreatives:'Mejores Públicos y Anuncios',
+    audiencesTitle:'Ranking de Públicos', cplPorPublico:'CPL por Público', thPublico:'Público',
+    creativesTitle:'Ranking de Creativos', creativesTag:'Volumen x CPL',
+    badgeVolume:'Mejor Volumen', badgeCpl:'Mejor CPL',
+    creativeLeads:'Leads', creativeCpl:'CPL', creativeSpend:'Invertido', creativeImpr:'Impresiones',
+    tabVendas:'Ventas e Inversión', tabAds:'Mejores Públicos y Anuncios', tabPesquisa:'Encuesta del Evento',
+    pesquisaEyebrow:'Encuesta del Evento',
+    pesquisaH1:'Evento de Enero/2026 — Perfil de los Inscritos',
+    paisPesquisa:'País de los Encuestados', faixaEtaria:'Franja Etaria', rendaMensal:'Ingreso Mensual',
+    tempoCripto:'Tiempo en el Mundo Cripto', comoConheceu:'Cómo Conoció el Evento',
+    pesquisaFooter:'Datos agregados a partir de las respuestas del formulario del evento · Sin información identificable',
+    kpiTotalRespostas:'Total de Respuestas', kpiPctEspanha:'% España', kpiPctComFilhos:'Tiene Hijos', kpiPctExperientes:'Más de 2 Años en Cripto',
+    ocupacao:'Ocupación', temFilhos:'Tiene Hijos', situacaoAtual:'Situación Actual (Trayectoria en Cripto)'
+  }
+};
+
+let currentLang = 'pt';
+let currentTheme = 'dark';
+let chartInstances = [];
+
+function track(chart){ chartInstances.push(chart); return chart; }
+function destroyAll(){ chartInstances.forEach(c=>{ try{ c.destroy(); }catch(e){} }); chartInstances = []; }
+
+function applyStaticText(lang){
+  const dict = I18N[lang];
+  document.documentElement.lang = lang==='es' ? 'es-ES' : 'pt-BR';
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key = el.getAttribute('data-i18n');
+    if (dict[key] !== undefined) el.innerHTML = dict[key];
+  });
+}
+
+function getChartTextColor(theme){
+  return theme==='light' ? '#1b1e27' : '#8a8f9c';
+}
+function getDlOnColorBg(theme){
+  // for datalabels placed on colored bar fills (light bg always works ok with dark text)
+  return '#0b0d12';
+}
+function getDlFreeText(theme){
+  // for datalabels placed over transparent panel background (line charts etc)
+  return theme==='light' ? '#1b1e27' : '#e8eaef';
+}
+function getPanelHexForBorder(theme){
+  return theme==='light' ? '#ffffff' : '#12151c';
+}
+
+function buildAll(lang, theme){
+  destroyAll();
+  const dict = I18N[lang];
+  applyStaticText(lang);
+
+  Chart.defaults.color = getChartTextColor(theme);
+  Chart.defaults.font.family = "'Space Grotesk', sans-serif";
+  Chart.defaults.borderColor = theme==='light' ? '#dde1e8' : '#232834';
+
+  const dlFree = getDlFreeText(theme);
+  const panelBorder = getPanelHexForBorder(theme);
+
+  // ===== KPIs (main) =====
+  document.getElementById('kpiTotal').textContent = fmtEUR(DATA.total_all, lang);
+  document.getElementById('kpiCount').textContent = fmtNum(DATA.count_all, lang);
+  document.getElementById('kpiAvg').textContent = fmtEUR(DATA.total_all/DATA.count_all, lang);
+  document.getElementById('kpiCountries').textContent = DATA.overall.country_order.length;
+
+  // Month chart - stacked bar by country
+  const monthLabels = DATA.overall.months.map(m=>{
+    const [y,mo]=m.split('-');
+    const namesPt=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    const namesEs=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    const names = lang==='es' ? namesEs : namesPt;
+    return names[parseInt(mo)-1]+'/'+y.slice(2);
+  });
+  const monthDatasets = DATA.overall.country_order.map((c,i)=>({
+    label:c,
+    data:DATA.overall.pivot[c],
+    backgroundColor:palette[i%palette.length],
+    borderRadius:4,
+    stack:'s'
+  }));
+
+  track(new Chart(document.getElementById('monthChart'),{
+    type:'bar',
+    data:{labels:monthLabels, datasets:monthDatasets},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{position:'bottom', labels:{boxWidth:10,padding:14,font:{size:11}}},
+        tooltip:{callbacks:{label:(ctx)=>` ${ctx.dataset.label}: ${fmtEUR(ctx.raw, lang)}`}}
+      },
+      scales:{
+        x:{stacked:true, grid:{display:false}},
+        y:{stacked:true, beginAtZero:true, ticks:{callback:(v)=>fmtEUR(v, lang)}}
+      }
+    }
+  }));
+
+  // Country chart (overall)
+  const countryLabels = DATA.overall.country_order;
+  const countryValues = countryLabels.map(c=>DATA.overall.country_totals[c]);
+  track(new Chart(document.getElementById('countryChart'),{
+    type:'doughnut',
+    data:{
+      labels:countryLabels,
+      datasets:[{data:countryValues, backgroundColor:palette, borderColor:panelBorder, borderWidth:2}]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{position:'bottom', labels:{boxWidth:10,padding:10,font:{size:11}}},
+        tooltip:{callbacks:{label:(ctx)=>` ${ctx.label}: ${fmtEUR(ctx.raw, lang)}`}}
+      },
+      cutout:'62%'
+    }
+  }));
+
+  // Country table (overall)
+  const ctBody = document.getElementById('countryTable');
+  ctBody.innerHTML = '';
+  countryLabels.forEach((c,i)=>{
+    const pct = (DATA.overall.country_totals[c]/DATA.total_all*100).toFixed(1);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${palette[i%palette.length]};margin-right:8px;"></span>${c}</td>
+      <td class="num">${fmtNum(DATA.overall.country_counts[c], lang)}</td>
+      <td class="num">${fmtEUR(DATA.overall.country_totals[c], lang)}</td>
+      <td class="num">${pct}%</td>`;
+    ctBody.appendChild(tr);
+  });
+
+  // January banner
+  document.getElementById('janDesc').textContent = `${DATA.jan.count} ${dict.janVendas} · ${DATA.jan.countries.length} ${dict.janPaises}`;
+  document.getElementById('janTotal').textContent = fmtEUR(DATA.jan.total, lang);
+
+  // January day chart - stacked by country
+  const janDayLabels = DATA.jan.days.map(d=>{
+    const parts = d.split('-');
+    return parts[2]+'/'+parts[1];
+  });
+  const janDayDatasets = DATA.jan.day_country_order.map((c,i)=>({
+    label:c,
+    data:DATA.jan.day_pivot[c],
+    backgroundColor:palette[i%palette.length],
+    borderRadius:4,
+    stack:'s'
+  }));
+  track(new Chart(document.getElementById('janDayChart'),{
+    type:'bar',
+    data:{
+      labels:janDayLabels,
+      datasets:janDayDatasets
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{position:'bottom', labels:{boxWidth:10,padding:14,font:{size:11}}},
+        tooltip:{callbacks:{label:(ctx)=>` ${ctx.dataset.label}: ${fmtEUR(ctx.raw, lang)}`}}
+      },
+      scales:{
+        x:{stacked:true, grid:{display:false}},
+        y:{stacked:true, beginAtZero:true, ticks:{callback:(v)=>fmtEUR(v, lang)}}
+      }
+    }
+  }));
+
+  // January country chart
+  track(new Chart(document.getElementById('janCountryChart'),{
+    type:'doughnut',
+    data:{
+      labels:DATA.jan.countries,
+      datasets:[{data:DATA.jan.country_totals, backgroundColor:palette, borderColor:panelBorder, borderWidth:2}]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{position:'bottom', labels:{boxWidth:10,padding:10,font:{size:11}}},
+        tooltip:{callbacks:{label:(ctx)=>` ${ctx.label}: ${fmtEUR(ctx.raw, lang)}`}}
+      },
+      cutout:'62%'
+    }
+  }));
+
+  // January country table
+  const jctBody = document.getElementById('janCountryTable');
+  jctBody.innerHTML = '';
+  DATA.jan.countries.forEach((c,i)=>{
+    const pct = (DATA.jan.country_totals[i]/DATA.jan.total*100).toFixed(1);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${palette[i%palette.length]};margin-right:8px;"></span>${c}</td>
+      <td class="num">${fmtNum(DATA.jan.country_counts[i], lang)}</td>
+      <td class="num">${fmtEUR(DATA.jan.country_totals[i], lang)}</td>
+      <td class="num">${pct}%</td>`;
+    jctBody.appendChild(tr);
+  });
+
+  // ===== Meta Ads — Geral (ESP + LATAM) =====
+  if (typeof GENERAL !== 'undefined') {
+    document.getElementById('generalAdsWrap').style.display = 'block';
+
+    const dlWhite = {
+      color:dlFree,
+      font:{size:10, weight:'600', family:"'DM Mono', monospace"},
+      formatter:(v)=> v===0 ? '' : fmtEUR(v, lang)
+    };
+
+    const genDayLabels = GENERAL.dates.map(d=>{
+      const p = d.split('-');
+      return p[2]+'/'+p[1];
+    });
+
+    track(new Chart(document.getElementById('generalSpendChart'),{
+      type:'bar',
+      data:{
+        labels:genDayLabels,
+        datasets:[
+          {label:dict.legEsp, data:GSPLIT.esp_spend, backgroundColor:'#ffb84d', borderRadius:4, stack:'s'},
+          {label:dict.legLatam, data:GSPLIT.latam_spend, backgroundColor:'#5b8cff', borderRadius:4, stack:'s'}
+        ]
+      },
+      plugins:[ChartDataLabels],
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{position:'bottom', labels:{boxWidth:10,padding:14,font:{size:11}}},
+          datalabels:{color:'#0b0d12', font:{size:9,weight:'700'}, formatter:(v)=> v<5 ? '' : fmtEUR(v, lang)},
+          tooltip:{callbacks:{label:(ctx)=>` ${ctx.dataset.label}: ${fmtEUR(ctx.raw, lang)}`}}
+        },
+        scales:{
+          x:{stacked:true, grid:{display:false}},
+          y:{stacked:true, beginAtZero:true, ticks:{callback:(v)=>fmtEUR(v, lang)}}
+        }
+      }
+    }));
+
+    const genCpl = GENERAL.spend.map((s,i)=> GENERAL.leads[i] ? +(s/GENERAL.leads[i]).toFixed(2) : null);
+    const espCplDaily = GSPLIT.esp_spend.map((s,i)=> GSPLIT.esp_leads[i] ? +(s/GSPLIT.esp_leads[i]).toFixed(2) : null);
+    const latamCplDaily = GSPLIT.latam_spend.map((s,i)=> GSPLIT.latam_leads[i] ? +(s/GSPLIT.latam_leads[i]).toFixed(2) : null);
+    track(new Chart(document.getElementById('generalCplChart'),{
+      type:'line',
+      data:{
+        labels:genDayLabels,
+        datasets:[
+          {label:dict.legCplGeral, data:genCpl, borderColor:'#3ddc97', backgroundColor:'#3ddc97', tension:.35, pointRadius:3, spanGaps:true},
+          {label:dict.legCplEsp, data:espCplDaily, borderColor:'#ffb84d', backgroundColor:'#ffb84d', tension:.35, pointRadius:3, spanGaps:true},
+          {label:dict.legCplLatam, data:latamCplDaily, borderColor:'#5b8cff', backgroundColor:'#5b8cff', tension:.35, pointRadius:3, spanGaps:true}
+        ]
+      },
+      plugins:[ChartDataLabels],
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{position:'bottom', labels:{boxWidth:10,padding:14,font:{size:11}}},
+          datalabels:{...dlWhite, anchor:'end', align:'top', formatter:(v)=> v==null?'':fmtEUR(v, lang)},
+          tooltip:{callbacks:{label:(ctx)=>` ${ctx.dataset.label}: ${fmtEUR(ctx.raw, lang)}`}}
+        },
+        scales:{
+          x:{grid:{display:false}},
+          y:{beginAtZero:true, ticks:{callback:(v)=>fmtEUR(v, lang)}, grace:'15%'}
+        }
+      }
+    }));
+
+    // KPIs
+    const generalKpis = document.getElementById('generalKpis');
+    const cplGeralAll = GENERAL.total_spend/GENERAL.total_leads;
+    const cplEsp = GSPLIT.esp_total_spend/GSPLIT.esp_total_leads;
+    const cplLatam = LATAM.total_spend/LATAM.total_leads;
+    const pctLatamInvest = (LATAM.total_spend/GENERAL.total_spend*100).toFixed(1);
+    generalKpis.innerHTML = `
+      <div class="kpi"><div class="label">${dict.kpiInvTotal}</div><div class="value accent">${fmtEUR(GENERAL.total_spend, lang)}</div></div>
+      <div class="kpi"><div class="label">${dict.kpiCplGeral}</div><div class="value">${fmtEUR(cplGeralAll, lang)}</div></div>
+      <div class="kpi"><div class="label">${dict.kpiCplEsp}</div><div class="value">${fmtEUR(cplEsp, lang)}</div></div>
+      <div class="kpi"><div class="label">${dict.kpiCplLatam}</div><div class="value">${fmtEUR(cplLatam, lang)}</div></div>
+    `;
+
+    // Investment split ESP x LATAM (Outro incluído em ESP)
+    const espSpend = GSPLIT.esp_total_spend;
+    track(new Chart(document.getElementById('investSplitChart'),{
+      type:'doughnut',
+      data:{
+        labels:[dict.legEsp, dict.legLatam],
+        datasets:[{data:[espSpend, LATAM.total_spend], backgroundColor:['#ffb84d','#5b8cff'], borderColor:panelBorder, borderWidth:2}]
+      },
+      plugins:[ChartDataLabels],
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{position:'bottom', labels:{boxWidth:10,padding:10,font:{size:11}}},
+          datalabels:{color:'#0b0d12', font:{size:11,weight:'700'}, formatter:(v,ctx)=> v===0?'':(v/GENERAL.total_spend*100).toFixed(1)+'%'},
+          tooltip:{callbacks:{label:(ctx)=>` ${ctx.label}: ${fmtEUR(ctx.raw, lang)}`}}
+        },
+        cutout:'62%'
+      }
+    }));
+
+    // ROAS compare: Geral x ESP x LATAM
+    const roasGeral = GENERAL.sales_return_total/GENERAL.total_spend;
+    const roasEsp = GENERAL.esp_return/espSpend;
+    const roasLatam = LATAM.sales_return/LATAM.total_spend;
+    track(new Chart(document.getElementById('roasCompareChart'),{
+      type:'bar',
+      data:{
+        labels:[dict.legGeral, dict.legEsp, dict.legLatam],
+        datasets:[{label:'ROAS', data:[roasGeral, roasEsp, roasLatam], backgroundColor:['#3ddc97','#ffb84d','#5b8cff'], borderRadius:6, maxBarThickness:60}]
+      },
+      plugins:[ChartDataLabels],
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          datalabels:{color:dlFree, font:{size:12,weight:'700',family:"'DM Mono', monospace"}, anchor:'end', align:'top', formatter:(v)=>v.toFixed(2)+'x'},
+          tooltip:{callbacks:{label:(ctx)=>` ${ctx.raw.toFixed(2)}x`}}
+        },
+        scales:{
+          x:{grid:{display:false}},
+          y:{beginAtZero:true, grace:'15%', ticks:{callback:(v)=>v+'x'}}
+        }
+      }
+    }));
+
+    // General invest x return
+    track(new Chart(document.getElementById('generalRoasChart'),{
+      type:'bar',
+      data:{
+        labels:[dict.geralJan],
+        datasets:[
+          {label:dict.legInvestido, data:[GENERAL.total_spend], backgroundColor:'#5b8cff', borderRadius:6, maxBarThickness:70},
+          {label:dict.legFaturado, data:[GENERAL.sales_return_total], backgroundColor:'#3ddc97', borderRadius:6, maxBarThickness:70}
+        ]
+      },
+      plugins:[ChartDataLabels],
+      options:{
+        indexAxis:'y',
+        responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{position:'bottom', labels:{boxWidth:10,padding:14,font:{size:11}}},
+          datalabels:{color:'#0b0d12', font:{size:11,weight:'700'}, formatter:(v)=>fmtEUR(v, lang)},
+          tooltip:{callbacks:{label:(ctx)=>` ${ctx.dataset.label}: ${fmtEUR(ctx.raw, lang)}`}}
+        },
+        scales:{
+          x:{beginAtZero:true, ticks:{callback:(v)=>fmtEUR(v, lang)}},
+          y:{grid:{display:false}}
+        }
+      }
+    }));
+
+    const lucroGeral = GENERAL.sales_return_total - GENERAL.total_spend;
+    const generalRoasBody = document.getElementById('generalRoasTable');
+    generalRoasBody.innerHTML = `
+      <tr><td>${dict.rowInvestidoGeral}</td><td class="num">${fmtEUR(GENERAL.total_spend, lang)}</td></tr>
+      <tr><td>${dict.rowFaturadoTotalJan}</td><td class="num">${fmtEUR(GENERAL.sales_return_total, lang)}</td></tr>
+      <tr><td>${dict.rowRoasGeral}</td><td class="num">${roasGeral.toFixed(2)}x</td></tr>
+      <tr><td>${dict.rowRoasEsp}</td><td class="num">${roasEsp.toFixed(2)}x</td></tr>
+      <tr><td>${dict.rowRoasLatam}</td><td class="num">${roasLatam.toFixed(2)}x</td></tr>
+      <tr><td>${dict.rowLucroBruto}</td><td class="num">${fmtEUR(lucroGeral, lang)}</td></tr>
+      <tr><td>${dict.rowCplGeral}</td><td class="num">${fmtEUR(cplGeralAll, lang)}</td></tr>
+      <tr><td>${dict.rowPctInvLatam}</td><td class="num">${pctLatamInvest}%</td></tr>
+    `;
+  }
+
+  // ===== Melhores Públicos e Criativos — por região =====
+  if (typeof AUDIENCES_REGION !== 'undefined') {
+    document.getElementById('creativesWrap').style.display = 'block';
+    ['ESP','LATAM'].forEach(region=>{
+      const list = AUDIENCES_REGION[region] || [];
+      const sorted = list.slice().sort((a,b)=>b.leads-a.leads);
+      const labels = sorted.map(a=>a.name.replace('-'+region,''));
+      const leads = sorted.map(a=>a.leads);
+      const cpls = sorted.map(a=>a.cpl);
+      const color = region==='ESP' ? '#ffb84d' : '#5b8cff';
+      track(new Chart(document.getElementById('audienceChart-'+region),{
+        type:'bar',
+        data:{
+          labels:labels,
+          datasets:[{label:dict.creativeLeads, data:leads, backgroundColor:color, borderRadius:6, maxBarThickness:26}]
+        },
+        plugins:[ChartDataLabels],
+        options:{
+          indexAxis:'y',
+          responsive:true,maintainAspectRatio:false,
+          plugins:{
+            legend:{display:false},
+            datalabels:{color:dlFree, font:{size:10,weight:'700',family:"'DM Mono', monospace"}, anchor:'end', align:'right',
+              formatter:(v,ctx)=> `${fmtNum(v, lang)} (${fmtEUR(cpls[ctx.dataIndex], lang)})`},
+            tooltip:{callbacks:{label:(ctx)=>` ${fmtNum(ctx.raw, lang)} leads · CPL ${fmtEUR(cpls[ctx.dataIndex], lang)}`}}
+          },
+          scales:{
+            x:{beginAtZero:true, grace:'35%', ticks:{display:false}, grid:{display:false}},
+            y:{grid:{display:false}, ticks:{font:{size:10}}}
+          }
+        }
+      }));
+    });
+
+    ['ESP','LATAM'].forEach(region=>{
+      const list = CREATIVES_REGION[region] || [];
+      const grid = document.getElementById('creativesGrid-'+region);
+      grid.innerHTML = '';
+      if (!list.length) return;
+      const bestVolumeName = list.slice().sort((a,b)=>b.leads-a.leads)[0].name;
+      const bestCplName = list.slice().sort((a,b)=>a.cpl-b.cpl)[0].name;
+      list.slice().sort((a,b)=>b.leads-a.leads).forEach(c=>{
+        const card = document.createElement('div');
+        card.className = 'creative-card';
+        let badge = '';
+        if (c.name === bestVolumeName) badge = `<span class="creative-badge badge-volume">${dict.badgeVolume}</span>`;
+        else if (c.name === bestCplName) badge = `<span class="creative-badge badge-cpl">${dict.badgeCpl}</span>`;
+        card.innerHTML = `
+          ${badge}
+          <img class="creative-thumb" src="${c.thumb}" alt="${c.name}" onerror="this.style.display='none'">
+          <div class="creative-body">
+            <div class="creative-name">${c.name}</div>
+            <div class="creative-stats">
+              <div class="row"><span>${dict.creativeLeads}</span><b>${fmtNum(c.leads, lang)}</b></div>
+              <div class="row"><span>${dict.creativeCpl}</span><b>${fmtEUR(c.cpl, lang)}</b></div>
+              <div class="row"><span>${dict.creativeSpend}</span><b>${fmtEUR(c.spend, lang)}</b></div>
+              <div class="row"><span>${dict.creativeImpr}</span><b>${fmtNum(c.impressions, lang)}</b></div>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    });
+  }
+
+  // ===== LATAM Meta Ads section =====
+  if (typeof LATAM !== 'undefined') {
+    document.getElementById('latamWrap').style.display = 'block';
+
+    const latamDayLabels = LATAM.dates.map(d=>{
+      const p = d.split('-');
+      return p[2]+'/'+p[1];
+    });
+
+    track(new Chart(document.getElementById('latamSpendChart'),{
+      type:'bar',
+      data:{
+        labels:latamDayLabels,
+        datasets:[
+          {label:dict.legFrio, data:LATAM.frio_spend, backgroundColor:'#5b8cff', borderRadius:4, stack:'s'},
+          {label:dict.legQuente, data:LATAM.quente_spend, backgroundColor:'#ff6b81', borderRadius:4, stack:'s'}
+        ]
+      },
+      plugins:[ChartDataLabels],
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{position:'bottom', labels:{boxWidth:10,padding:14,font:{size:11}}},
+          datalabels:{color:'#0b0d12', font:{size:9,weight:'700'}, formatter:(v)=> v<5 ? '' : fmtEUR(v, lang)},
+          tooltip:{callbacks:{label:(ctx)=>` ${ctx.dataset.label}: ${fmtEUR(ctx.raw, lang)}`}}
+        },
+        scales:{
+          x:{stacked:true, grid:{display:false}},
+          y:{stacked:true, beginAtZero:true, ticks:{callback:(v)=>fmtEUR(v, lang)}}
+        }
+      }
+    }));
+
+    const frioCpl = LATAM.frio_spend.map((s,i)=> LATAM.frio_leads[i] ? +(s/LATAM.frio_leads[i]).toFixed(2) : null);
+    const quenteCpl = LATAM.quente_spend.map((s,i)=> LATAM.quente_leads[i] ? +(s/LATAM.quente_leads[i]).toFixed(2) : null);
+
+    track(new Chart(document.getElementById('latamCplChart'),{
+      type:'line',
+      data:{
+        labels:latamDayLabels,
+        datasets:[
+          {label:dict.legCplFrio, data:frioCpl, borderColor:'#5b8cff', backgroundColor:'#5b8cff', tension:.35, pointRadius:3, spanGaps:true},
+          {label:dict.legCplQuente, data:quenteCpl, borderColor:'#ff6b81', backgroundColor:'#ff6b81', tension:.35, pointRadius:3, spanGaps:true}
+        ]
+      },
+      plugins:[ChartDataLabels],
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{position:'bottom', labels:{boxWidth:10,padding:14,font:{size:11}}},
+          datalabels:{color:dlFree, font:{size:9,weight:'600',family:"'DM Mono', monospace"}, align:'top', formatter:(v)=> v==null?'':fmtEUR(v, lang)},
+          tooltip:{callbacks:{label:(ctx)=>` ${ctx.dataset.label}: ${fmtEUR(ctx.raw, lang)}`}}
+        },
+        scales:{
+          x:{grid:{display:false}},
+          y:{beginAtZero:true, ticks:{callback:(v)=>fmtEUR(v, lang)}, grace:'15%'}
+        }
+      }
+    }));
+
+    // KPI cards
+    const latamKpis = document.getElementById('latamKpis');
+    const cplGeral = LATAM.total_spend/LATAM.total_leads;
+    const cplFrio = LATAM.frio_total_spend/LATAM.frio_total_leads;
+    const cplQuente = LATAM.quente_total_spend/LATAM.quente_total_leads;
+    latamKpis.innerHTML = `
+      <div class="kpi"><div class="label">${dict.kpiInvTotalLatam}</div><div class="value accent">${fmtEUR(LATAM.total_spend, lang)}</div></div>
+      <div class="kpi"><div class="label">${dict.kpiLeadsTotais}</div><div class="value">${fmtNum(LATAM.total_leads, lang)}</div></div>
+      <div class="kpi"><div class="label">${dict.kpiCplGeral}</div><div class="value">${fmtEUR(cplGeral, lang)}</div></div>
+      <div class="kpi"><div class="label">${dict.kpiCplFrioQuente}</div><div class="value" style="font-size:18px;">${fmtEUR(cplFrio, lang)} / ${fmtEUR(cplQuente, lang)}</div></div>
+    `;
+
+    // Investment vs Return chart
+    track(new Chart(document.getElementById('latamRoasChart'),{
+      type:'bar',
+      data:{
+        labels:[dict.latamJan],
+        datasets:[
+          {label:dict.legInvestido, data:[LATAM.total_spend], backgroundColor:'#5b8cff', borderRadius:6, maxBarThickness:70},
+          {label:dict.legFaturado, data:[LATAM.sales_return], backgroundColor:'#3ddc97', borderRadius:6, maxBarThickness:70}
+        ]
+      },
+      plugins:[ChartDataLabels],
+      options:{
+        indexAxis:'y',
+        responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{position:'bottom', labels:{boxWidth:10,padding:14,font:{size:11}}},
+          datalabels:{color:'#0b0d12', font:{size:11,weight:'700'}, formatter:(v)=>fmtEUR(v, lang)},
+          tooltip:{callbacks:{label:(ctx)=>` ${ctx.dataset.label}: ${fmtEUR(ctx.raw, lang)}`}}
+        },
+        scales:{
+          x:{beginAtZero:true, ticks:{callback:(v)=>fmtEUR(v, lang)}},
+          y:{grid:{display:false}}
+        }
+      }
+    }));
+
+    const roas = LATAM.sales_return/LATAM.total_spend;
+    const lucro = LATAM.sales_return - LATAM.total_spend;
+    const roasBody = document.getElementById('latamRoasTable');
+    roasBody.innerHTML = `
+      <tr><td>${dict.rowInvestidoLatam}</td><td class="num">${fmtEUR(LATAM.total_spend, lang)}</td></tr>
+      <tr><td>${dict.rowFaturadoLatamPaises}</td><td class="num">${fmtEUR(LATAM.sales_return, lang)}</td></tr>
+      <tr><td>${dict.rowRoas}</td><td class="num">${roas.toFixed(2)}x</td></tr>
+      <tr><td>${dict.rowLucroBruto}</td><td class="num">${fmtEUR(lucro, lang)}</td></tr>
+      <tr><td>${dict.rowCplGeral}</td><td class="num">${fmtEUR(cplGeral, lang)}</td></tr>
+    `;
+  }
+
+  // ===== Pesquisa do Evento =====
+  if (typeof SURVEY !== 'undefined') {
+    document.getElementById('pesquisaWrap').style.display = 'block';
+
+    document.getElementById('pesquisaSubtitle').textContent = `${SURVEY.total} ${dict.janVendas==='vendas'?'respostas':'respuestas'}`;
+
+    const pctEspanha = (SURVEY.country_values[SURVEY.country_labels.indexOf('España')]/SURVEY.total*100).toFixed(0);
+    const pctFilhos = (SURVEY.hijos_values[SURVEY.hijos_labels.indexOf('Sí')]/SURVEY.total*100).toFixed(0);
+    const idxMais2 = SURVEY.tempo_labels.indexOf('Más de 2 años');
+    const pctExperientes = (SURVEY.tempo_values[idxMais2]/SURVEY.total*100).toFixed(0);
+    const pesquisaKpis = document.getElementById('pesquisaKpis');
+    pesquisaKpis.innerHTML = `
+      <div class="kpi"><div class="label">${dict.kpiTotalRespostas}</div><div class="value accent">${fmtNum(SURVEY.total, lang)}</div></div>
+      <div class="kpi"><div class="label">${dict.kpiPctEspanha}</div><div class="value">${pctEspanha}%</div></div>
+      <div class="kpi"><div class="label">${dict.kpiPctComFilhos}</div><div class="value">${pctFilhos}%</div></div>
+      <div class="kpi"><div class="label">${dict.kpiPctExperientes}</div><div class="value">${pctExperientes}%</div></div>
+    `;
+
+    track(new Chart(document.getElementById('pesquisaPaisChart'),{
+      type:'doughnut',
+      data:{
+        labels:SURVEY.country_labels,
+        datasets:[{data:SURVEY.country_values, backgroundColor:palette, borderColor:panelBorder, borderWidth:2}]
+      },
+      plugins:[ChartDataLabels],
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{position:'bottom', labels:{boxWidth:10,padding:10,font:{size:11}}},
+          datalabels:{color:'#0b0d12', font:{size:10,weight:'700'}, formatter:(v)=> v<8?'':`${v} (${(v/SURVEY.total*100).toFixed(0)}%)`},
+          tooltip:{callbacks:{label:(ctx)=>` ${ctx.label}: ${fmtNum(ctx.raw, lang)} (${(ctx.raw/SURVEY.total*100).toFixed(0)}%)`}}
+        },
+        cutout:'55%'
+      }
+    }));
+
+    track(new Chart(document.getElementById('pesquisaEdadChart'),{
+      type:'bar',
+      data:{
+        labels:SURVEY.edad_labels,
+        datasets:[{label:dict.faixaEtaria, data:SURVEY.edad_values, backgroundColor:'#3ddc97', borderRadius:6, maxBarThickness:48}]
+      },
+      plugins:[ChartDataLabels],
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          datalabels:{color:dlFree, font:{size:10,weight:'700'}, anchor:'end', align:'top', formatter:(v)=>v===0?'':`${v} (${(v/SURVEY.total*100).toFixed(0)}%)`},
+          tooltip:{callbacks:{label:(ctx)=>` ${fmtNum(ctx.raw, lang)} (${(ctx.raw/SURVEY.total*100).toFixed(0)}%)`}}
+        },
+        scales:{
+          x:{grid:{display:false}, ticks:{font:{size:9}}},
+          y:{beginAtZero:true, grace:'15%'}
+        }
+      }
+    }));
+
+    track(new Chart(document.getElementById('pesquisaIngresosChart'),{
+      type:'bar',
+      data:{
+        labels:SURVEY.ingresos_labels,
+        datasets:[{label:dict.rendaMensal, data:SURVEY.ingresos_values, backgroundColor:'#ffb84d', borderRadius:6, maxBarThickness:40}]
+      },
+      plugins:[ChartDataLabels],
+      options:{
+        indexAxis:'y',
+        responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          datalabels:{color:dlFree, font:{size:10,weight:'700'}, anchor:'end', align:'right', formatter:(v)=>v===0?'':`${v} (${(v/SURVEY.total*100).toFixed(0)}%)`},
+          tooltip:{callbacks:{label:(ctx)=>` ${fmtNum(ctx.raw, lang)} (${(ctx.raw/SURVEY.total*100).toFixed(0)}%)`}}
+        },
+        scales:{
+          x:{beginAtZero:true, grace:'15%', grid:{display:false}},
+          y:{ticks:{font:{size:10}}}
+        }
+      }
+    }));
+
+    track(new Chart(document.getElementById('pesquisaTempoChart'),{
+      type:'doughnut',
+      data:{
+        labels:SURVEY.tempo_labels,
+        datasets:[{data:SURVEY.tempo_values, backgroundColor:palette, borderColor:panelBorder, borderWidth:2}]
+      },
+      plugins:[ChartDataLabels],
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{position:'bottom', labels:{boxWidth:10,padding:8,font:{size:10}}},
+          datalabels:{color:'#0b0d12', font:{size:10,weight:'700'}, formatter:(v)=> v<8?'':`${v} (${(v/SURVEY.total*100).toFixed(0)}%)`},
+          tooltip:{callbacks:{label:(ctx)=>` ${ctx.label}: ${fmtNum(ctx.raw, lang)} (${(ctx.raw/SURVEY.total*100).toFixed(0)}%)`}}
+        },
+        cutout:'55%'
+      }
+    }));
+
+    track(new Chart(document.getElementById('pesquisaComoChart'),{
+      type:'bar',
+      data:{
+        labels:SURVEY.como_labels,
+        datasets:[{label:dict.comoConheceu, data:SURVEY.como_values, backgroundColor:'#c792ea', borderRadius:6, maxBarThickness:28}]
+      },
+      plugins:[ChartDataLabels],
+      options:{
+        indexAxis:'y',
+        responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          datalabels:{color:dlFree, font:{size:10,weight:'700'}, anchor:'end', align:'right', formatter:(v)=>v===0?'':`${v} (${(v/SURVEY.total*100).toFixed(0)}%)`},
+          tooltip:{callbacks:{label:(ctx)=>` ${fmtNum(ctx.raw, lang)} (${(ctx.raw/SURVEY.total*100).toFixed(0)}%)`}}
+        },
+        scales:{
+          x:{beginAtZero:true, grace:'15%', grid:{display:false}},
+          y:{ticks:{font:{size:10}}}
+        }
+      }
+    }));
+
+    track(new Chart(document.getElementById('pesquisaOcupChart'),{
+      type:'bar',
+      data:{
+        labels:SURVEY.occ_labels,
+        datasets:[{label:dict.ocupacao, data:SURVEY.occ_values, backgroundColor:'#4dd0e1', borderRadius:6, maxBarThickness:24}]
+      },
+      plugins:[ChartDataLabels],
+      options:{
+        indexAxis:'y',
+        responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          datalabels:{color:dlFree, font:{size:9,weight:'700'}, anchor:'end', align:'right', formatter:(v)=>v===0?'':`${v} (${(v/SURVEY.total*100).toFixed(0)}%)`},
+          tooltip:{callbacks:{label:(ctx)=>` ${fmtNum(ctx.raw, lang)} (${(ctx.raw/SURVEY.total*100).toFixed(0)}%)`}}
+        },
+        scales:{
+          x:{beginAtZero:true, grace:'15%', grid:{display:false}},
+          y:{ticks:{font:{size:9}}}
+        }
+      }
+    }));
+
+    track(new Chart(document.getElementById('pesquisaFilhosChart'),{
+      type:'doughnut',
+      data:{
+        labels:SURVEY.hijos_labels,
+        datasets:[{data:SURVEY.hijos_values, backgroundColor:['#3ddc97','#ff6b81'], borderColor:panelBorder, borderWidth:2}]
+      },
+      plugins:[ChartDataLabels],
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{position:'bottom', labels:{boxWidth:10,padding:10,font:{size:11}}},
+          datalabels:{color:'#0b0d12', font:{size:12,weight:'700'}, formatter:(v)=> `${v} (${(v/SURVEY.total*100).toFixed(0)}%)`},
+          tooltip:{callbacks:{label:(ctx)=>` ${ctx.label}: ${fmtNum(ctx.raw, lang)} (${(ctx.raw/SURVEY.total*100).toFixed(0)}%)`}}
+        },
+        cutout:'62%'
+      }
+    }));
+
+    track(new Chart(document.getElementById('pesquisaSituacaoChart'),{
+      type:'bar',
+      data:{
+        labels:SURVEY.sit_labels,
+        datasets:[{label:dict.situacaoAtual, data:SURVEY.sit_values, backgroundColor:'#aed581', borderRadius:6, maxBarThickness:28}]
+      },
+      plugins:[ChartDataLabels],
+      options:{
+        indexAxis:'y',
+        responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          datalabels:{color:dlFree, font:{size:10,weight:'700'}, anchor:'end', align:'right', formatter:(v)=>v===0?'':`${v} (${(v/SURVEY.total*100).toFixed(0)}%)`},
+          tooltip:{callbacks:{label:(ctx)=>` ${fmtNum(ctx.raw, lang)} (${(ctx.raw/SURVEY.total*100).toFixed(0)}%)`}}
+        },
+        scales:{
+          x:{beginAtZero:true, grace:'15%', grid:{display:false}},
+          y:{ticks:{font:{size:10}}}
+        }
+      }
+    }));
+  }
+}
+
+// ===== Toolbar wiring =====
+document.getElementById('langToggle').addEventListener('click', (e)=>{
+  const btn = e.target.closest('button[data-lang]');
+  if (!btn) return;
+  currentLang = btn.getAttribute('data-lang');
+  document.querySelectorAll('#langToggle button').forEach(b=>b.classList.toggle('active', b===btn));
+  buildAll(currentLang, currentTheme);
+});
+
+document.getElementById('themeToggle').addEventListener('click', (e)=>{
+  const btn = e.target.closest('button[data-theme]');
+  if (!btn) return;
+  currentTheme = btn.getAttribute('data-theme');
+  document.querySelectorAll('#themeToggle button').forEach(b=>b.classList.toggle('active', b===btn));
+  document.documentElement.classList.toggle('light', currentTheme==='light');
+  buildAll(currentLang, currentTheme);
+});
+
+document.getElementById('tabsBar').addEventListener('click', (e)=>{
+  const btn = e.target.closest('button[data-tab]');
+  if (!btn) return;
+  const tab = btn.getAttribute('data-tab');
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b===btn));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active', p.id===tab));
+});
+
+buildAll(currentLang, currentTheme);
+</script>
+
+</body>
+</html>
