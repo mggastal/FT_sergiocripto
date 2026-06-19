@@ -57,18 +57,29 @@
   h1{font-size:32px;margin:0 0 6px;font-weight:700;}
   .subtitle{color:var(--muted);font-size:14px;}
 
-  .toolbar{
+  .top-fixed{
     position:fixed;
     top:0;left:0;right:0;
     z-index:100;
+  }
+  .toolbar{
     background:var(--panel);
     border-bottom:1px solid var(--border);
     padding:12px 24px;
     display:flex;
-    justify-content:flex-end;
+    justify-content:space-between;
+    align-items:center;
     gap:10px;
     flex-wrap:wrap;
   }
+  .report-title{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:13px;
+    font-weight:700;
+    color:var(--text);
+    letter-spacing:.01em;
+  }
+  .toolbar-right{display:flex;gap:10px;flex-wrap:wrap;}
   .toggle-group{
     display:flex;
     background:var(--panel-2);
@@ -94,9 +105,6 @@
     color:#fff;
   }
   .tabs-bar{
-    position:fixed;
-    top:49px;left:0;right:0;
-    z-index:99;
     background:var(--bg);
     border-bottom:1px solid var(--border);
     padding:0 24px;
@@ -276,6 +284,19 @@
   .creative-stats{display:flex;flex-direction:column;gap:5px;font-size:12px;}
   .creative-stats .row{display:flex;justify-content:space-between;color:var(--muted);}
   .creative-stats .row b{color:var(--text);font-family:'DM Mono',monospace;}
+  .video-link-btn{
+    display:block;
+    text-align:center;
+    margin-top:12px;
+    padding:8px 0;
+    background:var(--accent);
+    color:#fff;
+    font-size:12px;
+    font-weight:600;
+    border-radius:8px;
+    text-decoration:none;
+  }
+  .video-link-btn:hover{opacity:.88;}
 
   @media(max-width:900px){
     .kpis{grid-template-columns:repeat(2,1fr);}
@@ -286,14 +307,18 @@
 </head>
 <body>
 
+<div class="top-fixed" id="topFixed">
 <div class="toolbar">
-  <div class="toggle-group" id="langToggle">
-    <button data-lang="pt" class="active">Português</button>
-    <button data-lang="es">Español</button>
-  </div>
-  <div class="toggle-group" id="themeToggle">
-    <button data-theme="dark" class="active">Escuro</button>
-    <button data-theme="light">Claro</button>
+  <div class="report-title">Impacto Pasivo — Jan 2026 — Sérgio Cripto</div>
+  <div class="toolbar-right">
+    <div class="toggle-group" id="langToggle">
+      <button data-lang="pt" class="active">Português</button>
+      <button data-lang="es">Español</button>
+    </div>
+    <div class="toggle-group" id="themeToggle">
+      <button data-theme="dark" class="active">Escuro</button>
+      <button data-theme="light">Claro</button>
+    </div>
   </div>
 </div>
 
@@ -301,6 +326,7 @@
   <button class="tab-btn active" data-tab="tabVendas" data-i18n="tabVendas">Vendas & Investimento</button>
   <button class="tab-btn" data-tab="tabAds" data-i18n="tabAds">Melhores Públicos e Anúncios</button>
   <button class="tab-btn" data-tab="tabPesquisa" data-i18n="tabPesquisa">Pesquisa do Evento</button>
+</div>
 </div>
 
 <div id="tabVendas" class="tab-panel active">
@@ -563,18 +589,23 @@
 
   <section>
     <div class="section-title">
+      <h2 data-i18n="detalhamentoPublicos">Detalhamento dos Públicos Frios (ESP)</h2>
+    </div>
+    <div id="audienceDetails" class="creatives-grid"></div>
+  </section>
+
+  <section>
+    <div class="section-title">
       <h2 data-i18n="creativesTitle">Ranking de Criativos</h2>
       <span class="tag" data-i18n="creativesTag">Volume x CPL</span>
     </div>
-    <div class="region-cols">
-      <div>
-        <span class="region-label esp">España</span>
-        <div id="creativesGrid-ESP" class="creatives-grid"></div>
-      </div>
-      <div>
-        <span class="region-label latam">LATAM</span>
-        <div id="creativesGrid-LATAM" class="creatives-grid"></div>
-      </div>
+    <div>
+      <span class="region-label esp">España</span>
+      <div id="creativesGrid-ESP" class="creatives-grid"></div>
+    </div>
+    <div style="margin-top:28px;">
+      <span class="region-label latam">LATAM</span>
+      <div id="creativesGrid-LATAM" class="creatives-grid"></div>
     </div>
   </section>
 </div>
@@ -753,7 +784,9 @@ const I18N = {
     tempoCripto:'Tempo no Mundo Cripto', comoConheceu:'Como Conheceu o Evento',
     pesquisaFooter:'Dados agregados a partir das respostas do formulário do evento · Sem informações identificáveis',
     kpiTotalRespostas:'Total de Respostas', kpiPctEspanha:'% Espanha', kpiPctComFilhos:'Tem Filhos', kpiPctExperientes:'Mais de 2 Anos em Cripto',
-    ocupacao:'Ocupação', temFilhos:'Tem Filhos', situacaoAtual:'Situação Atual (Jornada em Cripto)'
+    ocupacao:'Ocupação', temFilhos:'Tem Filhos', situacaoAtual:'Situação Atual (Jornada em Cripto)',
+    detalhamentoPublicos:'Detalhamento dos Públicos Frios (ESP)',
+    detIdade:'Idade', detGenero:'Gênero', detInteresses:'Interesses', todosGeneros:'Todos os gêneros'
   },
   es:{
     eyebrow:'Informe de Ventas',
@@ -816,7 +849,9 @@ const I18N = {
     tempoCripto:'Tiempo en el Mundo Cripto', comoConheceu:'Cómo Conoció el Evento',
     pesquisaFooter:'Datos agregados a partir de las respuestas del formulario del evento · Sin información identificable',
     kpiTotalRespostas:'Total de Respuestas', kpiPctEspanha:'% España', kpiPctComFilhos:'Tiene Hijos', kpiPctExperientes:'Más de 2 Años en Cripto',
-    ocupacao:'Ocupación', temFilhos:'Tiene Hijos', situacaoAtual:'Situación Actual (Trayectoria en Cripto)'
+    ocupacao:'Ocupación', temFilhos:'Tiene Hijos', situacaoAtual:'Situación Actual (Trayectoria en Cripto)',
+    detalhamentoPublicos:'Detalle de los Públicos Fríos (ESP)',
+    detIdade:'Edad', detGenero:'Género', detInteresses:'Intereses', todosGeneros:'Todos los géneros'
   }
 };
 
@@ -1197,6 +1232,55 @@ function buildAll(lang, theme){
       }));
     });
 
+    const AUDIENCE_DETAILS = [
+      {
+        name:'03-TF-30_55_ADVANTAGE_AVATAR-ESP',
+        interesses:'Inclusão: nível educacional (pós-graduação, mestrado ou doutorado), instituição (ensino superior completo), país (todos)'
+      },
+      {
+        name:'03-TF-30_55_TRADING-ESP',
+        interesses:'Interesses: swing trade, índice do mercado de ações, day trading, análises técnicas'
+      },
+      {
+        name:'03-TF-30_55_MERCADO-ESP',
+        interesses:'Interesses: mercado financeiro, mercado de ações'
+      },
+      {
+        name:'03-TF-30_55_FINANZAS-ESP',
+        interesses:'Interesses: gestão de investimentos, investimento (negócios e finanças), investidor'
+      }
+    ];
+    const audDetailsGrid = document.getElementById('audienceDetails');
+    if (audDetailsGrid) {
+      audDetailsGrid.innerHTML = '';
+      AUDIENCE_DETAILS.forEach(a=>{
+        const card = document.createElement('div');
+        card.className = 'creative-card';
+        card.innerHTML = `
+          <div class="creative-body" style="padding-top:18px;">
+            <div class="creative-name">${a.name}</div>
+            <div class="creative-stats">
+              <div class="row"><span>${dict.detIdade}</span><b>30 – 55</b></div>
+              <div class="row"><span>${dict.detGenero}</span><b>${dict.todosGeneros}</b></div>
+            </div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.5;margin-top:10px;">${a.interesses}</div>
+          </div>
+        `;
+        audDetailsGrid.appendChild(card);
+      });
+    }
+
+    const VIDEO_LINKS = {
+      'IP01-VIDEO-01':'https://fb.me/adspreview/facebook/1UXCMnY1tNnDEjB',
+      'IP01-VIDEO-02':'https://fb.me/adspreview/facebook/ydNtSQBptZHR3KP',
+      'IP01-VIDEO-03':'https://fb.me/adspreview/facebook/2CNJo6uoQLPo5YS',
+      'IP01-VIDEO-04':'https://fb.me/adspreview/facebook/22eHviKMXsXMKXL',
+      'IP01-VIDEO-05':'https://fb.me/adspreview/facebook/28qjBdXcAkd314f',
+      'IP01-VIDEO-06':'https://fb.me/adspreview/facebook/1V9TqXFxcWyTSZC',
+      'IP01-VIDEO-07':'https://fb.me/adspreview/facebook/2p1tGUNUtmQoMAQ'
+    };
+    const videoLinkLabel = lang==='es' ? 'Ver video' : 'Ver vídeo';
+
     ['ESP','LATAM'].forEach(region=>{
       const list = CREATIVES_REGION[region] || [];
       const grid = document.getElementById('creativesGrid-'+region);
@@ -1210,6 +1294,8 @@ function buildAll(lang, theme){
         let badge = '';
         if (c.name === bestVolumeName) badge = `<span class="creative-badge badge-volume">${dict.badgeVolume}</span>`;
         else if (c.name === bestCplName) badge = `<span class="creative-badge badge-cpl">${dict.badgeCpl}</span>`;
+        const videoUrl = VIDEO_LINKS[c.name];
+        const videoBtn = videoUrl ? `<a href="${videoUrl}" target="_blank" rel="noopener" class="video-link-btn">▶ ${videoLinkLabel}</a>` : '';
         card.innerHTML = `
           ${badge}
           <img class="creative-thumb" src="${c.thumb}" alt="${c.name}" onerror="this.style.display='none'">
@@ -1221,6 +1307,7 @@ function buildAll(lang, theme){
               <div class="row"><span>${dict.creativeSpend}</span><b>${fmtEUR(c.spend, lang)}</b></div>
               <div class="row"><span>${dict.creativeImpr}</span><b>${fmtNum(c.impressions, lang)}</b></div>
             </div>
+            ${videoBtn}
           </div>
         `;
         grid.appendChild(card);
@@ -1528,6 +1615,7 @@ document.getElementById('langToggle').addEventListener('click', (e)=>{
   currentLang = btn.getAttribute('data-lang');
   document.querySelectorAll('#langToggle button').forEach(b=>b.classList.toggle('active', b===btn));
   buildAll(currentLang, currentTheme);
+  adjustTopPadding();
 });
 
 document.getElementById('themeToggle').addEventListener('click', (e)=>{
@@ -1546,6 +1634,13 @@ document.getElementById('tabsBar').addEventListener('click', (e)=>{
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b===btn));
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active', p.id===tab));
 });
+
+function adjustTopPadding(){
+  const h = document.getElementById('topFixed').offsetHeight;
+  document.body.style.paddingTop = (h + 24) + 'px';
+}
+window.addEventListener('resize', adjustTopPadding);
+adjustTopPadding();
 
 buildAll(currentLang, currentTheme);
 </script>
