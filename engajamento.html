@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sérgio Cripto — Relatório C1</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+  :root {
+    --bg:        #0a0c10;
+    --surface:   #111418;
+    --border:    #1e2329;
+    --accent:    #f7931a;   /* bitcoin orange */
+    --accent2:   #00d4a8;   /* teal highlight */
+    --text:      #e8eaf0;
+    --muted:     #6b7280;
+    --danger:    #ef4444;
+    --good:      #22c55e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    min-height: 100vh;
+    padding: 40px 24px 80px;
+  }
+
+  /* HEADER */
+  .header {
+    max-width: 1100px;
+    margin: 0 auto 48px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 24px;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .header-left .eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .header-left h1 {
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+  .header-left h1 span { color: var(--accent); }
+  .header-meta {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-align: right;
+    line-height: 1.8;
+  }
+
+  /* SUMMARY CARDS */
+  .kpi-row {
+    max-width: 1100px;
+    margin: 0 auto 48px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+  }
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+    opacity: 0.6;
+  }
+  .kpi.teal::before { background: var(--accent2); }
+  .kpi label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 10px;
+  }
+  .kpi .val {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1;
+  }
+  .kpi .val.accent { color: var(--accent); }
+  .kpi .val.teal   { color: var(--accent2); }
+  .kpi .sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  /* SECTIONS */
+  .section {
+    max-width: 1100px;
+    margin: 0 auto 48px;
+  }
+  .section-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* CHART CARDS */
+  .chart-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  @media (max-width: 700px) { .chart-grid { grid-template-columns: 1fr; } }
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+  }
+  .chart-card h3 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .chart-card .chart-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 20px;
+    font-family: 'Space Mono', monospace;
+  }
+  .chart-wrap { position: relative; height: 240px; }
+
+  /* TABLE */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  thead tr {
+    border-bottom: 1px solid var(--border);
+  }
+  thead th {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 14px 18px;
+    text-align: left;
+    white-space: nowrap;
+  }
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(255,255,255,0.025); }
+  tbody td {
+    padding: 14px 18px;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .mono { font-family: 'Space Mono', monospace; font-size: 12px; }
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+  .tag-best  { background: rgba(34,197,94,0.15); color: var(--good); }
+  .tag-mid   { background: rgba(247,147,26,0.15); color: var(--accent); }
+  .tag-low   { background: rgba(107,114,128,0.12); color: var(--muted); }
+  .tag-worst { background: rgba(239,68,68,0.12);   color: var(--danger); }
+
+  /* BADGE highlight row */
+  tr.highlight td { background: rgba(247,147,26,0.04); }
+
+  /* INSIGHT BOX */
+  .insight-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .insight {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 12px 12px 0;
+    padding: 18px 20px;
+  }
+  .insight.teal { border-left-color: var(--accent2); }
+  .insight.danger { border-left-color: var(--danger); }
+  .insight .i-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .insight p { font-size: 13px; line-height: 1.6; color: var(--text); }
+  .insight strong { color: var(--accent); }
+  .insight.teal strong { color: var(--accent2); }
+  .insight.danger strong { color: var(--danger); }
+
+  /* FOOTER */
+  .footer {
+    max-width: 1100px;
+    margin: 0 auto;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    text-align: center;
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <div class="eyebrow">Meta Ads · Instagram · Conjunto C1</div>
+    <h1>Sérgio <span>Cripto</span><br>Custo por Seguidor</h1>
+  </div>
+  <div class="header-meta">
+    Conta: SERGIOCRIPTO 4<br>
+    Objetivo: Visita ao perfil / Seguidores IG<br>
+    Período: Nov 2024 – Jun 2025<br>
+    Relatório gerado em: 25/06/2026
+  </div>
+</div>
+
+<!-- KPIs -->
+<div class="kpi-row">
+  <div class="kpi">
+    <label>Total Investido</label>
+    <div class="val accent">€282,81</div>
+    <div class="sub">6 anúncios · C1</div>
+  </div>
+  <div class="kpi teal">
+    <label>Seguidores Gerados</label>
+    <div class="val teal">978</div>
+    <div class="sub">Apenas 3 ads com dados</div>
+  </div>
+  <div class="kpi">
+    <label>Custo Médio / Seguidor</label>
+    <div class="val accent">€0,29</div>
+    <div class="sub">Ponderado por investimento</div>
+  </div>
+  <div class="kpi teal">
+    <label>Alcance Total</label>
+    <div class="val teal">52.869</div>
+    <div class="sub">72.055 impressões</div>
+  </div>
+  <div class="kpi">
+    <label>CPM Médio</label>
+    <div class="val">€3,92</div>
+    <div class="sub">Por 1.000 impressões</div>
+  </div>
+  <div class="kpi">
+    <label>Resultados Totais</label>
+    <div class="val">2.765</div>
+    <div class="sub">Visitas ao perfil</div>
+  </div>
+</div>
+
+<!-- GRÁFICOS ROW 1 -->
+<div class="section">
+  <div class="section-title">Custo por Seguidor</div>
+  <div class="chart-grid">
+    <div class="chart-card">
+      <h3>€ por Seguidor por Anúncio</h3>
+      <div class="chart-sub">Menor = mais eficiente</div>
+      <div class="chart-wrap">
+        <canvas id="chartCPS"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>Seguidores vs. Investimento</h3>
+      <div class="chart-sub">Comparativo por anúncio</div>
+      <div class="chart-wrap">
+        <canvas id="chartFollVsSpend"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GRÁFICOS ROW 2 -->
+<div class="section">
+  <div class="section-title">Taxas de Visualização de Vídeo</div>
+  <div class="chart-grid">
+    <div class="chart-card">
+      <h3>ThruPlays por Anúncio</h3>
+      <div class="chart-sub">Visualizações completas (ou 15s+)</div>
+      <div class="chart-wrap">
+        <canvas id="chartThruPlays"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>Retenção de Vídeo (%)</h3>
+      <div class="chart-sub">25% · 50% · 75% · 100% por anúncio</div>
+      <div class="chart-wrap">
+        <canvas id="chartRetencao"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TABELA COMPLETA -->
+<div class="section">
+  <div class="section-title">Tabela Detalhada — Todos os Anúncios C1</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Anúncio</th>
+          <th>Investido</th>
+          <th>Alcance</th>
+          <th>CPM</th>
+          <th>Resultados</th>
+          <th>Seguidores</th>
+          <th>€ / Seguidor</th>
+          <th>ThruPlays</th>
+          <th>Retenção 25%</th>
+          <th>Retenção 100%</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="highlight">
+          <td><span class="mono">C1_AD04</span><br><span style="font-size:11px;color:#6b7280">Deja de quejarte y avanza</span></td>
+          <td class="mono">€3,87</td>
+          <td class="mono">1.071</td>
+          <td class="mono">€3,10</td>
+          <td class="mono">58</td>
+          <td class="mono">308</td>
+          <td class="mono" style="color:#22c55e;font-weight:700">€0,013</td>
+          <td class="mono">165</td>
+          <td class="mono">285</td>
+          <td class="mono">109</td>
+          <td><span class="tag tag-best">MELHOR CPF</span></td>
+        </tr>
+        <tr>
+          <td><span class="mono">C1_AD05</span><br><span style="font-size:11px;color:#6b7280">Si tienes esta cantidad de Bitcoin...</span></td>
+          <td class="mono">€21,60</td>
+          <td class="mono">5.422</td>
+          <td class="mono">€3,57</td>
+          <td class="mono">392</td>
+          <td class="mono">321</td>
+          <td class="mono" style="color:#f7931a;font-weight:700">€0,067</td>
+          <td class="mono">1.287</td>
+          <td class="mono">1.305</td>
+          <td class="mono">784</td>
+          <td><span class="tag tag-mid">BOM</span></td>
+        </tr>
+        <tr>
+          <td><span class="mono">C1_AD06</span><br><span style="font-size:11px;color:#6b7280">¿Por que deberías tener algo de Bitcoin?</span></td>
+          <td class="mono">€255,36</td>
+          <td class="mono">46.148</td>
+          <td class="mono">€3,97</td>
+          <td class="mono">2.295</td>
+          <td class="mono">349</td>
+          <td class="mono" style="color:#ef4444;font-weight:700">€0,732</td>
+          <td class="mono">3.584</td>
+          <td class="mono">6.023</td>
+          <td class="mono">2.249</td>
+          <td><span class="tag tag-worst">CARO / SEGUIDOR</span></td>
+        </tr>
+        <tr>
+          <td><span class="mono">C1_AD03</span><br><span style="font-size:11px;color:#6b7280">Comenta si has adivinado...</span></td>
+          <td class="mono">€1,98</td>
+          <td class="mono">468</td>
+          <td class="mono">€4,10</td>
+          <td class="mono">20</td>
+          <td class="mono">0</td>
+          <td class="mono" style="color:#6b7280">—</td>
+          <td class="mono">12</td>
+          <td class="mono">16</td>
+          <td class="mono">4</td>
+          <td><span class="tag tag-low">SEM DADOS</span></td>
+        </tr>
+        <tr>
+          <td><span class="mono">C1_AD02</span><br><span style="font-size:11px;color:#6b7280">Te pagan por apostar a que NO aparecerá</span></td>
+          <td class="mono">—</td>
+          <td class="mono">—</td>
+          <td class="mono">—</td>
+          <td class="mono">—</td>
+          <td class="mono">0</td>
+          <td class="mono" style="color:#6b7280">—</td>
+          <td class="mono">—</td>
+          <td class="mono">—</td>
+          <td class="mono">—</td>
+          <td><span class="tag tag-low">SEM DADOS</span></td>
+        </tr>
+        <tr>
+          <td><span class="mono">C1_AD01</span><br><span style="font-size:11px;color:#6b7280">Si tu dinero no trabaja para ti...</span></td>
+          <td class="mono">—</td>
+          <td class="mono">—</td>
+          <td class="mono">—</td>
+          <td class="mono">—</td>
+          <td class="mono">0</td>
+          <td class="mono" style="color:#6b7280">—</td>
+          <td class="mono">—</td>
+          <td class="mono">—</td>
+          <td class="mono">—</td>
+          <td><span class="tag tag-low">SEM DADOS</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- INSIGHTS -->
+<div class="section">
+  <div class="section-title">Insights</div>
+  <div class="insight-grid">
+    <div class="insight teal">
+      <div class="i-label">Eficiência</div>
+      <p>O <strong>C1_AD04</strong> entregou o menor custo por seguidor do conjunto: <strong>€0,013</strong> — 56× mais barato que o C1_AD06, apesar do menor investimento. Merece escala.</p>
+    </div>
+    <div class="insight">
+      <div class="i-label">Volume x Custo</div>
+      <p>O <strong>C1_AD06</strong> concentra <strong>90% do orçamento</strong> (€255) e gerou 349 seguidores a €0,73 cada. Alto alcance, baixa conversão em seguidor por euro gasto.</p>
+    </div>
+    <div class="insight teal">
+      <div class="i-label">Retenção de Vídeo</div>
+      <p>O <strong>C1_AD05</strong> tem a maior taxa de visualização completa relativa: <strong>~21% dos ThruPlays chegam a 100%</strong>. Conteúdo com boa retenção para o formato Reel.</p>
+    </div>
+    <div class="insight danger">
+      <div class="i-label">Atenção</div>
+      <p>Três anúncios (<strong>AD01, AD02, AD03</strong>) não possuem dados de seguidores e investimento insignificante — precisam de orçamento real para conclusões válidas.</p>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  Sérgio Cripto · Conjunto C1 · Meta Ads · Dados extraídos do Gerenciador de Anúncios e Meta Business Suite
+</div>
+
+<script>
+const ADS = ['C1_AD04','C1_AD05','C1_AD06'];
+const COLORS_BAR  = ['#22c55e','#f7931a','#ef4444'];
+const COLORS_SOFT = ['rgba(34,197,94,0.2)','rgba(247,147,26,0.2)','rgba(239,68,68,0.2)'];
+
+const gridColor = '#1e2329';
+const tickColor = '#6b7280';
+
+const baseOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: { legend: { display: false } },
+  scales: {
+    x: { ticks: { color: tickColor, font: { family: 'Space Mono', size: 10 } }, grid: { color: gridColor } },
+    y: { ticks: { color: tickColor, font: { family: 'Space Mono', size: 10 } }, grid: { color: gridColor } }
+  }
+};
+
+// 1. Custo por Seguidor
+new Chart(document.getElementById('chartCPS'), {
+  type: 'bar',
+  data: {
+    labels: ADS,
+    datasets: [{
+      label: '€ / Seguidor',
+      data: [0.013, 0.067, 0.732],
+      backgroundColor: COLORS_SOFT,
+      borderColor: COLORS_BAR,
+      borderWidth: 2,
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    ...baseOptions,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: ctx => `€${ctx.raw.toFixed(3)} / seguidor`
+        }
+      }
+    },
+    scales: {
+      ...baseOptions.scales,
+      y: {
+        ...baseOptions.scales.y,
+        ticks: { ...baseOptions.scales.y.ticks, callback: v => `€${v.toFixed(3)}` }
+      }
+    }
+  }
+});
+
+// 2. Seguidores vs Investimento
+new Chart(document.getElementById('chartFollVsSpend'), {
+  type: 'bar',
+  data: {
+    labels: ADS,
+    datasets: [
+      {
+        label: 'Seguidores',
+        data: [308, 321, 349],
+        backgroundColor: 'rgba(0,212,168,0.25)',
+        borderColor: '#00d4a8',
+        borderWidth: 2,
+        borderRadius: 6,
+        yAxisID: 'y',
+      },
+      {
+        label: 'Investido (€)',
+        data: [3.87, 21.60, 255.36],
+        backgroundColor: 'rgba(247,147,26,0.25)',
+        borderColor: '#f7931a',
+        borderWidth: 2,
+        borderRadius: 6,
+        yAxisID: 'y2',
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: true,
+        labels: { color: tickColor, font: { family: 'Space Mono', size: 10 }, boxWidth: 12 }
+      }
+    },
+    scales: {
+      x: { ticks: { color: tickColor, font: { family: 'Space Mono', size: 10 } }, grid: { color: gridColor } },
+      y:  { position: 'left',  ticks: { color: '#00d4a8', font: { family: 'Space Mono', size: 10 } }, grid: { color: gridColor } },
+      y2: { position: 'right', ticks: { color: '#f7931a', font: { family: 'Space Mono', size: 10 }, callback: v => `€${v}` }, grid: { display: false } }
+    }
+  }
+});
+
+// 3. ThruPlays
+new Chart(document.getElementById('chartThruPlays'), {
+  type: 'bar',
+  data: {
+    labels: [...ADS, 'C1_AD03'],
+    datasets: [{
+      label: 'ThruPlays',
+      data: [165, 1287, 3584, 12],
+      backgroundColor: ['rgba(34,197,94,0.2)','rgba(247,147,26,0.2)','rgba(239,68,68,0.2)','rgba(107,114,128,0.15)'],
+      borderColor: ['#22c55e','#f7931a','#ef4444','#6b7280'],
+      borderWidth: 2,
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    ...baseOptions,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `${ctx.raw.toLocaleString()} ThruPlays` } } }
+  }
+});
+
+// 4. Retenção — Linha
+new Chart(document.getElementById('chartRetencao'), {
+  type: 'line',
+  data: {
+    labels: ['25%','50%','75%','100%'],
+    datasets: [
+      {
+        label: 'C1_AD04',
+        data: [285, 218, 165, 109],
+        borderColor: '#22c55e',
+        backgroundColor: 'rgba(34,197,94,0.08)',
+        tension: 0.4,
+        pointBackgroundColor: '#22c55e',
+        fill: true,
+      },
+      {
+        label: 'C1_AD05',
+        data: [1305, 1150, 953, 784],
+        borderColor: '#f7931a',
+        backgroundColor: 'rgba(247,147,26,0.08)',
+        tension: 0.4,
+        pointBackgroundColor: '#f7931a',
+        fill: true,
+      },
+      {
+        label: 'C1_AD06',
+        data: [6023, 8122, 2905, 2249],
+        borderColor: '#ef4444',
+        backgroundColor: 'rgba(239,68,68,0.08)',
+        tension: 0.4,
+        pointBackgroundColor: '#ef4444',
+        fill: true,
+      },
+      {
+        label: 'C1_AD03',
+        data: [16, 8, 7, 4],
+        borderColor: '#6b7280',
+        backgroundColor: 'rgba(107,114,128,0.05)',
+        tension: 0.4,
+        pointBackgroundColor: '#6b7280',
+        borderDash: [4,4],
+        fill: false,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: true,
+        labels: { color: tickColor, font: { family: 'Space Mono', size: 10 }, boxWidth: 12 }
+      }
+    },
+    scales: {
+      x: { ticks: { color: tickColor, font: { family: 'Space Mono', size: 10 } }, grid: { color: gridColor } },
+      y: { ticks: { color: tickColor, font: { family: 'Space Mono', size: 10 } }, grid: { color: gridColor } }
+    }
+  }
+});
+</script>
+</body>
+</html>
