@@ -17,7 +17,7 @@ NOME_CLIENTE     = "Sergio Cripto"
 LOGO_LETRA       = "SC"
 COR_ACENTO       = "#B8860B"
 
-LANCAMENTO_COD   = "TLC02"        # filtra campanhas; "" = ver tudo
+LANCAMENTO_COD   = "IP02"        # filtra campanhas; "" = ver tudo
 USAR_PESQUISA    = True            # False = oculta aba Pesquisa
 
 # ══ MOEDA ══════════════════════════════════════════════
