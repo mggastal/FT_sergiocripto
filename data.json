@@ -2,13 +2,13 @@
   "cliente": "Sergio Cripto",
   "cor": "#B8860B",
   "letra": "SC",
-  "lancamento": "TLC02",
+  "lancamento": "IP02",
   "moeda": "EUR",
   "moeda_simbolo": "€",
   "atualizado": "03/07/2026",
   "kpis": {
-    "spend": 17446.13,
-    "leads": 1458,
-    "cpl": 11.97
+    "spend": 399.11,
+    "leads": 20,
+    "cpl": 19.96
   }
 }
