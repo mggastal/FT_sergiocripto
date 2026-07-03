@@ -218,25 +218,20 @@ details.desk-only{display:block!important;}
 .lp-kpi{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:9px 11px;}
 .lp-kpi-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1.1px;font-weight:600;margin-bottom:3px;}
 .lp-kpi-val{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;line-height:1;}
-.lp-kpi-sub{font-size:9px;color:var(--muted2);margin-top:1px;}
-.lp-cmp-table{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);margin-bottom:14px;}
-.lp-cmp-table table{width:100%;border-collapse:collapse;}
+.lp-kpi-sub{font-size:9px;color:var(--muted2);margin-top:2px;}
+.lp-cmp-table{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);margin-bottom:14px;overflow-x:auto;}
+.lp-cmp-table table{width:100%;border-collapse:collapse;min-width:320px;}
 .lp-cmp-table thead th{font-size:9px;text-transform:uppercase;letter-spacing:.8px;font-weight:700;padding:9px 12px;text-align:right;border-bottom:1px solid var(--border);white-space:nowrap;}
 .lp-cmp-table thead th:first-child{text-align:left;color:var(--muted);}
 .lp-cmp-table tbody td{padding:8px 12px;font-size:12px;border-bottom:1px solid var(--border);text-align:right;font-family:'DM Mono',monospace;}
 .lp-cmp-table tbody td:first-child{text-align:left;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;color:var(--muted);}
 .lp-cmp-table tbody tr:last-child td{border-bottom:none;}
-.lp-cmp-table tfoot td{padding:7px 12px;font-size:10px;font-weight:700;text-align:right;font-family:'DM Mono',monospace;background:var(--surface2);border-top:2px solid var(--border);}
-.lp-cmp-table tfoot td:first-child{text-align:left;font-family:'Syne',sans-serif;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);}
-.lp-winner{font-size:9px;font-weight:800;padding:1px 6px;border-radius:10px;margin-left:4px;vertical-align:middle;}
-.lp-chart-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+.lp-winner{font-size:9px;font-weight:800;padding:1px 5px;border-radius:8px;background:#05966920;color:#059669;margin-left:3px;}
+.lp-chart-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
 .lp-camp-section{margin-bottom:14px;}
 .lp-camp-ttl{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;margin-bottom:7px;display:flex;align-items:center;gap:7px;}
-@media(max-width:768px){
-  .lp-hero{grid-template-columns:1fr;}
-  .lp-chart-row{grid-template-columns:1fr;}
-  .lp-kpis{grid-template-columns:1fr 1fr;}
-}
+@media(max-width:900px){.lp-chart-row{grid-template-columns:1fr 1fr;}}
+@media(max-width:600px){.lp-hero{grid-template-columns:1fr;}.lp-chart-row{grid-template-columns:1fr;}.lp-kpis{grid-template-columns:1fr 1fr;}}
 
 </style>
 </head>
@@ -252,7 +247,7 @@ details.desk-only{display:block!important;}
   <nav class="sb-nav">
     <button class="sb-item active" onclick="goPage('meta',this)"><span class="ico">🎯</span><span data-i18n="nav_meta">Meta Ads</span></button>
     <button class="sb-item" onclick="goPage('diario',this)"><span class="ico">📈</span><span data-i18n="nav_diario">Métricas Diárias</span></button>
-    <button class="sb-item" onclick="goPage('lp',this)"><span class="ico">⚖️</span><span>Comparar LPs</span></button>
+    <button class="sb-item" onclick="goPage('lp',this)"><span class="ico">⚖️</span><span data-i18n="nav_lp">Comparar LPs</span></button>
     <button class="sb-item" id="sbPesquisa" onclick="goPage('pesquisa',this)"><span class="ico">🔍</span><span data-i18n="nav_pesquisa">Pesquisa</span></button>
   </nav>
   <div class="sb-lct"><div class="sb-lct-lbl" data-i18n="launch">Lançamento</div><div class="sb-lct-val" id="sbLct">—</div></div>
@@ -338,207 +333,174 @@ details.desk-only{display:block!important;}
     <!-- COMPARAÇÃO LP -->
     <div class="page-section" id="page-lp">
 
-      <!-- Cards hero lado a lado -->
       <div class="lp-hero">
         <div class="lp-card">
           <div class="lp-badge" style="background:#7c3aed18;color:#7c3aed;border:1px solid #7c3aed33">
-            <span style="font-size:16px">①</span> LPV01
+            <span style="font-size:15px">①</span> LPV01 — <span data-i18n="lp_sem_tel">sem telefone</span>
           </div>
-          <div style="font-size:10px;color:var(--muted);margin-bottom:8px;font-weight:600">
-            IP02-JUL26-CAPTACION-TF-ESP-LPV01 · IP02-JUL26-CAPTACION-TT-ESP-LPV01
-          </div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:8px;">IP02-JUL26-CAPTACION-TF-ESP-LPV01 · IP02-JUL26-CAPTACION-TT-ESP-LPV01</div>
           <div class="lp-kpis">
-            <div class="lp-kpi">
-              <div class="lp-kpi-lbl">Investimento</div>
-              <div class="lp-kpi-val" style="color:#7c3aed">€184.24</div>
-            </div>
-            <div class="lp-kpi">
-              <div class="lp-kpi-lbl">Leads</div>
-              <div class="lp-kpi-val" style="color:#7c3aed">13</div>
-            </div>
+            <div class="lp-kpi"><div class="lp-kpi-lbl" data-i18n="kpi_invest">Investimento</div><div class="lp-kpi-val" style="color:#7c3aed">€184.24</div></div>
+            <div class="lp-kpi"><div class="lp-kpi-lbl" data-i18n="kpi_leads">Leads</div><div class="lp-kpi-val" style="color:#7c3aed">13</div></div>
             <div class="lp-kpi" style="grid-column:span 2">
-              <div class="lp-kpi-lbl">CPL ✓ Vencedor</div>
+              <div class="lp-kpi-lbl" data-i18n="kpi_cpl">CPL <span data-i18n="lp_vencedor" style="font-size:9px;color:#059669"> ✓ Vencedor</span></div>
               <div class="lp-kpi-val cr">€14.17</div>
-              <div class="lp-kpi-sub">CTR 0.81% · Connect Rate 66.36% · TxConv 18.31%</div>
+              <div class="lp-kpi-sub">CTR 0.81% · CR 66.36% · TxConv 18.31%</div>
             </div>
           </div>
         </div>
         <div class="lp-card">
           <div class="lp-badge" style="background:#0369a118;color:#0369a1;border:1px solid #0369a133">
-            <span style="font-size:16px">②</span> LPV02
+            <span style="font-size:15px">②</span> LPV02 — <span data-i18n="lp_com_tel">com telefone</span>
           </div>
-          <div style="font-size:10px;color:var(--muted);margin-bottom:8px;font-weight:600">
-            IP02-JUL26-CAPTACION-TT-ESP-LPV02 · IP02-JUL26-CAPTACION-TF-ESP-LPV02
-          </div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:8px;">IP02-JUL26-CAPTACION-TT-ESP-LPV02 · IP02-JUL26-CAPTACION-TF-ESP-LPV02</div>
           <div class="lp-kpis">
-            <div class="lp-kpi">
-              <div class="lp-kpi-lbl">Investimento</div>
-              <div class="lp-kpi-val" style="color:#0369a1">€214.87</div>
-            </div>
-            <div class="lp-kpi">
-              <div class="lp-kpi-lbl">Leads</div>
-              <div class="lp-kpi-val" style="color:#0369a1">7</div>
-            </div>
+            <div class="lp-kpi"><div class="lp-kpi-lbl" data-i18n="kpi_invest">Investimento</div><div class="lp-kpi-val" style="color:#0369a1">€214.87</div></div>
+            <div class="lp-kpi"><div class="lp-kpi-lbl" data-i18n="kpi_leads">Leads</div><div class="lp-kpi-val" style="color:#0369a1">7</div></div>
             <div class="lp-kpi" style="grid-column:span 2">
-              <div class="lp-kpi-lbl">CPL </div>
+              <div class="lp-kpi-lbl" data-i18n="kpi_cpl">CPL </div>
               <div class="lp-kpi-val cr">€30.70</div>
-              <div class="lp-kpi-sub">CTR 0.83% · Connect Rate 54.61% · TxConv 8.43%</div>
+              <div class="lp-kpi-sub">CTR 0.83% · CR 54.61% · TxConv 8.43%</div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Gráficos CPL e Leads lado a lado -->
+      <!-- Legenda + 4 gráficos -->
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:10px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#7c3aed"></span>
+          LPV01 — <span data-i18n="lp_sem_tel">sem telefone</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#0369a1"></span>
+          LPV02 — <span data-i18n="lp_com_tel">com telefone</span>
+        </div>
+      </div>
       <div class="lp-chart-row">
         <div class="cc">
-          <div class="cc-t">Leads — LPV01 vs LPV02</div>
-          <div class="cc-s">Comparação de leads captados por página</div>
-          <div class="cw" style="height:200px"><canvas id="chLpLeads"></canvas></div>
+          <div class="cc-t" data-i18n="lp_ch_leads">Leads</div>
+          <div class="cc-s" data-i18n="lp_ch_leads_sub">Leads captados por LP</div>
+          <div class="cw" style="height:180px"><canvas id="chLpLeads"></canvas></div>
         </div>
         <div class="cc">
-          <div class="cc-t">CPL — LPV01 vs LPV02</div>
-          <div class="cc-s">Custo por lead por página</div>
-          <div class="cw" style="height:200px"><canvas id="chLpCpl"></canvas></div>
+          <div class="cc-t" data-i18n="lp_ch_cpl">CPL</div>
+          <div class="cc-s" data-i18n="lp_ch_cpl_sub">Custo por lead por LP</div>
+          <div class="cw" style="height:180px"><canvas id="chLpCpl"></canvas></div>
+        </div>
+        <div class="cc">
+          <div class="cc-t" data-i18n="lp_ch_cr">Connect Rate</div>
+          <div class="cc-s" data-i18n="lp_ch_cr_sub">Visualização de página / Cliques</div>
+          <div class="cw" style="height:180px"><canvas id="chLpCr"></canvas></div>
+        </div>
+        <div class="cc">
+          <div class="cc-t" data-i18n="lp_ch_tx">Taxa de Conversão LP</div>
+          <div class="cc-s" data-i18n="lp_ch_tx_sub">Leads / Visualização de página</div>
+          <div class="cw" style="height:180px"><canvas id="chLpTx"></canvas></div>
         </div>
       </div>
 
-      <!-- Tabela comparativa detalhada -->
-      <div class="sec-hd">Comparação Detalhada</div>
-      <div class="lp-cmp-table mb14">
-        <table>
-          <thead>
-            <tr>
-              <th style="text-align:left;color:var(--muted)">Métrica</th>
-              <th style="color:#7c3aed">① LPV01</th>
-              <th style="color:#0369a1">② LPV02</th>
-            </tr>
-          </thead>
-          <tbody>
+      <div class="sec-hd" data-i18n="lp_cmp_ttl">Comparação Detalhada</div>
+      <div class="lp-cmp-table mb14" style="--c1:#7c3aed;--c2:#0369a1">
+        <table><thead><tr>
+          <th style="text-align:left;color:var(--muted)" data-i18n="lp_th_metrica">Métrica</th>
+          <th style="color:#7c3aed">① LPV01</th>
+          <th style="color:#0369a1">② LPV02</th>
+        </tr></thead><tbody>
         <tr>
-          <td>Investimento</td>
-          <td style="color:var(--lpv01-c,#7c3aed)">€184.24<span class="lp-winner" style="background:#05966920;color:#059669">✓</span></td>
-          <td style="color:var(--lpv02-c,#0369a1)">€214.87</td>
+          <td data-i18n="lp_metric_invest">Investimento</td>
+          <td style="color:var(--c1)">€184.24<span class="lp-winner">✓</span></td>
+          <td style="color:var(--c2)">€214.87</td>
         </tr>
         <tr>
-          <td>Impressões</td>
-          <td style="color:var(--lpv01-c,#7c3aed)">13.149</td>
-          <td style="color:var(--lpv02-c,#0369a1)">18.331<span class="lp-winner" style="background:#05966920;color:#059669">✓</span></td>
+          <td data-i18n="lp_metric_imp">Impressões</td>
+          <td style="color:var(--c1)">13.149</td>
+          <td style="color:var(--c2)">18.331<span class="lp-winner">✓</span></td>
         </tr>
         <tr>
-          <td>CPM</td>
-          <td style="color:var(--lpv01-c,#7c3aed)">€14.01</td>
-          <td style="color:var(--lpv02-c,#0369a1)">€11.72<span class="lp-winner" style="background:#05966920;color:#059669">✓</span></td>
+          <td data-i18n="lp_metric_cpm">CPM</td>
+          <td style="color:var(--c1)">€14.01</td>
+          <td style="color:var(--c2)">€11.72<span class="lp-winner">✓</span></td>
         </tr>
         <tr>
-          <td>Cliques no Link</td>
-          <td style="color:var(--lpv01-c,#7c3aed)">107</td>
-          <td style="color:var(--lpv02-c,#0369a1)">152<span class="lp-winner" style="background:#05966920;color:#059669">✓</span></td>
+          <td data-i18n="lp_metric_lc">Cliques no Link</td>
+          <td style="color:var(--c1)">107</td>
+          <td style="color:var(--c2)">152<span class="lp-winner">✓</span></td>
         </tr>
         <tr>
-          <td>CTR</td>
-          <td style="color:var(--lpv01-c,#7c3aed)">0.81%</td>
-          <td style="color:var(--lpv02-c,#0369a1)">0.83%<span class="lp-winner" style="background:#05966920;color:#059669">✓</span></td>
+          <td data-i18n="lp_metric_ctr">CTR</td>
+          <td style="color:var(--c1)">0.81%</td>
+          <td style="color:var(--c2)">0.83%<span class="lp-winner">✓</span></td>
         </tr>
         <tr>
-          <td>Page Views</td>
-          <td style="color:var(--lpv01-c,#7c3aed)">71</td>
-          <td style="color:var(--lpv02-c,#0369a1)">83<span class="lp-winner" style="background:#05966920;color:#059669">✓</span></td>
+          <td data-i18n="lp_metric_pv">Page Views</td>
+          <td style="color:var(--c1)">71</td>
+          <td style="color:var(--c2)">83<span class="lp-winner">✓</span></td>
         </tr>
         <tr>
-          <td>Connect Rate</td>
-          <td style="color:var(--lpv01-c,#7c3aed)">66.36%<span class="lp-winner" style="background:#05966920;color:#059669">✓</span></td>
-          <td style="color:var(--lpv02-c,#0369a1)">54.61%</td>
+          <td data-i18n="lp_metric_cr">Connect Rate</td>
+          <td style="color:var(--c1)">66.36%<span class="lp-winner">✓</span></td>
+          <td style="color:var(--c2)">54.61%</td>
         </tr>
         <tr>
-          <td>Leads</td>
-          <td style="color:var(--lpv01-c,#7c3aed)">13<span class="lp-winner" style="background:#05966920;color:#059669">✓</span></td>
-          <td style="color:var(--lpv02-c,#0369a1)">7</td>
+          <td data-i18n="lp_metric_leads">Leads</td>
+          <td style="color:var(--c1)">13<span class="lp-winner">✓</span></td>
+          <td style="color:var(--c2)">7</td>
         </tr>
         <tr>
-          <td>Custo por Lead (CPL)</td>
-          <td class="cr" style="color:var(--lpv01-c,#7c3aed)">€14.17<span class="lp-winner" style="background:#05966920;color:#059669">✓</span></td>
-          <td class="cr" style="color:var(--lpv02-c,#0369a1)">€30.70</td>
+          <td data-i18n="lp_metric_cpl">Custo por Lead (CPL)</td>
+          <td class="cr" style="color:var(--c1)">€14.17<span class="lp-winner">✓</span></td>
+          <td class="cr" style="color:var(--c2)">€30.70</td>
         </tr>
         <tr>
-          <td>Taxa Conv. LP (%)</td>
-          <td style="color:var(--lpv01-c,#7c3aed)">18.31%<span class="lp-winner" style="background:#05966920;color:#059669">✓</span></td>
-          <td style="color:var(--lpv02-c,#0369a1)">8.43%</td>
+          <td data-i18n="lp_metric_tx">Taxa Conv. LP</td>
+          <td style="color:var(--c1)">18.31%<span class="lp-winner">✓</span></td>
+          <td style="color:var(--c2)">8.43%</td>
         </tr>
-          </tbody>
-        </table>
+        </tbody></table>
       </div>
 
-      <!-- Campanhas LPV01 -->
       <div class="lp-camp-section">
         <div class="lp-camp-ttl">
           <span class="lp-badge" style="background:#7c3aed18;color:#7c3aed;border:1px solid #7c3aed33;margin-bottom:0">LPV01</span>
-          Campanhas
+          <span data-i18n="campanhas">Campanhas</span>
         </div>
         <div class="lp-cmp-table">
-          <table><thead><tr>
-          <th style="text-align:left">Campanha</th>
-          <th>Invest.</th><th>Impr.</th><th>CTR</th><th>PV</th>
-          <th>C.Rate</th><th>Leads</th><th>CPL</th><th>Tx.Conv</th>
-        </tr></thead><tbody>
+          <table><thead><tr><th style="text-align:left" data-i18n="col_camp">Campanha</th><th data-i18n="col_invest">Invest.</th><th data-i18n="col_impr">Impr.</th><th>CTR</th><th>PV</th><th data-i18n="lp_metric_cr">C.Rate</th><th data-i18n="col_leads">Leads</th><th data-i18n="col_cpl">CPL</th><th data-i18n="lp_metric_tx">Tx.Conv</th></tr></thead><tbody>
         <tr>
-          <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px" title="IP02-JUL26-CAPTACION-TF-ESP-LPV01">IP02-JUL26-CAPTACION-TF-ESP-LPV01</td>
-          <td>€121.27</td>
-          <td>9.274</td>
-          <td>0.88%</td>
-          <td>49</td>
-          <td>59.76%</td>
-          <td>10</td>
-          <td class="cr">€12.13</td>
-          <td>20.41%</td>
+          <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px" title="IP02-JUL26-CAPTACION-TF-ESP-LPV01">IP02-JUL26-CAPTACION-TF-ESP-LPV01</td>
+          <td>€121.27</td><td>9.274</td><td>0.88%</td>
+          <td>49</td><td>59.76%</td><td>10</td>
+          <td class="cr">€12.13</td><td>20.41%</td>
         </tr>
         <tr>
-          <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px" title="IP02-JUL26-CAPTACION-TT-ESP-LPV01">IP02-JUL26-CAPTACION-TT-ESP-LPV01</td>
-          <td>€62.97</td>
-          <td>3.875</td>
-          <td>0.65%</td>
-          <td>22</td>
-          <td>88.00%</td>
-          <td>3</td>
-          <td class="cr">€20.99</td>
-          <td>13.64%</td>
+          <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px" title="IP02-JUL26-CAPTACION-TT-ESP-LPV01">IP02-JUL26-CAPTACION-TT-ESP-LPV01</td>
+          <td>€62.97</td><td>3.875</td><td>0.65%</td>
+          <td>22</td><td>88.00%</td><td>3</td>
+          <td class="cr">€20.99</td><td>13.64%</td>
         </tr>
           </tbody></table>
         </div>
       </div>
 
-      <!-- Campanhas LPV02 -->
       <div class="lp-camp-section">
         <div class="lp-camp-ttl">
           <span class="lp-badge" style="background:#0369a118;color:#0369a1;border:1px solid #0369a133;margin-bottom:0">LPV02</span>
-          Campanhas
+          <span data-i18n="campanhas">Campanhas</span>
         </div>
         <div class="lp-cmp-table">
-          <table><thead><tr>
-          <th style="text-align:left">Campanha</th>
-          <th>Invest.</th><th>Impr.</th><th>CTR</th><th>PV</th>
-          <th>C.Rate</th><th>Leads</th><th>CPL</th><th>Tx.Conv</th>
-        </tr></thead><tbody>
+          <table><thead><tr><th style="text-align:left" data-i18n="col_camp">Campanha</th><th data-i18n="col_invest">Invest.</th><th data-i18n="col_impr">Impr.</th><th>CTR</th><th>PV</th><th data-i18n="lp_metric_cr">C.Rate</th><th data-i18n="col_leads">Leads</th><th data-i18n="col_cpl">CPL</th><th data-i18n="lp_metric_tx">Tx.Conv</th></tr></thead><tbody>
         <tr>
-          <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px" title="IP02-JUL26-CAPTACION-TT-ESP-LPV02">IP02-JUL26-CAPTACION-TT-ESP-LPV02</td>
-          <td>€81.72</td>
-          <td>4.863</td>
-          <td>1.27%</td>
-          <td>28</td>
-          <td>45.16%</td>
-          <td>4</td>
-          <td class="cr">€20.43</td>
-          <td>14.29%</td>
+          <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px" title="IP02-JUL26-CAPTACION-TT-ESP-LPV02">IP02-JUL26-CAPTACION-TT-ESP-LPV02</td>
+          <td>€81.72</td><td>4.863</td><td>1.27%</td>
+          <td>28</td><td>45.16%</td><td>4</td>
+          <td class="cr">€20.43</td><td>14.29%</td>
         </tr>
         <tr>
-          <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px" title="IP02-JUL26-CAPTACION-TF-ESP-LPV02">IP02-JUL26-CAPTACION-TF-ESP-LPV02</td>
-          <td>€133.15</td>
-          <td>13.468</td>
-          <td>0.67%</td>
-          <td>55</td>
-          <td>61.11%</td>
-          <td>3</td>
-          <td class="cr">€44.38</td>
-          <td>5.45%</td>
+          <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px" title="IP02-JUL26-CAPTACION-TF-ESP-LPV02">IP02-JUL26-CAPTACION-TF-ESP-LPV02</td>
+          <td>€133.15</td><td>13.468</td><td>0.67%</td>
+          <td>55</td><td>61.11%</td><td>3</td>
+          <td class="cr">€44.38</td><td>5.45%</td>
         </tr>
           </tbody></table>
         </div>
@@ -695,6 +657,31 @@ const TRANSLATIONS = {
     seg_col_invest:   'Invest.',
     seg_col_leads:    'Leads',
     seg_col_cpl:      'CPL',
+    nav_lp:           'Comparar LPs',
+    // Comparação LP
+    lp_sem_tel:       'sem telefone',
+    lp_com_tel:       'com telefone',
+    lp_cmp_ttl:       'Comparação Detalhada',
+    lp_th_metrica:    'Métrica',
+    lp_ch_leads:      'Leads',
+    lp_ch_leads_sub:  'Leads captados por LP',
+    lp_ch_cpl:        'CPL',
+    lp_ch_cpl_sub:    'Custo por lead por LP',
+    lp_ch_cr:         'Connect Rate',
+    lp_ch_cr_sub:     'Visualização de página / Cliques',
+    lp_ch_tx:         'Taxa Conv. LP',
+    lp_ch_tx_sub:     'Leads / Visualização de página',
+    lp_vencedor:      '✓ Vencedor',
+    lp_metric_invest: 'Investimento',
+    lp_metric_imp:    'Impressões',
+    lp_metric_cpm:    'CPM',
+    lp_metric_lc:     'Cliques no Link',
+    lp_metric_ctr:    'CTR',
+    lp_metric_pv:     'Page Views',
+    lp_metric_cr:     'Connect Rate',
+    lp_metric_leads:  'Leads',
+    lp_metric_cpl:    'Custo por Lead (CPL)',
+    lp_metric_tx:     'Taxa Conv. LP (%)',
   },
   ES: {
     launch:           'Lanzamiento',
@@ -766,6 +753,31 @@ const TRANSLATIONS = {
     seg_col_invest:   'Inversión',
     seg_col_leads:    'Leads',
     seg_col_cpl:      'CPL',
+    nav_lp:           'Comparar LPs',
+    // Comparación LP
+    lp_sem_tel:       'sin teléfono',
+    lp_com_tel:       'con teléfono',
+    lp_cmp_ttl:       'Comparación Detallada',
+    lp_th_metrica:    'Métrica',
+    lp_ch_leads:      'Leads',
+    lp_ch_leads_sub:  'Leads captados por LP',
+    lp_ch_cpl:        'CPL',
+    lp_ch_cpl_sub:    'Costo por lead por LP',
+    lp_ch_cr:         'Connect Rate',
+    lp_ch_cr_sub:     'Vista de página / Clics',
+    lp_ch_tx:         'Tasa Conv. LP',
+    lp_ch_tx_sub:     'Leads / Vista de página',
+    lp_vencedor:      '✓ Ganador',
+    lp_metric_invest: 'Inversión',
+    lp_metric_imp:    'Impresiones',
+    lp_metric_cpm:    'CPM',
+    lp_metric_lc:     'Clics en el enlace',
+    lp_metric_ctr:    'CTR',
+    lp_metric_pv:     'Vistas de página',
+    lp_metric_cr:     'Connect Rate',
+    lp_metric_leads:  'Leads',
+    lp_metric_cpl:    'Costo por Lead (CPL)',
+    lp_metric_tx:     'Tasa Conv. LP (%)',
   }
 };
 
@@ -779,7 +791,7 @@ function applyI18n(){
     el.textContent=t(key);
   });
   // Atualiza título da página e topbar
-  const titles={meta:t('nav_meta'),diario:t('nav_diario'),pesquisa:t('nav_pesquisa'),lp:'Comparar LPs'};
+  const titles={meta:t('nav_meta'),diario:t('nav_diario'),pesquisa:t('nav_pesquisa'),lp:t('nav_lp')};
   const activeP=document.querySelector('.page-section.active')?.id?.replace('page-','');
   if(activeP && titles[activeP]) document.getElementById('pageTitle').textContent=titles[activeP];
   // Atualiza themeLabel baseado no tema atual
@@ -1777,45 +1789,56 @@ function rerenderActive(){
 // ═══ NAVEGAÇÃO ═══
 
 // ═══ COMPARAÇÃO LP ═══
-const LPV_DATA = {"LPV01": {"totals": {"spend": 184.24, "imp": 13149, "lc": 107, "pv": 71, "leads": 13, "cpm": 14.01, "ctr": 0.81, "cr": 66.36, "cpl": 14.17, "tx_conv": 18.31}, "camps": [{"n": "IP02-JUL26-CAPTACION-TF-ESP-LPV01", "spend": 121.27, "imp": 9274, "lc": 82, "pv": 49, "leads": 10, "cpm": 13.08, "ctr": 0.88, "cr": 59.76, "cpl": 12.13, "tx_conv": 20.41}, {"n": "IP02-JUL26-CAPTACION-TT-ESP-LPV01", "spend": 62.97, "imp": 3875, "lc": 25, "pv": 22, "leads": 3, "cpm": 16.25, "ctr": 0.65, "cr": 88.0, "cpl": 20.99, "tx_conv": 13.64}], "daily": {"days": ["03/07"], "spend": [184.24], "imp": [13149], "lc": [107], "pv": [71], "leads": [13], "cpl": [14.17]}}, "LPV02": {"totals": {"spend": 214.87, "imp": 18331, "lc": 152, "pv": 83, "leads": 7, "cpm": 11.72, "ctr": 0.83, "cr": 54.61, "cpl": 30.7, "tx_conv": 8.43}, "camps": [{"n": "IP02-JUL26-CAPTACION-TT-ESP-LPV02", "spend": 81.72, "imp": 4863, "lc": 62, "pv": 28, "leads": 4, "cpm": 16.8, "ctr": 1.27, "cr": 45.16, "cpl": 20.43, "tx_conv": 14.29}, {"n": "IP02-JUL26-CAPTACION-TF-ESP-LPV02", "spend": 133.15, "imp": 13468, "lc": 90, "pv": 55, "leads": 3, "cpm": 9.89, "ctr": 0.67, "cr": 61.11, "cpl": 44.38, "tx_conv": 5.45}], "daily": {"days": ["03/07"], "spend": [214.87], "imp": [18331], "lc": [152], "pv": [83], "leads": [7], "cpl": [30.7]}}, "days": ["03/07"]};
+const LPV_DATA = {"LPV01": {"totals": {"spend": 184.24, "imp": 13149, "lc": 107, "pv": 71, "leads": 13, "cpm": 14.01, "ctr": 0.81, "cr": 66.36, "cpl": 14.17, "tx_conv": 18.31}, "camps": [{"n": "IP02-JUL26-CAPTACION-TF-ESP-LPV01", "spend": 121.27, "imp": 9274, "lc": 82, "pv": 49, "leads": 10, "cpm": 13.08, "ctr": 0.88, "cr": 59.76, "cpl": 12.13, "tx_conv": 20.41}, {"n": "IP02-JUL26-CAPTACION-TT-ESP-LPV01", "spend": 62.97, "imp": 3875, "lc": 25, "pv": 22, "leads": 3, "cpm": 16.25, "ctr": 0.65, "cr": 88.0, "cpl": 20.99, "tx_conv": 13.64}], "daily": {"days": ["03/07"], "spend": [184.24], "imp": [13149], "lc": [107], "pv": [71], "leads": [13], "cpl": [14.17], "cr": [66.36], "tx_conv": [18.31]}}, "LPV02": {"totals": {"spend": 214.87, "imp": 18331, "lc": 152, "pv": 83, "leads": 7, "cpm": 11.72, "ctr": 0.83, "cr": 54.61, "cpl": 30.7, "tx_conv": 8.43}, "camps": [{"n": "IP02-JUL26-CAPTACION-TT-ESP-LPV02", "spend": 81.72, "imp": 4863, "lc": 62, "pv": 28, "leads": 4, "cpm": 16.8, "ctr": 1.27, "cr": 45.16, "cpl": 20.43, "tx_conv": 14.29}, {"n": "IP02-JUL26-CAPTACION-TF-ESP-LPV02", "spend": 133.15, "imp": 13468, "lc": 90, "pv": 55, "leads": 3, "cpm": 9.89, "ctr": 0.67, "cr": 61.11, "cpl": 44.38, "tx_conv": 5.45}], "daily": {"days": ["03/07"], "spend": [214.87], "imp": [18331], "lc": [152], "pv": [83], "leads": [7], "cpl": [30.7], "cr": [54.61], "tx_conv": [8.43]}}, "days": ["03/07"]};
 
 function renderLp(){
   if(!LPV_DATA) return;
-  const d1 = LPV_DATA.LPV01; const d2 = LPV_DATA.LPV02;
-  const days = LPV_DATA.days;
-  const C1 = '#7c3aed', C2 = '#0369a1';
+  const d1=LPV_DATA.LPV01,d2=LPV_DATA.LPV02,days=LPV_DATA.days;
+  const C1='#7c3aed',C2='#0369a1';
+  const lbl1='LPV01 — '+t('lp_sem_tel');
+  const lbl2='LPV02 — '+t('lp_com_tel');
 
-  // Gráfico Leads
+  function dlCfg(fmtFn){
+    return{display:_=>showLabels,color:ctx=>ctx.datasetIndex===0?C1:C2,
+      font:{size:9,weight:'bold'},formatter:v=>v!=null?fmtFn(v):null,
+      anchor:'end',align:'top',offset:2,clip:false};
+  }
+  function bOpts(yCb,dlFmt){
+    return{...bo(),
+      plugins:{...bo().plugins,
+        legend:{labels:{color:TXT(),font:bf,boxWidth:9,padding:8}},
+        datalabels:dlCfg(dlFmt||String)},
+      scales:{x:{ticks:{color:TXT(),font:bf},grid:{color:GRID()}},
+              y:{ticks:{color:TXT(),font:bf,callback:yCb||undefined},grid:{color:GRID()},min:0,grace:'15%'}}};
+  }
+
   dc('chLpLeads');
-  CH['chLpLeads'] = new Chart(document.getElementById('chLpLeads'),{
-    type:'bar',
-    data:{
-      labels: days,
-      datasets:[
-        {label:'LPV01',data:d1.daily.leads,backgroundColor:C1+'bb',borderRadius:4},
-        {label:'LPV02',data:d2.daily.leads,backgroundColor:C2+'bb',borderRadius:4},
-      ]
-    },
-    options:{...bo(),plugins:{...bo().plugins,datalabels:{display:false}},
-      scales:{x:{ticks:{color:TXT(),font:bf},grid:{color:GRID()}},
-               y:{ticks:{color:TXT(),font:bf},grid:{color:GRID()},min:0}}}
-  });
+  CH['chLpLeads']=new Chart(document.getElementById('chLpLeads'),{type:'bar',
+    data:{labels:days,datasets:[
+      {label:lbl1,data:d1.daily.leads,backgroundColor:C1+'bb',borderRadius:4},
+      {label:lbl2,data:d2.daily.leads,backgroundColor:C2+'bb',borderRadius:4}]},
+    options:bOpts(null,v=>String(Math.round(v)))});
 
-  // Gráfico CPL
   dc('chLpCpl');
-  CH['chLpCpl'] = new Chart(document.getElementById('chLpCpl'),{
-    type:'bar',
-    data:{
-      labels: days,
-      datasets:[
-        {label:'LPV01',data:d1.daily.cpl,backgroundColor:C1+'bb',borderRadius:4},
-        {label:'LPV02',data:d2.daily.cpl,backgroundColor:C2+'bb',borderRadius:4},
-      ]
-    },
-    options:{...bo(),plugins:{...bo().plugins,datalabels:{display:false}},
-      scales:{x:{ticks:{color:TXT(),font:bf},grid:{color:GRID()}},
-               y:{ticks:{color:TXT(),font:bf,callback:v=>fR(v)},grid:{color:GRID()},min:0}}}
-  });
+  CH['chLpCpl']=new Chart(document.getElementById('chLpCpl'),{type:'bar',
+    data:{labels:days,datasets:[
+      {label:lbl1,data:d1.daily.cpl,backgroundColor:C1+'bb',borderRadius:4},
+      {label:lbl2,data:d2.daily.cpl,backgroundColor:C2+'bb',borderRadius:4}]},
+    options:bOpts(v=>fR(v),v=>fR(v))});
+
+  dc('chLpCr');
+  CH['chLpCr']=new Chart(document.getElementById('chLpCr'),{type:'bar',
+    data:{labels:days,datasets:[
+      {label:lbl1,data:d1.daily.cr,backgroundColor:C1+'bb',borderRadius:4},
+      {label:lbl2,data:d2.daily.cr,backgroundColor:C2+'bb',borderRadius:4}]},
+    options:bOpts(v=>v+'%',v=>v!=null?v.toFixed(1)+'%':null)});
+
+  dc('chLpTx');
+  CH['chLpTx']=new Chart(document.getElementById('chLpTx'),{type:'bar',
+    data:{labels:days,datasets:[
+      {label:lbl1,data:d1.daily.tx_conv,backgroundColor:C1+'bb',borderRadius:4},
+      {label:lbl2,data:d2.daily.tx_conv,backgroundColor:C2+'bb',borderRadius:4}]},
+    options:bOpts(v=>v+'%',v=>v!=null?v.toFixed(1)+'%':null)});
 }
 
 function goPage(p,btn){
@@ -1823,7 +1846,7 @@ function goPage(p,btn){
   document.querySelectorAll('.sb-item').forEach(e=>e.classList.remove('active'));
   document.getElementById('page-'+p).classList.add('active');
   if(btn) btn.classList.add('active');
-  const titles={meta:t('nav_meta'),diario:t('nav_diario'),pesquisa:t('nav_pesquisa'),lp:'Comparar LPs'};
+  const titles={meta:t('nav_meta'),diario:t('nav_diario'),pesquisa:t('nav_pesquisa'),lp:t('nav_lp')};
   document.getElementById('pageTitle').textContent=titles[p]||p;
   if(p==='meta')     renderMeta();
   if(p==='diario')   renderDiario();
