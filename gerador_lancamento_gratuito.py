@@ -362,95 +362,69 @@ def replace_js_const(html, name, value):
 
 # ══ COMPARAÇÃO LP (LPV01 vs LPV02) ════════════════════════
 def build_lpv_data(df):
-    """Agrega métricas por LPV01 / LPV02 — para aba Comparar LPs."""
     from collections import defaultdict
-
     sub = df[df["campaign"].str.contains(LANCAMENTO_COD, na=False)] if LANCAMENTO_COD else df
 
     lpv_daily = {"LPV01": defaultdict(lambda: defaultdict(float)),
                  "LPV02": defaultdict(lambda: defaultdict(float))}
     lpv_camps = defaultdict(lambda: defaultdict(float))
     camp_lpv  = {}
-
     all_days_set = set()
 
     for _, row in sub.iterrows():
         camp = str(row.get("campaign", ""))
+        lv   = "LPV01" if "LPV01" in camp else ("LPV02" if "LPV02" in camp else None)
+        if lv is None: continue
         d    = row["date"].strftime("%d/%m")
         sp   = float(row.get("spend",       0) or 0)
         imp  = float(row.get("impressions", 0) or 0)
         lc   = float(row.get("link_clicks", 0) or 0)
         pv   = float(row.get("page_view",   0) or 0)
         ld   = float(row.get("leads",       0) or 0)
-
-        lpv = "LPV01" if "LPV01" in camp else ("LPV02" if "LPV02" in camp else None)
-        if lpv is None:
-            continue
-
-        all_days_set.add(d)
-        camp_lpv[camp] = lpv
-
-        for k, v in [("spend", sp), ("imp", imp), ("lc", lc), ("pv", pv), ("leads", ld)]:
-            lpv_daily[lpv][d][k] += v
-            lpv_camps[camp][k]   += v
+        all_days_set.add(d); camp_lpv[camp] = lv
+        for k,v in [("sp",sp),("imp",imp),("lc",lc),("pv",pv),("ld",ld)]:
+            lpv_daily[lv][d][k] += v
+            lpv_camps[camp][k]  += v
 
     def day_key(s):
-        dd, mm = s.split("/"); return int(mm) * 100 + int(dd)
+        dd,mm=s.split("/"); return int(mm)*100+int(dd)
+    days = sorted(all_days_set, key=day_key)
 
-    all_days = sorted(all_days_set, key=day_key)
+    def metrics(agg):
+        sp=round(float(agg.get("sp",0)),2); imp=int(agg.get("imp",0))
+        lc=int(agg.get("lc",0)); pv=int(agg.get("pv",0)); ld=int(agg.get("ld",0))
+        return {"spend":sp,"imp":imp,"lc":lc,"pv":pv,"leads":ld,
+                "cpm":  round(sp/imp*1000,2) if imp>0 else None,
+                "ctr":  round(lc/imp*100,2)  if imp>0 else None,
+                "cr":   round(pv/lc*100,2)   if lc>0  else None,
+                "cpl":  round(sp/ld,2)        if ld>0  else None,
+                "tx_conv":round(ld/pv*100,2)  if pv>0  else None}
 
-    def metrics(v):
-        sp = round(float(v.get("spend", 0)), 2)
-        imp = int(v.get("imp", 0)); lc = int(v.get("lc", 0))
-        pv  = int(v.get("pv",  0)); ld = int(v.get("leads", 0))
-        return {
-            "spend": sp, "imp": imp, "lc": lc, "pv": pv, "leads": ld,
-            "cpm":     round(sp / imp * 1000, 2) if imp > 0 else None,
-            "ctr":     round(lc / imp * 100,  2) if imp > 0 else None,
-            "cr":      round(pv / lc  * 100,  2) if lc  > 0 else None,
-            "cpl":     round(sp / ld,          2) if ld  > 0 else None,
-            "tx_conv": round(ld / pv  * 100,  2) if pv  > 0 else None,
-        }
-
-    def build_daily(daily_dict):
-        out = {"days": all_days, "spend": [], "imp": [], "lc": [], "pv": [],
-               "leads": [], "cpl": [], "cr": [], "tx_conv": []}
-        for d in all_days:
-            v   = daily_dict[d]
-            sp  = round(float(v.get("spend", 0)), 2)
-            imp = int(v.get("imp",   0)); lc = int(v.get("lc",    0))
-            pv  = int(v.get("pv",    0)); ld = int(v.get("leads", 0))
-            out["spend"].append(sp);  out["imp"].append(imp)
-            out["lc"].append(lc);     out["pv"].append(pv); out["leads"].append(ld)
-            out["cpl"].append(round(sp / ld, 2) if ld > 0 else None)
-            out["cr"].append(round(pv / lc * 100, 2) if lc > 0 else None)
-            out["tx_conv"].append(round(ld / pv * 100, 2) if pv > 0 else None)
+    def build_daily(lv):
+        out={"days":days,"spend":[],"imp":[],"lc":[],"pv":[],"leads":[],"cpl":[],"cr":[],"tx_conv":[]}
+        for d in days:
+            v=lpv_daily[lv][d]
+            sp=round(float(v.get("sp",0)),2); imp=int(v.get("imp",0))
+            lc=int(v.get("lc",0)); pv=int(v.get("pv",0)); ld=int(v.get("ld",0))
+            out["spend"].append(sp); out["imp"].append(imp); out["lc"].append(lc)
+            out["pv"].append(pv);   out["leads"].append(ld)
+            out["cpl"].append(round(sp/ld,2) if ld>0 else None)
+            out["cr"].append(round(pv/lc*100,2) if lc>0 else None)
+            out["tx_conv"].append(round(ld/pv*100,2) if pv>0 else None)
         return out
 
-    def totals(lpv_key):
-        return {k: sum(lpv_daily[lpv_key][d][k] for d in all_days)
-                for k in ["spend", "imp", "lc", "pv", "leads"]}
-
-    def camp_list(lpv_key):
-        result = []
-        for c, v in sorted(lpv_camps.items(), key=lambda x: -x[1].get("leads", 0)):
-            if camp_lpv.get(c) != lpv_key:
-                continue
-            m = metrics(v); m["n"] = c; result.append(m)
-        return result
+    def totals(lv):
+        t=defaultdict(float)
+        for d in days:
+            for k,v in lpv_daily[lv][d].items(): t[k]+=v
+        return t
 
     return {
-        "LPV01": {
-            "totals": metrics(totals("LPV01")),
-            "daily":  build_daily(lpv_daily["LPV01"]),
-            "camps":  camp_list("LPV01"),
-        },
-        "LPV02": {
-            "totals": metrics(totals("LPV02")),
-            "daily":  build_daily(lpv_daily["LPV02"]),
-            "camps":  camp_list("LPV02"),
-        },
-        "days": all_days,
+        "LPV01":{"totals":metrics(totals("LPV01")),"daily":build_daily("LPV01"),
+                 "camps":[{"n":c,**metrics(v)} for c,v in sorted(lpv_camps.items(),key=lambda x:-x[1].get("ld",0)) if camp_lpv.get(c)=="LPV01"]},
+        "LPV02":{"totals":metrics(totals("LPV02")),"daily":build_daily("LPV02"),
+                 "camps":[{"n":c,**metrics(v)} for c,v in sorted(lpv_camps.items(),key=lambda x:-x[1].get("ld",0)) if camp_lpv.get(c)=="LPV02"]},
+        "days": days,
     }
 
 def inject_all(tpl, meta_k, meta_d, meta_dc, meta_raw_c, meta_t, meta_bd, pes, lpv_data=None):
@@ -525,9 +499,9 @@ def main():
     print("\n[COMPARAÇÃO LP]")
     try:
         lpv_data = build_lpv_data(df_meta)
-        l1 = lpv_data["LPV01"]["totals"]; l2 = lpv_data["LPV02"]["totals"]
-        print(f"  LPV01: {l1['leads']} leads | CPL {MOEDA_SIMBOLO}{l1['cpl']} | {MOEDA_SIMBOLO}{l1['spend']:.2f}")
-        print(f"  LPV02: {l2['leads']} leads | CPL {MOEDA_SIMBOLO}{l2['cpl']} | {MOEDA_SIMBOLO}{l2['spend']:.2f}")
+        l1=lpv_data["LPV01"]["totals"]; l2=lpv_data["LPV02"]["totals"]
+        print(f"  LPV01: {l1['leads']} leads | CPL {MOEDA_SIMBOLO}{l1['cpl']} | invest {MOEDA_SIMBOLO}{l1['spend']:.2f}")
+        print(f"  LPV02: {l2['leads']} leads | CPL {MOEDA_SIMBOLO}{l2['cpl']} | invest {MOEDA_SIMBOLO}{l2['spend']:.2f}")
     except Exception as e:
         print(f"  ⚠ {e}"); lpv_data = None
 
