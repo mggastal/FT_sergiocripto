@@ -209,7 +209,6 @@ details.desk-only{display:block!important;}
   .seg-card{overflow-x:auto!important;}
   .daily-side{flex-direction:row;gap:12px;border-right:none;border-bottom:1px solid var(--border);}
 }
-
 /* ═══ COMPARAÇÃO LP ═══ */
 .lp-hero{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
 .lp-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;box-shadow:var(--sh);}
@@ -328,7 +327,6 @@ details.desk-only{display:block!important;}
         <div class="ads-grid" id="adsGrid"></div>
       </div>
     </div>
-
 
     <!-- COMPARAÇÃO LP -->
     <div class="page-section" id="page-lp">
@@ -508,7 +506,6 @@ details.desk-only{display:block!important;}
 
     </div>
     <!-- /COMPARAÇÃO LP -->
-
     <!-- MÉTRICAS DIÁRIAS -->
     <div class="page-section" id="page-diario">
       <details style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:0;margin-bottom:14px;box-shadow:var(--sh);" id="campFilterDetails">
@@ -556,6 +553,7 @@ const META_TABLES       = null;
 const DATA_GERACAO      = null;
 const META_BD           = null;
 const PESQUISA          = null;
+const LPV_DATA          = null;
 
 // ═══ CONFIG (injetados pelo gerador) ═══
 const LANCAMENTO_COD = 'RDC01';
@@ -657,31 +655,6 @@ const TRANSLATIONS = {
     seg_col_invest:   'Invest.',
     seg_col_leads:    'Leads',
     seg_col_cpl:      'CPL',
-    nav_lp:           'Comparar LPs',
-    // Comparação LP
-    lp_sem_tel:       'sem telefone',
-    lp_com_tel:       'com telefone',
-    lp_cmp_ttl:       'Comparação Detalhada',
-    lp_th_metrica:    'Métrica',
-    lp_ch_leads:      'Leads',
-    lp_ch_leads_sub:  'Leads captados por LP',
-    lp_ch_cpl:        'CPL',
-    lp_ch_cpl_sub:    'Custo por lead por LP',
-    lp_ch_cr:         'Connect Rate',
-    lp_ch_cr_sub:     'Visualização de página / Cliques',
-    lp_ch_tx:         'Taxa Conv. LP',
-    lp_ch_tx_sub:     'Leads / Visualização de página',
-    lp_vencedor:      '✓ Vencedor',
-    lp_metric_invest: 'Investimento',
-    lp_metric_imp:    'Impressões',
-    lp_metric_cpm:    'CPM',
-    lp_metric_lc:     'Cliques no Link',
-    lp_metric_ctr:    'CTR',
-    lp_metric_pv:     'Page Views',
-    lp_metric_cr:     'Connect Rate',
-    lp_metric_leads:  'Leads',
-    lp_metric_cpl:    'Custo por Lead (CPL)',
-    lp_metric_tx:     'Taxa Conv. LP (%)',
   },
   ES: {
     launch:           'Lanzamiento',
@@ -753,31 +726,6 @@ const TRANSLATIONS = {
     seg_col_invest:   'Inversión',
     seg_col_leads:    'Leads',
     seg_col_cpl:      'CPL',
-    nav_lp:           'Comparar LPs',
-    // Comparación LP
-    lp_sem_tel:       'sin teléfono',
-    lp_com_tel:       'con teléfono',
-    lp_cmp_ttl:       'Comparación Detallada',
-    lp_th_metrica:    'Métrica',
-    lp_ch_leads:      'Leads',
-    lp_ch_leads_sub:  'Leads captados por LP',
-    lp_ch_cpl:        'CPL',
-    lp_ch_cpl_sub:    'Costo por lead por LP',
-    lp_ch_cr:         'Connect Rate',
-    lp_ch_cr_sub:     'Vista de página / Clics',
-    lp_ch_tx:         'Tasa Conv. LP',
-    lp_ch_tx_sub:     'Leads / Vista de página',
-    lp_vencedor:      '✓ Ganador',
-    lp_metric_invest: 'Inversión',
-    lp_metric_imp:    'Impresiones',
-    lp_metric_cpm:    'CPM',
-    lp_metric_lc:     'Clics en el enlace',
-    lp_metric_ctr:    'CTR',
-    lp_metric_pv:     'Vistas de página',
-    lp_metric_cr:     'Connect Rate',
-    lp_metric_leads:  'Leads',
-    lp_metric_cpl:    'Costo por Lead (CPL)',
-    lp_metric_tx:     'Tasa Conv. LP (%)',
   }
 };
 
@@ -1787,9 +1735,8 @@ function rerenderActive(){
 }
 
 // ═══ NAVEGAÇÃO ═══
-
 // ═══ COMPARAÇÃO LP ═══
-const LPV_DATA = {"LPV01": {"totals": {"spend": 184.24, "imp": 13149, "lc": 107, "pv": 71, "leads": 13, "cpm": 14.01, "ctr": 0.81, "cr": 66.36, "cpl": 14.17, "tx_conv": 18.31}, "camps": [{"n": "IP02-JUL26-CAPTACION-TF-ESP-LPV01", "spend": 121.27, "imp": 9274, "lc": 82, "pv": 49, "leads": 10, "cpm": 13.08, "ctr": 0.88, "cr": 59.76, "cpl": 12.13, "tx_conv": 20.41}, {"n": "IP02-JUL26-CAPTACION-TT-ESP-LPV01", "spend": 62.97, "imp": 3875, "lc": 25, "pv": 22, "leads": 3, "cpm": 16.25, "ctr": 0.65, "cr": 88.0, "cpl": 20.99, "tx_conv": 13.64}], "daily": {"days": ["03/07"], "spend": [184.24], "imp": [13149], "lc": [107], "pv": [71], "leads": [13], "cpl": [14.17], "cr": [66.36], "tx_conv": [18.31]}}, "LPV02": {"totals": {"spend": 214.87, "imp": 18331, "lc": 152, "pv": 83, "leads": 7, "cpm": 11.72, "ctr": 0.83, "cr": 54.61, "cpl": 30.7, "tx_conv": 8.43}, "camps": [{"n": "IP02-JUL26-CAPTACION-TT-ESP-LPV02", "spend": 81.72, "imp": 4863, "lc": 62, "pv": 28, "leads": 4, "cpm": 16.8, "ctr": 1.27, "cr": 45.16, "cpl": 20.43, "tx_conv": 14.29}, {"n": "IP02-JUL26-CAPTACION-TF-ESP-LPV02", "spend": 133.15, "imp": 13468, "lc": 90, "pv": 55, "leads": 3, "cpm": 9.89, "ctr": 0.67, "cr": 61.11, "cpl": 44.38, "tx_conv": 5.45}], "daily": {"days": ["03/07"], "spend": [214.87], "imp": [18331], "lc": [152], "pv": [83], "leads": [7], "cpl": [30.7], "cr": [54.61], "tx_conv": [8.43]}}, "days": ["03/07"]};
+const LPV_DATA = null;
 
 function renderLp(){
   if(!LPV_DATA) return;
