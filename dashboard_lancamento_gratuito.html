@@ -221,19 +221,21 @@ details.desk-only{display:block!important;}
 .lp-kpi-sub{font-size:9px;color:var(--muted2);margin-top:2px;}
 .lp-charts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
 .lp-cmp-tbl{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);margin-bottom:14px;overflow-x:auto;}
-.lp-cmp-tbl table{width:100%;border-collapse:collapse;}
-.lp-cmp-tbl thead th{font-size:9px;text-transform:uppercase;letter-spacing:.6px;font-weight:700;padding:8px 10px;border-bottom:1px solid var(--border);background:var(--surface2);}
 .lp-camp-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
 .lp-camp-pair > div{min-width:0;overflow:hidden;}
 .lp-camp-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;overflow-x:auto;box-shadow:var(--sh);}
 .lp-camp-box table{width:100%;border-collapse:collapse;}
-.lp-camp-box tbody tr:hover td{background:var(--surface2);}
-.lp-camp-box tbody td{border-bottom:1px solid var(--border);padding:6px 8px;white-space:nowrap;}
+.lp-camp-box thead th{font-size:8px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:700;padding:6px 8px;text-align:right;border-bottom:1px solid var(--border);background:var(--surface2);white-space:nowrap;}
+.lp-camp-box thead th:first-child{text-align:left;}
+.lp-camp-box tbody td{border-bottom:1px solid var(--border);padding:6px 8px;white-space:nowrap;text-align:right;}
+.lp-camp-box tbody td:first-child{text-align:left;}
 .lp-camp-box tbody tr:last-child td{border-bottom:none;}
+.lp-camp-box tbody tr:hover td{background:var(--surface2);}
 .lp-camp-lbl{font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;margin-bottom:7px;display:flex;align-items:center;gap:7px;}
 .lp-lgd{display:flex;align-items:center;gap:14px;margin-bottom:9px;flex-wrap:wrap;}
 .lp-lgd-item{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;}
 .lp-dot{width:10px;height:10px;border-radius:2px;display:inline-block;}
+.lp-win{background:#05966920;color:#059669;border:1px solid #05966940;border-radius:6px;padding:2px 8px;font-weight:700;}
 @media(max-width:900px){.lp-charts{grid-template-columns:1fr 1fr;}}
 @media(max-width:600px){.lp-hero,.lp-camp-pair{grid-template-columns:1fr;}.lp-charts{grid-template-columns:1fr 1fr;}}
 
@@ -336,27 +338,19 @@ details.desk-only{display:block!important;}
 
     <!-- COMPARAÇÃO LP -->
     <div class="page-section" id="page-lp">
-      <!-- Cards hero -->
       <div class="lp-hero" id="lpHero"></div>
-
-      <!-- Legenda + 4 gráficos -->
       <div class="lp-lgd" id="lpLgd"></div>
       <div class="lp-charts">
-        <div class="cc"><div class="cc-t">Leads</div><div class="cc-s">por dia</div><div class="cw" style="height:180px"><canvas id="chLpLeads"></canvas></div></div>
-        <div class="cc"><div class="cc-t">CPL</div><div class="cc-s">Custo por lead</div><div class="cw" style="height:180px"><canvas id="chLpCpl"></canvas></div></div>
-        <div class="cc"><div class="cc-t">Connect Rate</div><div class="cc-s">PV / Cliques</div><div class="cw" style="height:180px"><canvas id="chLpCr"></canvas></div></div>
-        <div class="cc"><div class="cc-t">Taxa Conv. LP</div><div class="cc-s">Leads / PV</div><div class="cw" style="height:180px"><canvas id="chLpTx"></canvas></div></div>
+        <div class="cc"><div class="cc-t" data-i18n="lp_ch_leads">Leads</div><div class="cc-s" data-i18n="lp_ch_leads_s">por dia</div><div class="cw" style="height:180px"><canvas id="chLpLeads"></canvas></div></div>
+        <div class="cc"><div class="cc-t">CPL</div><div class="cc-s" data-i18n="lp_ch_cpl_s">Custo por lead</div><div class="cw" style="height:180px"><canvas id="chLpCpl"></canvas></div></div>
+        <div class="cc"><div class="cc-t">Connect Rate</div><div class="cc-s" data-i18n="lp_ch_cr_s">PV / Cliques</div><div class="cw" style="height:180px"><canvas id="chLpCr"></canvas></div></div>
+        <div class="cc"><div class="cc-t" data-i18n="lp_ch_tx">Taxa Conv. LP</div><div class="cc-s">Leads / PV</div><div class="cw" style="height:180px"><canvas id="chLpTx"></canvas></div></div>
       </div>
-
-      <!-- Tabela comparativa -->
-      <div class="sec-hd">Comparação Detalhada</div>
+      <div class="sec-hd" data-i18n="lp_cmp_ttl">Comparação Detalhada</div>
       <div class="lp-cmp-tbl mb14" id="lpCmpTbl"></div>
-
-      <!-- Campanhas lado a lado -->
       <div class="lp-camp-pair" id="lpCampPair"></div>
     </div>
     <!-- /COMPARAÇÃO LP -->
-
 
     <!-- MÉTRICAS DIÁRIAS -->
     <div class="page-section" id="page-diario">
@@ -432,7 +426,6 @@ const TRANSLATIONS = {
     nav_meta:         'Meta Ads',
     nav_diario:       'Métricas Diárias',
     nav_pesquisa:     'Pesquisa',
-    nav_lp:           'Comparar LPs',
     filtrar_camp:     'Filtrar por campanha',
     filtrar_origem:   'Filtrar respostas por origem',
     funil_ttl:        'Funil de Captação',
@@ -508,31 +501,29 @@ const TRANSLATIONS = {
     seg_col_invest:   'Invest.',
     seg_col_leads:    'Leads',
     seg_col_cpl:      'CPL',
-    // Comparação LP
-    lp_ttl:           'Comparar LPs',
+    nav_lp:           'Comparar LPs',
     lp_sem_tel:       'sem telefone',
     lp_com_tel:       'com telefone',
+    lp_vencedor:      'Vencedor',
     lp_cmp_ttl:       'Comparação Detalhada',
     lp_metrica:       'Métrica',
     lp_invest:        'Investimento',
     lp_imp:           'Impressões',
-    lp_cpm:           'CPM',
     lp_lc:            'Cliques no Link',
-    lp_ctr:           'CTR',
-    lp_pv:            'Page Views',
-    lp_cr:            'Connect Rate',
-    lp_leads:         'Leads',
     lp_cpl:           'Custo por Lead (CPL)',
     lp_txconv:        'Taxa Conv. LP (%)',
-    lp_campanhas:     'Campanhas',
     lp_sem_dados:     'Campanhas ainda sem dados',
+    lp_ch_leads:      'Leads',
+    lp_ch_leads_s:    'por dia',
+    lp_ch_cpl_s:      'Custo por lead',
+    lp_ch_cr_s:       'PV / Cliques',
+    lp_ch_tx:         'Taxa Conv. LP',
   },
   ES: {
     launch:           'Lanzamiento',
     nav_meta:         'Meta Ads',
     nav_diario:       'Métricas Diarias',
     nav_pesquisa:     'Encuesta',
-    nav_lp:           'Comparar LPs',
     filtrar_camp:     'Filtrar por campaña',
     filtrar_origem:   'Filtrar respuestas por origen',
     funil_ttl:        'Embudo de Captación',
@@ -598,24 +589,23 @@ const TRANSLATIONS = {
     seg_col_invest:   'Inversión',
     seg_col_leads:    'Leads',
     seg_col_cpl:      'CPL',
-    // Comparación LP
-    lp_ttl:           'Comparar LPs',
+    nav_lp:           'Comparar LPs',
     lp_sem_tel:       'sin teléfono',
     lp_com_tel:       'con teléfono',
+    lp_vencedor:      'Ganador',
     lp_cmp_ttl:       'Comparación Detallada',
     lp_metrica:       'Métrica',
     lp_invest:        'Inversión',
     lp_imp:           'Impresiones',
-    lp_cpm:           'CPM',
     lp_lc:            'Clics en el enlace',
-    lp_ctr:           'CTR',
-    lp_pv:            'Vistas de página',
-    lp_cr:            'Connect Rate',
-    lp_leads:         'Leads',
     lp_cpl:           'Costo por Lead (CPL)',
     lp_txconv:        'Tasa Conv. LP (%)',
-    lp_campanhas:     'Campañas',
     lp_sem_dados:     'Campañas sin datos aún',
+    lp_ch_leads:      'Leads',
+    lp_ch_leads_s:    'por día',
+    lp_ch_cpl_s:      'Costo por lead',
+    lp_ch_cr_s:       'PV / Clics',
+    lp_ch_tx:         'Tasa Conv. LP',
   }
 };
 
@@ -648,7 +638,8 @@ function setLang(lang, btn){
 }
 
 // ═══ FORMATAÇÃO DE MOEDA ══════════════════════════════════
-// O símbolo vem do config MOEDA_SIMBOLO/MOEDA_COD
+// O símbolo vem da const MOEDA_SIMBOLO (injetada pelo gerador)
+// Para EUR, o símbolo fica depois do número (padrão europeu)
 function fR(v){
   if(v==null||isNaN(v)) return '—';
   const n=Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -1414,42 +1405,337 @@ function renderDiarioCharts(){
   }
 
   // Labels traduzidos para o eixo Y dos gráficos
-
-  const METRICS_lp=[
-    [t('lp_invest'), 'spend',   v=>fR(v),  false, true],   // skip_highlight=true
-    [t('lp_imp'),    'imp',     v=>fN(v),  true,  false],
-    [t('lp_cpm'),    'cpm',     v=>fR(v),  false, false],
-    [t('lp_lc'),     'lc',      v=>fN(v),  true,  false],
-    [t('lp_ctr'),    'ctr',     v=>fP(v),  true,  false],
-    [t('lp_pv'),     'pv',      v=>fN(v),  true,  false],
-    [t('lp_cr'),     'cr',      v=>fP(v),  true,  false],
-    [t('lp_leads'),  'leads',   v=>fN(v),  true,  false],
-    [t('lp_cpl'),    'cpl',     v=>fR(v),  false, false],
-    [t('lp_txconv'), 'tx_conv', v=>fP(v),  true,  false],
+  const METRICS=[
+    {id:'ctr',  ttl:'CTR (%)',                                suffix:'%', data:()=>md.ctr},
+    {id:'cpm',  ttl:`CPM (${MOEDA_SIMBOLO})`,                suffix:'',  fmt:v=>v!=null?fR(v):null, data:()=>md.cpm},
+    {id:'cpl',  ttl:`${t('kpi_cpl_sub')} (${MOEDA_SIMBOLO})`,suffix:'',  fmt:v=>v!=null?fR(v):null, data:()=>md.cpl},
+    {id:'cr',   ttl:'Connect Rate (%)',                       suffix:'%', data:()=>md.connect_rate},
+    {id:'tx_cv',ttl:(currentLang==='ES'?'Tasa Conversión (%)':'Taxa Conversão (%)'), suffix:'%', data:()=>md.tx_conv},
   ];
-  const tblRows_lp=METRICS_lp.map(([lbl,key,fmt,hib,skip])=>{
-    const v1=t1[key], v2=t2[key];
-    const w=skip?0:win(v1,v2,hib);
-    const cc1=key==='cpl'?(v1==null?'cn':v1<=CPL_BOM?'cg':v1<=CPL_MEDIO?'cw2':'cr'):'';
-    const cc2=key==='cpl'?(v2==null?'cn':v2<=CPL_BOM?'cg':v2<=CPL_MEDIO?'cw2':'cr'):'';
-    const wrap=(v,isW,f)=>isW?`<span style="background:#05966920;color:#059669;border:1px solid #05966940;border-radius:6px;padding:2px 8px;font-weight:700">${f(v)}</span>`:f(v);
-    return `<tr>
-      <td style="font-size:12px;font-weight:600;color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--border)">${lbl}</td>
-      <td class="${cc1}" style="text-align:right;font-family:'DM Mono',monospace;font-size:13px;font-weight:600;padding:8px 10px;border-bottom:1px solid var(--border)">${wrap(v1,w===1,fmt)}</td>
-      <td class="${cc2}" style="text-align:right;font-family:'DM Mono',monospace;font-size:13px;font-weight:600;padding:8px 10px;border-bottom:1px solid var(--border)">${wrap(v2,w===2,fmt)}</td>
-    </tr>`;
-  }).join('');
-  document.getElementById('lpCmpTbl').innerHTML=`<table style="width:100%;border-collapse:collapse">
-    <thead><tr>
-      <th style="text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-weight:700;padding:9px 10px;border-bottom:1px solid var(--border);background:var(--surface2)">${t('lp_metrica')}</th>
-      <th style="text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:.7px;font-weight:700;padding:9px 10px;border-bottom:1px solid var(--border);background:var(--surface2);color:#7c3aed">① LPV01</th>
-      <th style="text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:.7px;font-weight:700;padding:9px 10px;border-bottom:1px solid var(--border);background:var(--surface2);color:#0369a1">② LPV02</th>
-    </tr></thead>
-    <tbody>${tblRows_lp}</tbody>
-  </table>`;
 
-    document.getElementById('lpCampPair').innerHTML=
-    campBox(C1,'LPV01',d1.camps)+campBox(C2,'LPV02',d2.camps);
+  const el=document.getElementById('dailyCharts');
+  el.innerHTML=METRICS.map(m=>{
+    const avgVal=METAS[m.id].avgVal;
+    const col=getMetricColor(m.id,avgVal);
+    return `<div class="daily-row">
+      <div class="daily-side">
+        <div class="ds-lbl">${t('d_periodo')}</div>
+        <div class="ds-val" id="avg_${m.id}" style="color:${col}">—</div>
+      </div>
+      <div class="daily-main">
+        <div class="daily-ttl">${m.ttl}</div>
+        <div class="cw" style="height:140px"><canvas id="ch_${m.id}"></canvas></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  METRICS.forEach(m=>{
+    const data=m.data();
+    const avgVal=METAS[m.id].avgVal;
+    const avgLine=data?.map(()=>avgVal);
+    const COLOR=getMetricColor(m.id,avgVal);
+    const fmtAvg=m.fmt?m.fmt(avgVal):(avgVal!=null?avgVal.toFixed(2)+m.suffix:'—');
+    const avgEl=document.getElementById(`avg_${m.id}`);
+    if(avgEl){ avgEl.textContent=fmtAvg; avgEl.style.color=COLOR; }
+    const id=`ch_${m.id}`;
+    if(CH[id]){CH[id].destroy();delete CH[id];}
+    CH[id]=new Chart(document.getElementById(id),{type:'line',
+      data:{labels:md.days,datasets:[
+        {label:m.ttl,data,borderColor:COLOR,backgroundColor:COLOR+'18',fill:true,
+         tension:.3,pointRadius:2,borderWidth:2,spanGaps:true,
+         datalabels:{display:ctx=>showLabels,color:COLOR,font:{size:labelSize,weight:'bold'},
+           formatter:(v,ctx)=>{
+             if(v==null) return null;
+             const tot=ctx.dataset.data.filter(x=>x!=null).length;
+             if(tot>18&&ctx.dataIndex%3!==0) return null;
+             return m.fmt?m.fmt(v):v.toFixed(1)+m.suffix;
+           },anchor:'top',align:'top',offset:2,clip:false}},
+        {label:t('d_media'),data:avgLine,borderColor:'#111',borderDash:[4,4],backgroundColor:'transparent',
+         pointRadius:0,borderWidth:1.5,spanGaps:true,datalabels:{display:false}},
+      ]},
+      options:{...bo(),scales:{
+        x:{ticks:{color:TXT(),font:bf,maxTicksLimit:14},grid:{color:GRID()}},
+        y:{ticks:{color:TXT(),font:bf,callback:v=>m.fmt?fR(v):v+m.suffix},grid:{color:GRID()},min:0}
+      }}
+    });
+  });
+}
+
+// ═══ PESQUISA ═══
+const PIZZA_COLS=['#3b82f6','#60a5fa','#1d4ed8','#93c5fd','#1e40af','#bfdbfe','#172554','#eff6ff'];
+
+function renderPesquisa(){
+  if(!PESQUISA) return;
+  const totalLeads=PESQUISA.total_leads||0; const resp=PESQUISA.total;
+  const taxa=totalLeads>0?r2(resp/totalLeads*100):null;
+  document.getElementById('pesKpis').innerHTML=`
+    <div class="kpi" style="--kc:#3b82f6"><div class="kpi-lbl">${t('p_respostas')}</div><div class="kpi-val">${fN(resp)}</div><div class="kpi-sub">${t('p_na_pesq')}</div></div>
+    <div class="kpi" style="--kc:#334155"><div class="kpi-lbl">${t('p_total_leads')}</div><div class="kpi-val">${fN(totalLeads)}</div><div class="kpi-sub">${t('p_captados')}</div></div>
+    <div class="kpi" style="--kc:#059669"><div class="kpi-lbl">${t('p_taxa')}</div><div class="kpi-val">${taxa!=null?taxa+'%':'—'}</div><div class="kpi-sub">${t('p_resp_leads')}</div></div>`;
+  buildUtmFilters();
+  buildPizzas();
+}
+
+const UTM_LABELS_MAP={
+  utm_source:   {PT:'Origem',   ES:'Origen'},
+  utm_medium:   {PT:'Meio',     ES:'Medio'},
+  utm_campaign: {PT:'Campanha', ES:'Campaña'},
+  utm_content:  {PT:'Conteúdo', ES:'Contenido'},
+};
+
+function buildUtmFilters(){
+  const utms=Object.keys(PESQUISA.filtros||{}).filter(k=>PESQUISA.filtros[k]?.length);
+  utms.forEach(u=>{if(!pesFilters[u]) pesFilters[u]=new Set(PESQUISA.filtros[u]);});
+  document.getElementById('utmGroups').innerHTML=utms.map(utm=>{
+    const lbl=(UTM_LABELS_MAP[utm]||{})[currentLang]||utm;
+    const vals=PESQUISA.filtros[utm];
+    return `<div>
+      <div class="utm-grp-lbl">${lbl}</div>
+      <div class="utm-list">${vals.map(v=>{
+        const cnt=PESQUISA.rows.filter(r=>r[utm]===v).length;
+        return `<label class="utm-item">
+          <input type="checkbox" value="${v}" data-utm="${utm}" onchange="onPesCheck(this)" checked>
+          <span class="utm-item-lbl">${v}</span><span class="utm-item-cnt">${cnt}</span>
+        </label>`;
+      }).join('')}</div>
+    </div>`;
+  }).join('');
+}
+
+function onPesCheck(cb){
+  const utm=cb.dataset.utm;
+  if(!pesFilters[utm]) pesFilters[utm]=new Set();
+  cb.checked?pesFilters[utm].add(cb.value):pesFilters[utm].delete(cb.value);
+  buildPizzas();
+}
+function checkAll(check){
+  document.querySelectorAll('#utmGroups input[type=checkbox]').forEach(cb=>{
+    cb.checked=check;
+    const utm=cb.dataset.utm;
+    if(!pesFilters[utm]) pesFilters[utm]=new Set();
+    check?pesFilters[utm].add(cb.value):pesFilters[utm].delete(cb.value);
+  });
+  buildPizzas();
+}
+function buildPizzas(){
+  if(!PESQUISA) return;
+  let rows=PESQUISA.rows;
+  Object.entries(pesFilters).forEach(([utm,vals])=>{
+    if(!vals||vals.size===0) return;
+    rows=rows.filter(r=>vals.has(r[utm]));
+  });
+  document.getElementById('pesCount').textContent=`${rows.length} ${t('p_selecionados')}`;
+  const grid=document.getElementById('pizzaGrid');
+  grid.innerHTML=PESQUISA.perguntas.map((p,i)=>`
+    <div class="pz-card">
+      <div class="pz-q">${p}</div>
+      <div class="pz-cw"><canvas id="pz_${i}"></canvas></div>
+      <div class="pz-leg" id="pzl_${i}"></div>
+    </div>`).join('');
+  PESQUISA.perguntas.forEach((p,i)=>{
+    const counts={};
+    rows.forEach(r=>{if(r[p]&&r[p]!=='null'&&r[p]!=='undefined') counts[r[p]]=(counts[r[p]]||0)+1;});
+    const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+    const total=sorted.reduce((s,[,v])=>s+v,0);
+    if(!sorted.length){document.getElementById(`pz_${i}`)?.parentElement&&(document.getElementById(`pz_${i}`).parentElement.style.display='none');return;}
+    const id=`pz_${i}`;
+    if(PC[id]){PC[id].destroy();delete PC[id];}
+    PC[id]=new Chart(document.getElementById(id),{type:'doughnut',
+      data:{labels:sorted.map(([k])=>k),datasets:[{data:sorted.map(([,v])=>v),backgroundColor:PIZZA_COLS.slice(0,sorted.length),borderWidth:0}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{
+        legend:{display:false},
+        datalabels:{display:true,color:'#fff',font:{size:9,weight:'bold'},
+          formatter:(v,ctx)=>{const t2=ctx.dataset.data.reduce((a,b)=>a+b,0);return t2>0&&v/t2>0.05?(v/t2*100).toFixed(0)+'%':null;}}
+      }}
+    });
+    document.getElementById(`pzl_${i}`).innerHTML=sorted.slice(0,6).map(([k,v],j)=>`
+      <div class="pl"><div class="pl-dot" style="background:${PIZZA_COLS[j]}"></div>
+        <div class="pl-lbl" title="${k}">${k}</div>
+        <div class="pl-pct">${total>0?(v/total*100).toFixed(1)+'%':v}</div>
+      </div>`).join('');
+  });
+}
+
+// ═══ CONTROLES ═══
+function setPeriod(days,btn){
+  periodDays=days; dateI=null; dateF=null;
+  document.getElementById('dtI').value=''; document.getElementById('dtF').value='';
+  document.querySelectorAll('.period-bar .pb').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const mf=document.getElementById('metaCampFilter');
+  if(mf) delete mf.dataset.campsKey;
+  metaCampSel=new Set();
+  rerenderActive();
+}
+
+document.getElementById('dtI').addEventListener('change',e=>{
+  if(e.target.value){
+    const[y,m,d]=e.target.value.split('-').map(Number);
+    dateI=new Date(y,m-1,d,0,0,0);
+    const dtFel=document.getElementById('dtF');
+    if(dtFel){dtFel.min=e.target.value; if(!dtFel.value) dtFel.focus();}
+  } else dateI=null;
+  periodDays=0;
+  document.querySelectorAll('.period-bar .pb').forEach(b=>b.classList.remove('active'));
+  rerenderActive();
+});
+document.getElementById('dtF').addEventListener('change',e=>{
+  if(e.target.value){const[y,m,d]=e.target.value.split('-').map(Number);dateF=new Date(y,m-1,d,23,59,59);}else dateF=null;
+  periodDays=0;
+  document.querySelectorAll('.period-bar .pb').forEach(b=>b.classList.remove('active'));
+  rerenderActive();
+});
+function clearDates(){
+  dateI=null; dateF=null;
+  document.getElementById('dtI').value=''; document.getElementById('dtF').value=''; rerenderActive();
+}
+function setLct(on,btn){
+  filtroLct=on;
+  document.querySelectorAll('#lctBar .pb').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); rerenderActive();
+}
+function toggleLabels(el){
+  showLabels=!showLabels;
+  el.classList.toggle('on',showLabels);
+  rerenderActive();
+}
+function onLabelSize(v){
+  labelSize=parseInt(v);
+  rerenderActive();
+}
+
+function rerenderActive(){
+  const p=document.querySelector('.page-section.active')?.id?.replace('page-','');
+  if(p==='meta')     renderMeta();
+  if(p==='diario')   renderDiario();
+  if(p==='pesquisa') renderPesquisa();
+  if(p==='lp')       renderLp();
+  applyI18n();
+  setTimeout(()=>{Object.values({...CH,...PC}).forEach(c=>{try{c.resize();}catch(e){}});},60);
+}
+
+// ═══ NAVEGAÇÃO ═══
+// ═══ COMPARAÇÃO LP ═══
+function renderLp(){
+  if(!LPV_DATA) return;
+  const d1=LPV_DATA.LPV01, d2=LPV_DATA.LPV02, days=LPV_DATA.days;
+  const t1=d1.totals, t2=d2.totals;
+  const C1='#7c3aed', C2='#0369a1';
+
+  function win(v1,v2,hib){
+    if(v1==null||v2==null) return 0;
+    return (hib?v1>v2:v1<v2)?1:((hib?v2>v1:v2<v1)?2:0);
+  }
+  const lblSem=t('lp_sem_tel'), lblCom=t('lp_com_tel');
+
+  function heroCard(tt,camps,c,label,sub,isWin){
+    const venc=isWin?` <span style="font-size:9px;color:#059669;font-weight:800">✓ ${t('lp_vencedor')}</span>`:'';
+    const cplCls2=tt.cpl==null?'':tt.cpl<=CPL_BOM?'cg':tt.cpl<=CPL_MEDIO?'cw2':'cr';
+    return `<div class="lp-card">
+      <div class="lp-badge" style="background:${c}18;color:${c};border:1px solid ${c}33">${label} — ${sub}</div>
+      <div style="font-size:10px;color:var(--muted);margin-bottom:8px">${(camps||[]).map(x=>x.n).join(' · ')}</div>
+      <div class="lp-kpis">
+        <div class="lp-kpi"><div class="lp-kpi-lbl">${t('kpi_invest')}</div><div class="lp-kpi-val" style="color:${c}">${fR(tt.spend)}</div></div>
+        <div class="lp-kpi"><div class="lp-kpi-lbl">Leads</div><div class="lp-kpi-val" style="color:${c}">${fN(tt.leads)}</div></div>
+        <div class="lp-kpi" style="grid-column:span 2">
+          <div class="lp-kpi-lbl">CPL${venc}</div>
+          <div class="lp-kpi-val ${cplCls2}">${fR(tt.cpl)}</div>
+          <div class="lp-kpi-sub">CTR ${fP(tt.ctr)} · CR ${fP(tt.cr)} · TxConv ${fP(tt.tx_conv)}</div>
+        </div>
+      </div>
+    </div>`;
+  }
+  const wCpl=win(t1.cpl,t2.cpl,false);
+  document.getElementById('lpHero').innerHTML=
+    heroCard(t1,d1.camps,C1,'① LPV01',lblSem,wCpl===1)+
+    heroCard(t2,d2.camps,C2,'② LPV02',lblCom,wCpl===2);
+
+  document.getElementById('lpLgd').innerHTML=
+    `<div class="lp-lgd-item"><span class="lp-dot" style="background:${C1}"></span>LPV01 — ${lblSem}</div>
+     <div class="lp-lgd-item"><span class="lp-dot" style="background:${C2}"></span>LPV02 — ${lblCom}</div>`;
+
+  function dlCfg(fmt){
+    return{display:function(){return showLabels;},color:function(ctx){return ctx.datasetIndex===0?C1:C2;},
+      font:{size:9,weight:'bold'},formatter:function(v){return v!=null?fmt(v):null;},
+      anchor:'end',align:'top',offset:2,clip:false};
+  }
+  function opts(yCb,fmt){
+    return{...bo(),plugins:{...bo().plugins,
+      legend:{labels:{color:TXT(),font:bf,boxWidth:9,padding:8}},
+      datalabels:dlCfg(fmt)},
+      scales:{x:{ticks:{color:TXT(),font:bf},grid:{color:GRID()}},
+              y:{ticks:{color:TXT(),font:bf,callback:yCb||undefined},grid:{color:GRID()},min:0,grace:'15%'}}};
+  }
+  function mkChart(id,key,yCb,fmt){
+    dc(id);
+    CH[id]=new Chart(document.getElementById(id),{type:'bar',
+      data:{labels:days,datasets:[
+        {label:'LPV01 — '+lblSem,data:d1.daily[key],backgroundColor:C1+'bb',borderRadius:4},
+        {label:'LPV02 — '+lblCom,data:d2.daily[key],backgroundColor:C2+'bb',borderRadius:4}]},
+      options:opts(yCb,fmt)});
+  }
+  mkChart('chLpLeads','leads',null,function(v){return String(Math.round(v));});
+  mkChart('chLpCpl','cpl',function(v){return fR(v);},function(v){return fR(v);});
+  mkChart('chLpCr','cr',function(v){return v+'%';},function(v){return v!=null?v.toFixed(1)+'%':null;});
+  mkChart('chLpTx','tx_conv',function(v){return v+'%';},function(v){return v!=null?v.toFixed(1)+'%':null;});
+
+  // ─ Tabela comparativa (i18n em runtime, invest sem highlight, vencedor com fundo verde) ─
+  const ROWS=[
+    [t('lp_invest'), 'spend',   fR, false, true],
+    [t('lp_imp'),    'imp',     fN, true,  false],
+    ['CPM',          'cpm',     fR, false, false],
+    [t('lp_lc'),     'lc',      fN, true,  false],
+    ['CTR',          'ctr',     fP, true,  false],
+    ['Page Views',   'pv',      fN, true,  false],
+    ['Connect Rate', 'cr',      fP, true,  false],
+    ['Leads',        'leads',   fN, true,  false],
+    [t('lp_cpl'),    'cpl',     fR, false, false],
+    [t('lp_txconv'), 'tx_conv', fP, true,  false],
+  ];
+  const rowsHtml=ROWS.map(function(r){
+    const lbl=r[0],key=r[1],fmt=r[2],hib=r[3],skip=r[4];
+    const v1=t1[key],v2=t2[key];
+    const w=skip?0:win(v1,v2,hib);
+    const cc1=key==='cpl'?(v1==null?'':v1<=CPL_BOM?'cg':v1<=CPL_MEDIO?'cw2':'cr'):'';
+    const cc2=key==='cpl'?(v2==null?'':v2<=CPL_BOM?'cg':v2<=CPL_MEDIO?'cw2':'cr'):'';
+    const wrap=function(v,isW){return isW?'<span class="lp-win">'+fmt(v)+'</span>':fmt(v);};
+    return '<tr>'
+      +'<td style="font-size:12px;font-weight:600;color:var(--muted);padding:8px 12px;border-bottom:1px solid var(--border)">'+lbl+'</td>'
+      +'<td class="'+cc1+'" style="text-align:right;font-family:\'DM Mono\',monospace;font-size:13px;font-weight:600;padding:8px 12px;border-bottom:1px solid var(--border)">'+wrap(v1,w===1)+'</td>'
+      +'<td class="'+cc2+'" style="text-align:right;font-family:\'DM Mono\',monospace;font-size:13px;font-weight:600;padding:8px 12px;border-bottom:1px solid var(--border)">'+wrap(v2,w===2)+'</td>'
+      +'</tr>';
+  }).join('');
+  document.getElementById('lpCmpTbl').innerHTML=
+    '<table style="width:100%;border-collapse:collapse"><thead><tr>'
+    +'<th style="text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-weight:700;padding:9px 12px;border-bottom:1px solid var(--border);background:var(--surface2)">'+t('lp_metrica')+'</th>'
+    +'<th style="text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:.7px;font-weight:700;padding:9px 12px;border-bottom:1px solid var(--border);background:var(--surface2);color:'+C1+'">① LPV01</th>'
+    +'<th style="text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:.7px;font-weight:700;padding:9px 12px;border-bottom:1px solid var(--border);background:var(--surface2);color:'+C2+'">② LPV02</th>'
+    +'</tr></thead><tbody>'+rowsHtml+'</tbody></table>';
+
+  // ─ Tabelas de campanhas ─
+  function campRows(camps){
+    if(!camps||!camps.length) return '<tr><td colspan="9" style="padding:14px;text-align:center;color:var(--muted);font-size:11px">'+t('lp_sem_dados')+'</td></tr>';
+    return camps.map(function(c){
+      const cc=c.cpl==null?'':c.cpl<=CPL_BOM?'cg':c.cpl<=CPL_MEDIO?'cw2':'cr';
+      return '<tr>'
+        +'<td style="font-size:9px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+c.n+'">'+c.n+'</td>'
+        +'<td style="font-size:10px;font-family:monospace">'+fR(c.spend)+'</td>'
+        +'<td style="font-size:10px;font-family:monospace">'+fN(c.imp)+'</td>'
+        +'<td style="font-size:10px;font-family:monospace">'+fP(c.ctr)+'</td>'
+        +'<td style="font-size:10px;font-family:monospace">'+fN(c.pv)+'</td>'
+        +'<td style="font-size:10px;font-family:monospace">'+fP(c.cr)+'</td>'
+        +'<td style="font-size:10px;font-family:monospace">'+fN(c.leads)+'</td>'
+        +'<td class="'+cc+'" style="font-size:10px;font-family:monospace">'+fR(c.cpl)+'</td>'
+        +'<td style="font-size:10px;font-family:monospace">'+fP(c.tx_conv)+'</td>'
+        +'</tr>';
+    }).join('');
+  }
+  const hdr='<tr><th>'+t('col_camp')+'</th><th>'+t('col_invest')+'</th><th>'+t('col_impr')+'</th><th>CTR</th><th>PV</th><th>CR</th><th>Leads</th><th>CPL</th><th>TxConv</th></tr>';
+  function campBox(c,label,camps){
+    return '<div><div class="lp-camp-lbl"><span class="lp-badge" style="background:'+c+'18;color:'+c+';border:1px solid '+c+'33;margin-bottom:0">'+label+'</span> '+t('campanhas')+'</div>'
+      +'<div class="lp-camp-box"><table><thead>'+hdr+'</thead><tbody>'+campRows(camps)+'</tbody></table></div></div>';
+  }
+  document.getElementById('lpCampPair').innerHTML=campBox(C1,'LPV01',d1.camps)+campBox(C2,'LPV02',d2.camps);
 }
 
 function goPage(p,btn){
@@ -1457,7 +1743,7 @@ function goPage(p,btn){
   document.querySelectorAll('.sb-item').forEach(e=>e.classList.remove('active'));
   document.getElementById('page-'+p).classList.add('active');
   if(btn) btn.classList.add('active');
-  const titles={meta:t('nav_meta'),diario:t('nav_diario'),pesquisa:t('nav_pesquisa')};
+  const titles={meta:t('nav_meta'),diario:t('nav_diario'),pesquisa:t('nav_pesquisa'),lp:t('nav_lp')};
   document.getElementById('pageTitle').textContent=titles[p]||p;
   if(p==='meta')     renderMeta();
   if(p==='diario')   renderDiario();
