@@ -362,18 +362,23 @@ def replace_js_const(html, name, value):
 
 # ══ COMPARAÇÃO LP (LPV01 vs LPV02) ════════════════════════
 def build_lpv_data(df):
+    import re as _re
     from collections import defaultdict
     sub = df[df["campaign"].str.contains(LANCAMENTO_COD, na=False)] if LANCAMENTO_COD else df
 
-    lpv_daily = {"LPV01": defaultdict(lambda: defaultdict(float)),
-                 "LPV02": defaultdict(lambda: defaultdict(float))}
+    lpv_daily = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
     lpv_camps = defaultdict(lambda: defaultdict(float))
     camp_lpv  = {}
     all_days_set = set()
+    lpv_seen  = set()
+
+    def detect_lpv(camp):
+        m = _re.search(r"LPV(\d+)", camp)
+        return ("LPV" + m.group(1)) if m else None
 
     for _, row in sub.iterrows():
         camp = str(row.get("campaign", ""))
-        lv   = "LPV01" if "LPV01" in camp else ("LPV02" if "LPV02" in camp else None)
+        lv   = detect_lpv(camp)
         if lv is None: continue
         d    = row["date"].strftime("%d/%m")
         sp   = float(row.get("spend",       0) or 0)
@@ -381,7 +386,7 @@ def build_lpv_data(df):
         lc   = float(row.get("link_clicks", 0) or 0)
         pv   = float(row.get("page_view",   0) or 0)
         ld   = float(row.get("leads",       0) or 0)
-        all_days_set.add(d); camp_lpv[camp] = lv
+        all_days_set.add(d); camp_lpv[camp] = lv; lpv_seen.add(lv)
         for k,v in [("sp",sp),("imp",imp),("lc",lc),("pv",pv),("ld",ld)]:
             lpv_daily[lv][d][k] += v
             lpv_camps[camp][k]  += v
@@ -389,6 +394,8 @@ def build_lpv_data(df):
     def day_key(s):
         dd,mm=s.split("/"); return int(mm)*100+int(dd)
     days = sorted(all_days_set, key=day_key)
+    # ordena LPV01, LPV02, LPV03... numericamente
+    lpv_list = sorted(lpv_seen, key=lambda x: int(x.replace("LPV","")))
 
     def metrics(agg):
         sp=round(float(agg.get("sp",0)),2); imp=int(agg.get("imp",0))
@@ -419,13 +426,15 @@ def build_lpv_data(df):
             for k,v in lpv_daily[lv][d].items(): t[k]+=v
         return t
 
-    return {
-        "LPV01":{"totals":metrics(totals("LPV01")),"daily":build_daily("LPV01"),
-                 "camps":[{"n":c,**metrics(v)} for c,v in sorted(lpv_camps.items(),key=lambda x:-x[1].get("ld",0)) if camp_lpv.get(c)=="LPV01"]},
-        "LPV02":{"totals":metrics(totals("LPV02")),"daily":build_daily("LPV02"),
-                 "camps":[{"n":c,**metrics(v)} for c,v in sorted(lpv_camps.items(),key=lambda x:-x[1].get("ld",0)) if camp_lpv.get(c)=="LPV02"]},
-        "days": days,
-    }
+    result = {"days": days, "order": lpv_list}
+    for lv in lpv_list:
+        result[lv] = {
+            "totals": metrics(totals(lv)),
+            "daily":  build_daily(lv),
+            "camps":  [{"n":c, **metrics(v)} for c,v in sorted(lpv_camps.items(), key=lambda x:-x[1].get("ld",0)) if camp_lpv.get(c)==lv],
+        }
+    return result
+
 
 def inject_all(tpl, meta_k, meta_d, meta_dc, meta_raw_c, meta_t, meta_bd, pes, lpv_data=None):
     html=Path(tpl).read_text(encoding="utf-8")
