@@ -211,7 +211,7 @@ details.desk-only{display:block!important;}
 }
 
 /* ═══ COMPARAÇÃO LP ═══ */
-.lp-hero{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+.lp-hero{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:14px;}
 .lp-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;box-shadow:var(--sh);}
 .lp-badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:20px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;margin-bottom:10px;}
 .lp-kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
@@ -221,7 +221,7 @@ details.desk-only{display:block!important;}
 .lp-kpi-sub{font-size:9px;color:var(--muted2);margin-top:2px;}
 .lp-charts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
 .lp-cmp-tbl{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);margin-bottom:14px;overflow-x:auto;}
-.lp-camp-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+.lp-camp-pair{display:flex;flex-direction:column;gap:12px;margin-bottom:14px;}
 .lp-camp-pair > div{min-width:0;overflow:hidden;}
 .lp-camp-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;overflow-x:auto;box-shadow:var(--sh);}
 .lp-camp-box table{width:100%;border-collapse:collapse;}
@@ -1618,44 +1618,61 @@ function rerenderActive(){
 // ═══ COMPARAÇÃO LP ═══
 function renderLp(){
   if(!LPV_DATA) return;
-  const d1=LPV_DATA.LPV01, d2=LPV_DATA.LPV02, days=LPV_DATA.days;
-  const t1=d1.totals, t2=d2.totals;
-  const C1='#7c3aed', C2='#0369a1';
+  const days=LPV_DATA.days;
+  // ordem: usa LPV_DATA.order se existir, senão detecta as chaves LPVxx
+  const order = LPV_DATA.order || Object.keys(LPV_DATA).filter(function(k){return /^LPV\d+/.test(k);}).sort();
+  const LPS = order.map(function(key){ return {key:key, d:LPV_DATA[key], t:LPV_DATA[key].totals}; });
 
-  function win(v1,v2,hib){
-    if(v1==null||v2==null) return 0;
-    return (hib?v1>v2:v1<v2)?1:((hib?v2>v1:v2<v1)?2:0);
-  }
+  // paleta — cores por LP (cicla se houver mais que a lista)
+  const PALETTE=['#7c3aed','#0369a1','#059669','#d97706','#db2777','#0891b2'];
+  LPS.forEach(function(lp,i){ lp.color=PALETTE[i%PALETTE.length]; lp.num='①②③④⑤⑥'.charAt(i)||('('+(i+1)+')'); });
+
   const lblSem=t('lp_sem_tel'), lblCom=t('lp_com_tel');
+  // sub-rótulo por LP: LPV02 é "com telefone", as demais "sem telefone"
+  function subFor(key){ return key==='LPV02'?lblCom:lblSem; }
 
-  function heroCard(tt,camps,c,label,sub,isWin){
-    const venc=isWin?` <span style="font-size:9px;color:#059669;font-weight:800">✓ ${t('lp_vencedor')}</span>`:'';
-    const cplCls2=tt.cpl==null?'':tt.cpl<=CPL_BOM?'cg':tt.cpl<=CPL_MEDIO?'cw2':'cr';
-    return `<div class="lp-card">
-      <div class="lp-badge" style="background:${c}18;color:${c};border:1px solid ${c}33">${label} — ${sub}</div>
-      <div style="font-size:10px;color:var(--muted);margin-bottom:8px">${(camps||[]).map(x=>x.n).join(' · ')}</div>
-      <div class="lp-kpis">
-        <div class="lp-kpi"><div class="lp-kpi-lbl">${t('kpi_invest')}</div><div class="lp-kpi-val" style="color:${c}">${fR(tt.spend)}</div></div>
-        <div class="lp-kpi"><div class="lp-kpi-lbl">Leads</div><div class="lp-kpi-val" style="color:${c}">${fN(tt.leads)}</div></div>
-        <div class="lp-kpi" style="grid-column:span 2">
-          <div class="lp-kpi-lbl">CPL${venc}</div>
-          <div class="lp-kpi-val ${cplCls2}">${fR(tt.cpl)}</div>
-          <div class="lp-kpi-sub">CTR ${fP(tt.ctr)} · CR ${fP(tt.cr)} · TxConv ${fP(tt.tx_conv)}</div>
-        </div>
-      </div>
-    </div>`;
+  // vencedor de uma métrica (menor CPL, etc). hib=true → maior é melhor
+  function winnerIdx(key,hib){
+    var best=-1, bestVal=null;
+    LPS.forEach(function(lp,i){
+      var v=lp.t[key];
+      if(v==null) return;
+      if(bestVal==null || (hib? v>bestVal : v<bestVal)){ bestVal=v; best=i; }
+    });
+    // se todos iguais, sem vencedor
+    var distinct=LPS.map(function(lp){return lp.t[key];}).filter(function(v){return v!=null;});
+    if(distinct.length<2) return -1;
+    if(distinct.every(function(v){return v===distinct[0];})) return -1;
+    return best;
   }
-  const wCpl=win(t1.cpl,t2.cpl,false);
-  document.getElementById('lpHero').innerHTML=
-    heroCard(t1,d1.camps,C1,'① LPV01',lblSem,wCpl===1)+
-    heroCard(t2,d2.camps,C2,'② LPV02',lblCom,wCpl===2);
 
-  document.getElementById('lpLgd').innerHTML=
-    `<div class="lp-lgd-item"><span class="lp-dot" style="background:${C1}"></span>LPV01 — ${lblSem}</div>
-     <div class="lp-lgd-item"><span class="lp-dot" style="background:${C2}"></span>LPV02 — ${lblCom}</div>`;
+  // ─ Cards hero ─
+  var wCplIdx=winnerIdx('cpl',false);
+  document.getElementById('lpHero').innerHTML=LPS.map(function(lp,i){
+    var c=lp.color, tt=lp.t;
+    var venc=(i===wCplIdx)?' <span style="font-size:9px;color:#059669;font-weight:800">✓ '+t('lp_vencedor')+'</span>':'';
+    var cplCls2=tt.cpl==null?'':tt.cpl<=CPL_BOM?'cg':tt.cpl<=CPL_MEDIO?'cw2':'cr';
+    return '<div class="lp-card">'
+      +'<div class="lp-badge" style="background:'+c+'18;color:'+c+';border:1px solid '+c+'33">'+lp.num+' '+lp.key+' — '+subFor(lp.key)+'</div>'
+      +'<div style="font-size:10px;color:var(--muted);margin-bottom:8px">'+(lp.d.camps||[]).map(function(x){return x.n;}).join(' · ')+'</div>'
+      +'<div class="lp-kpis">'
+      +'<div class="lp-kpi"><div class="lp-kpi-lbl">'+t('kpi_invest')+'</div><div class="lp-kpi-val" style="color:'+c+'">'+fR(tt.spend)+'</div></div>'
+      +'<div class="lp-kpi"><div class="lp-kpi-lbl">Leads</div><div class="lp-kpi-val" style="color:'+c+'">'+fN(tt.leads)+'</div></div>'
+      +'<div class="lp-kpi" style="grid-column:span 2">'
+      +'<div class="lp-kpi-lbl">CPL'+venc+'</div>'
+      +'<div class="lp-kpi-val '+cplCls2+'">'+fR(tt.cpl)+'</div>'
+      +'<div class="lp-kpi-sub">CTR '+fP(tt.ctr)+' · CR '+fP(tt.cr)+' · TxConv '+fP(tt.tx_conv)+'</div>'
+      +'</div></div></div>';
+  }).join('');
 
+  // ─ Legenda ─
+  document.getElementById('lpLgd').innerHTML=LPS.map(function(lp){
+    return '<div class="lp-lgd-item"><span class="lp-dot" style="background:'+lp.color+'"></span>'+lp.key+' — '+subFor(lp.key)+'</div>';
+  }).join('');
+
+  // ─ Gráficos (N datasets) ─
   function dlCfg(fmt){
-    return{display:function(){return showLabels;},color:function(ctx){return ctx.datasetIndex===0?C1:C2;},
+    return{display:function(){return showLabels;},color:function(ctx){return LPS[ctx.datasetIndex]?LPS[ctx.datasetIndex].color:'#888';},
       font:{size:9,weight:'bold'},formatter:function(v){return v!=null?fmt(v):null;},
       anchor:'end',align:'top',offset:2,clip:false};
   }
@@ -1669,9 +1686,9 @@ function renderLp(){
   function mkChart(id,key,yCb,fmt){
     dc(id);
     CH[id]=new Chart(document.getElementById(id),{type:'bar',
-      data:{labels:days,datasets:[
-        {label:'LPV01 — '+lblSem,data:d1.daily[key],backgroundColor:C1+'bb',borderRadius:4},
-        {label:'LPV02 — '+lblCom,data:d2.daily[key],backgroundColor:C2+'bb',borderRadius:4}]},
+      data:{labels:days,datasets:LPS.map(function(lp){
+        return {label:lp.key+' — '+subFor(lp.key),data:lp.d.daily[key],backgroundColor:lp.color+'bb',borderRadius:4};
+      })},
       options:opts(yCb,fmt)});
   }
   mkChart('chLpLeads','leads',null,function(v){return String(Math.round(v));});
@@ -1679,7 +1696,7 @@ function renderLp(){
   mkChart('chLpCr','cr',function(v){return v+'%';},function(v){return v!=null?v.toFixed(1)+'%':null;});
   mkChart('chLpTx','tx_conv',function(v){return v+'%';},function(v){return v!=null?v.toFixed(1)+'%':null;});
 
-  // ─ Tabela comparativa (i18n em runtime, invest sem highlight, vencedor com fundo verde) ─
+  // ─ Tabela comparativa (N colunas) ─
   const ROWS=[
     [t('lp_invest'), 'spend',   fR, false, true],
     [t('lp_imp'),    'imp',     fN, true,  false],
@@ -1692,31 +1709,30 @@ function renderLp(){
     [t('lp_cpl'),    'cpl',     fR, false, false],
     [t('lp_txconv'), 'tx_conv', fP, true,  false],
   ];
-  const rowsHtml=ROWS.map(function(r){
-    const lbl=r[0],key=r[1],fmt=r[2],hib=r[3],skip=r[4];
-    const v1=t1[key],v2=t2[key];
-    const w=skip?0:win(v1,v2,hib);
-    const cc1=key==='cpl'?(v1==null?'':v1<=CPL_BOM?'cg':v1<=CPL_MEDIO?'cw2':'cr'):'';
-    const cc2=key==='cpl'?(v2==null?'':v2<=CPL_BOM?'cg':v2<=CPL_MEDIO?'cw2':'cr'):'';
-    const wrap=function(v,isW){return isW?'<span class="lp-win">'+fmt(v)+'</span>':fmt(v);};
-    return '<tr>'
-      +'<td style="font-size:12px;font-weight:600;color:var(--muted);padding:8px 12px;border-bottom:1px solid var(--border)">'+lbl+'</td>'
-      +'<td class="'+cc1+'" style="text-align:right;font-family:\'DM Mono\',monospace;font-size:13px;font-weight:600;padding:8px 12px;border-bottom:1px solid var(--border)">'+wrap(v1,w===1)+'</td>'
-      +'<td class="'+cc2+'" style="text-align:right;font-family:\'DM Mono\',monospace;font-size:13px;font-weight:600;padding:8px 12px;border-bottom:1px solid var(--border)">'+wrap(v2,w===2)+'</td>'
-      +'</tr>';
+  var rowsHtml=ROWS.map(function(r){
+    var lbl=r[0],key=r[1],fmt=r[2],hib=r[3],skip=r[4];
+    var wIdx=skip?-1:winnerIdx(key,hib);
+    var cells=LPS.map(function(lp,i){
+      var v=lp.t[key];
+      var cc=key==='cpl'?(v==null?'':v<=CPL_BOM?'cg':v<=CPL_MEDIO?'cw2':'cr'):'';
+      var val=(i===wIdx)?'<span class="lp-win">'+fmt(v)+'</span>':fmt(v);
+      return '<td class="'+cc+'" style="text-align:right;font-family:\'DM Mono\',monospace;font-size:13px;font-weight:600;padding:8px 12px;border-bottom:1px solid var(--border)">'+val+'</td>';
+    }).join('');
+    return '<tr><td style="font-size:12px;font-weight:600;color:var(--muted);padding:8px 12px;border-bottom:1px solid var(--border)">'+lbl+'</td>'+cells+'</tr>';
+  }).join('');
+  var headCells=LPS.map(function(lp){
+    return '<th style="text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:.7px;font-weight:700;padding:9px 12px;border-bottom:1px solid var(--border);background:var(--surface2);color:'+lp.color+'">'+lp.num+' '+lp.key+'</th>';
   }).join('');
   document.getElementById('lpCmpTbl').innerHTML=
     '<table style="width:100%;border-collapse:collapse"><thead><tr>'
     +'<th style="text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-weight:700;padding:9px 12px;border-bottom:1px solid var(--border);background:var(--surface2)">'+t('lp_metrica')+'</th>'
-    +'<th style="text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:.7px;font-weight:700;padding:9px 12px;border-bottom:1px solid var(--border);background:var(--surface2);color:'+C1+'">① LPV01</th>'
-    +'<th style="text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:.7px;font-weight:700;padding:9px 12px;border-bottom:1px solid var(--border);background:var(--surface2);color:'+C2+'">② LPV02</th>'
-    +'</tr></thead><tbody>'+rowsHtml+'</tbody></table>';
+    +headCells+'</tr></thead><tbody>'+rowsHtml+'</tbody></table>';
 
-  // ─ Tabelas de campanhas ─
+  // ─ Tabelas de campanhas (uma por LP) ─
   function campRows(camps){
     if(!camps||!camps.length) return '<tr><td colspan="9" style="padding:14px;text-align:center;color:var(--muted);font-size:11px">'+t('lp_sem_dados')+'</td></tr>';
     return camps.map(function(c){
-      const cc=c.cpl==null?'':c.cpl<=CPL_BOM?'cg':c.cpl<=CPL_MEDIO?'cw2':'cr';
+      var cc=c.cpl==null?'':c.cpl<=CPL_BOM?'cg':c.cpl<=CPL_MEDIO?'cw2':'cr';
       return '<tr>'
         +'<td style="font-size:9px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+c.n+'">'+c.n+'</td>'
         +'<td style="font-size:10px;font-family:monospace">'+fR(c.spend)+'</td>'
@@ -1730,12 +1746,11 @@ function renderLp(){
         +'</tr>';
     }).join('');
   }
-  const hdr='<tr><th>'+t('col_camp')+'</th><th>'+t('col_invest')+'</th><th>'+t('col_impr')+'</th><th>CTR</th><th>PV</th><th>CR</th><th>Leads</th><th>CPL</th><th>TxConv</th></tr>';
-  function campBox(c,label,camps){
-    return '<div><div class="lp-camp-lbl"><span class="lp-badge" style="background:'+c+'18;color:'+c+';border:1px solid '+c+'33;margin-bottom:0">'+label+'</span> '+t('campanhas')+'</div>'
-      +'<div class="lp-camp-box"><table><thead>'+hdr+'</thead><tbody>'+campRows(camps)+'</tbody></table></div></div>';
-  }
-  document.getElementById('lpCampPair').innerHTML=campBox(C1,'LPV01',d1.camps)+campBox(C2,'LPV02',d2.camps);
+  var hdr='<tr><th>'+t('col_camp')+'</th><th>'+t('col_invest')+'</th><th>'+t('col_impr')+'</th><th>CTR</th><th>PV</th><th>CR</th><th>Leads</th><th>CPL</th><th>TxConv</th></tr>';
+  document.getElementById('lpCampPair').innerHTML=LPS.map(function(lp){
+    return '<div><div class="lp-camp-lbl"><span class="lp-badge" style="background:'+lp.color+'18;color:'+lp.color+';border:1px solid '+lp.color+'33;margin-bottom:0">'+lp.key+'</span> '+t('campanhas')+'</div>'
+      +'<div class="lp-camp-box"><table><thead>'+hdr+'</thead><tbody>'+campRows(lp.d.camps)+'</tbody></table></div></div>';
+  }).join('');
 }
 
 function goPage(p,btn){
