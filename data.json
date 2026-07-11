@@ -5,10 +5,10 @@
   "lancamento": "IP02",
   "moeda": "EUR",
   "moeda_simbolo": "€",
-  "atualizado": "10/07/2026",
+  "atualizado": "11/07/2026",
   "kpis": {
-    "spend": 3285.73,
-    "leads": 465,
-    "cpl": 7.07
+    "spend": 3399.35,
+    "leads": 479,
+    "cpl": 7.1
   }
 }
