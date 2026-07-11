@@ -518,6 +518,7 @@ const TRANSLATIONS = {
     lp_ch_cpl_s:      'Custo por lead',
     lp_ch_cr_s:       'PV / Cliques',
     lp_ch_tx:         'Taxa Conv. LP',
+    p_sem_utm:        '(sem preenchimento)',
   },
   ES: {
     launch:           'Lanzamiento',
@@ -606,6 +607,7 @@ const TRANSLATIONS = {
     lp_ch_cpl_s:      'Costo por lead',
     lp_ch_cr_s:       'PV / Clics',
     lp_ch_tx:         'Tasa Conv. LP',
+    p_sem_utm:        '(sin completar)',
   }
 };
 
@@ -1495,7 +1497,7 @@ function buildUtmFilters(){
         const cnt=PESQUISA.rows.filter(r=>r[utm]===v).length;
         return `<label class="utm-item">
           <input type="checkbox" value="${v}" data-utm="${utm}" onchange="onPesCheck(this)" checked>
-          <span class="utm-item-lbl">${v}</span><span class="utm-item-cnt">${cnt}</span>
+          <span class="utm-item-lbl">${v==='(vazio)'?t('p_sem_utm'):v}</span><span class="utm-item-cnt">${cnt}</span>
         </label>`;
       }).join('')}</div>
     </div>`;
