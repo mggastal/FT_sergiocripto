@@ -19,6 +19,7 @@ COR_ACENTO       = "#B8860B"
 
 LANCAMENTO_COD   = "IP02"        # filtra campanhas; "" = ver tudo
 USAR_PESQUISA    = True            # False = oculta aba Pesquisa
+USAR_VENDAS      = True            # False = oculta aba Vendas
 
 # ══ MOEDA ══════════════════════════════════════════════
 # Escolha a moeda do cliente:
@@ -56,6 +57,7 @@ URL_META = sheet_url("meta-ads")
 URL_PES  = sheet_url("Pesquisa")
 URL_GA   = sheet_url("breakdown-gender-age")
 URL_PT   = sheet_url("breakdown-platform")
+URL_VENDAS = sheet_url("Vendas")
 
 def to_num(s):
     if pd.api.types.is_numeric_dtype(s): return s.fillna(0)
@@ -409,6 +411,151 @@ def pesquisa_process(df, total_leads):
             "filtros":filtros,"rows":rows,"perguntas":PERGUNTAS,"resp_por_dia":resp_por_dia}
 
 # ══ INJEÇÃO ════════════════════════════════════════════
+
+# ══════════════════════════════════════════════════════
+# VENDAS
+# ══════════════════════════════════════════════════════
+def load_vendas():
+    print("  Lendo Vendas...")
+    df = pd.read_csv(URL_VENDAS)
+    df = df.rename(columns={
+        "Precio Total (Euros)": "valor", "Precio Total": "valor", "Valor": "valor",
+        "Data": "data", "Fecha": "data",
+        "Campanha": "campanha", "Campaña": "campanha",
+        "Conjunto": "conjunto", "Criativo": "criativo",
+        "Pagamento": "pagamento", "Pago": "pagamento",
+        "País": "pais", "Pais": "pais", "Email": "email",
+    })
+    df["valor"] = to_num(df["valor"]) if "valor" in df.columns else 0
+    df["data"]  = pd.to_datetime(df.get("data"), errors="coerce", dayfirst=True)
+    for c in ["campanha", "conjunto", "criativo", "pagamento", "pais", "email"]:
+        if c not in df.columns: df[c] = None
+    # descarta linhas totalmente vazias (planilha traz milhares de linhas em branco)
+    df = df[(df["valor"] > 0) | df["email"].notna()]
+    print(f"     {len(df)} vendas")
+    return df
+
+
+def build_vendas_data(df_v, df_meta):
+    """Cruza vendas com investimento. Receita TOTAL entra no ROAS do lançamento
+    (a UTM do CRM não sobrescreve: comprador antigo carrega UTM de lançamento
+    anterior ou vazia, mas a venda é deste lançamento)."""
+    import re as _re
+    from collections import defaultdict
+
+    df_v = df_v.copy()
+    for c in ["campanha", "conjunto", "criativo", "pagamento", "pais"]:
+        df_v[c] = df_v[c].fillna("").astype(str).str.strip()
+
+    # ── Investimento do lançamento, por nível ──
+    m = df_meta[df_meta["is_lct"]] if LANCAMENTO_COD else df_meta
+    inv_total = float(m["spend"].sum())
+    inv_camp  = m.groupby("campaign")["spend"].sum().to_dict()
+    inv_conj  = m.groupby("adset")["spend"].sum().to_dict()
+    inv_criat = m.groupby("ad")["spend"].sum().to_dict()
+    inv_lpv   = defaultdict(float)
+    for _, r in m.iterrows():
+        mm = _re.search(r"LPV(\d+)", str(r.get("campaign", "")))
+        if mm: inv_lpv["LPV" + mm.group(1)] += float(r.get("spend", 0) or 0)
+
+    def r2(v): return round(float(v), 2)
+    def roas(rec, inv): return r2(rec / inv) if inv and inv > 0 else None
+
+    # ── Totais ──
+    receita = float(df_v["valor"].sum())
+    n_vendas = int(len(df_v))
+    atrib   = df_v[df_v["campanha"].str.contains(LANCAMENTO_COD, na=False, case=False)] if LANCAMENTO_COD else df_v
+    outras  = df_v.drop(atrib.index)
+
+    totals = {
+        "receita": r2(receita), "vendas": n_vendas,
+        "ticket": r2(receita / n_vendas) if n_vendas else None,
+        "invest": r2(inv_total), "roas": roas(receita, inv_total),
+        "cac": r2(inv_total / n_vendas) if n_vendas else None,
+        "receita_atrib": r2(atrib["valor"].sum()), "vendas_atrib": int(len(atrib)),
+        "receita_outras": r2(outras["valor"].sum()), "vendas_outras": int(len(outras)),
+        "roas_atrib": roas(float(atrib["valor"].sum()), inv_total),
+    }
+
+    # ── Série diária ──
+    dias = sorted(df_v["data"].dropna().dt.strftime("%d/%m/%y").unique(),
+                  key=lambda s: tuple(int(x) for x in reversed(s.split("/"))))
+    g = df_v.dropna(subset=["data"]).groupby(df_v["data"].dt.strftime("%d/%m/%y"))
+    daily = {"days": dias,
+             "receita": [r2(g.get_group(d)["valor"].sum()) if d in g.groups else 0 for d in dias],
+             "vendas":  [int(len(g.get_group(d))) if d in g.groups else 0 for d in dias]}
+    # investimento por dia (do meta) — para ROAS diário quando houver sobreposição
+    mg = m.groupby(m["date"].dt.strftime("%d/%m/%y"))["spend"].sum().to_dict()
+    daily["invest"] = [r2(mg.get(d, 0)) for d in dias]
+
+    # ── Quebras (só vendas com UTM deste lançamento cruzam com investimento) ──
+    def quebra(col, inv_map, inv_ref=None):
+        out = []
+        sub = atrib[atrib[col] != ""]
+        for nome, grp in sub.groupby(col):
+            rec = float(grp["valor"].sum()); inv = float(inv_map.get(nome, 0))
+            out.append({"n": nome, "vendas": int(len(grp)), "receita": r2(rec),
+                        "invest": r2(inv), "roas": roas(rec, inv),
+                        "ticket": r2(rec / len(grp)) if len(grp) else None})
+        out = sorted(out, key=lambda x: -x["receita"])
+        # investimento que não gerou venda neste nível → linha agregada,
+        # para o TOTAL da tabela bater com o investimento real do lançamento
+        base = inv_ref if inv_ref is not None else sum(inv_map.values())
+        resto = base - sum(x["invest"] for x in out)
+        if resto > 0.01:
+            out.append({"n": "__SEM_VENDA__", "vendas": 0, "receita": 0.0,
+                        "invest": r2(resto), "roas": 0.0, "ticket": None})
+        return out
+
+    camps     = quebra("campanha", inv_camp, inv_total)
+    publicos  = quebra("conjunto", inv_conj, inv_total)
+    criativos = quebra("criativo", inv_criat, inv_total)
+
+    # LPs: agrega por LPVxx
+    lp_rec = defaultdict(float); lp_n = defaultdict(int)
+    for _, r in atrib.iterrows():
+        mm = _re.search(r"LPV(\d+)", r["campanha"])
+        if not mm: continue
+        k = "LPV" + mm.group(1)
+        lp_rec[k] += float(r["valor"] or 0); lp_n[k] += 1
+    lps = []
+    for k in sorted(set(list(lp_rec.keys()) + list(inv_lpv.keys())),
+                    key=lambda x: int(x.replace("LPV", ""))):
+        rec = lp_rec.get(k, 0.0); inv = inv_lpv.get(k, 0.0)
+        lps.append({"n": k, "vendas": lp_n.get(k, 0), "receita": r2(rec),
+                    "invest": r2(inv), "roas": roas(rec, inv),
+                    "ticket": r2(rec / lp_n[k]) if lp_n.get(k) else None})
+    _resto_lp = inv_total - sum(x["invest"] for x in lps)
+    if _resto_lp > 0.01:
+        lps.append({"n": "__SEM_VENDA__", "vendas": 0, "receita": 0.0,
+                    "invest": r2(_resto_lp), "roas": 0.0, "ticket": None})
+
+    # ── Simples (sem investimento) ──
+    def simples(col, src):
+        out = []
+        s = src.copy()
+        s[col] = s[col].replace("", "__SEM_REG__")
+        for nome, grp in s.groupby(col):
+            out.append({"n": nome, "vendas": int(len(grp)), "receita": r2(grp["valor"].sum())})
+        return sorted(out, key=lambda x: -x["receita"])
+
+    pagamentos = simples("pagamento", df_v)
+    paises     = simples("pais", df_v)
+
+    # Outras origens: agrupa por campanha (vazio → "Sem campanha")
+    o = outras.copy()
+    o["origem"] = o["campanha"].replace("", "__SEM__")
+    outras_lst = []
+    for nome, grp in o.groupby("origem"):
+        outras_lst.append({"n": "(sem campanha)" if nome == "__SEM__" else nome,
+                           "vendas": int(len(grp)), "receita": r2(grp["valor"].sum())})
+    outras_lst = sorted(outras_lst, key=lambda x: -x["receita"])
+
+    return {"totals": totals, "daily": daily, "camps": camps, "publicos": publicos,
+            "criativos": criativos, "lps": lps, "pagamentos": pagamentos,
+            "paises": paises, "outras": outras_lst}
+
+
 def replace_js_const(html, name, value):
     pattern=rf"const {name}\s*=\s*(?:null|true|false|-?\d[\d\.]*|'[^']*'|\"[^\"]*\"|\{{[\s\S]*?\}}|\[[\s\S]*?\])\s*;"
     replacement=f"const {name} = {json.dumps(value,ensure_ascii=False)};"
@@ -495,7 +642,7 @@ def build_lpv_data(df):
     return result
 
 
-def inject_all(tpl, meta_k, meta_d, meta_dc, meta_raw_c, meta_t, meta_bd, pes, lpv_data=None):
+def inject_all(tpl, meta_k, meta_d, meta_dc, meta_raw_c, meta_t, meta_bd, pes, lpv_data=None, vendas_data=None):
     html=Path(tpl).read_text(encoding="utf-8")
     html=replace_js_const(html,"META_KPIS",       meta_k)
     html=replace_js_const(html,"META_DAILY",       meta_d)
@@ -506,6 +653,7 @@ def inject_all(tpl, meta_k, meta_d, meta_dc, meta_raw_c, meta_t, meta_bd, pes, l
     html=replace_js_const(html,"PESQUISA",         pes if USAR_PESQUISA else False)
     if lpv_data is not None:
         html=replace_js_const(html,"LPV_DATA", lpv_data)
+    html=replace_js_const(html,"VENDAS_DATA", vendas_data if (USAR_VENDAS and vendas_data) else False)
     html=replace_js_const(html,"DATA_GERACAO",     date.today().strftime("%Y-%m-%d"))
 
     _cpl_bom   = globals().get("CPL_BOM",   globals().get("CPA_BOM",   5.0))
@@ -573,10 +721,26 @@ def main():
     except Exception as e:
         print(f"  ⚠ {e}"); lpv_data = None
 
+    print("\n[VENDAS]")
+    vendas_data = None
+    if USAR_VENDAS:
+        try:
+            df_vendas = load_vendas()
+            vendas_data = build_vendas_data(df_vendas, df_meta)
+            t = vendas_data["totals"]
+            print(f"  ✓ {t['vendas']} vendas | receita {MOEDA_SIMBOLO}{t['receita']:,.2f} | "
+                  f"invest {MOEDA_SIMBOLO}{t['invest']:,.2f} | ROAS {t['roas']}x")
+            for lp in vendas_data["lps"]:
+                print(f"     {lp['n']}: {lp['vendas']} vendas | {MOEDA_SIMBOLO}{lp['receita']:,.2f} | ROAS {lp['roas']}x")
+        except Exception as e:
+            print(f"  ⚠ {e}"); vendas_data = None
+    else:
+        print("  (desativada)")
+
     print("\n[HTML]")
     if not Path(TEMPLATE_FILE).exists():
         print(f"  ERRO: {TEMPLATE_FILE} não encontrado"); return
-    html=inject_all(TEMPLATE_FILE,m_k,m_d,m_dc,m_raw,m_t,m_bd,pes,lpv_data)
+    html=inject_all(TEMPLATE_FILE,m_k,m_d,m_dc,m_raw,m_t,m_bd,pes,lpv_data,vendas_data)
     Path(OUTPUT_FILE).write_text(html,encoding="utf-8")
     print(f"  ✓ {OUTPUT_FILE} ({len(html)//1024}KB)")
 
