@@ -669,16 +669,17 @@ def build_lpv_data(df):
                 "tx_conv":round(ld/pv*100,2)  if pv>0  else None}
 
     def build_daily(lv):
-        out={"days":days,"spend":[],"imp":[],"lc":[],"pv":[],"leads":[],"checkout":[],"purchases":[],
+        out={"days":days,"spend":[],"imp":[],"lc":[],"pv":[],"leads":[],"checkout":[],"purchases":[],"receita":[],
              "cpl":[],"cpv":[],"cr":[],"tx_checkout":[],"tx_conv_lp":[],"tx_conv":[]}
         for d in days:
             v=lpv_daily[lv][d]
             sp=round(float(v.get("sp",0)),2); imp=int(v.get("imp",0))
             lc=int(v.get("lc",0)); pv=int(v.get("pv",0)); ld=int(v.get("ld",0))
-            ck=int(v.get("ck",0)); pu=int(v.get("pu",0))
+            ck=int(v.get("ck",0)); pu=int(v.get("pu",0)); pval=round(float(v.get("pval",0)),2)
             out["spend"].append(sp); out["imp"].append(imp); out["lc"].append(lc)
             out["pv"].append(pv);   out["leads"].append(ld)
             out["checkout"].append(ck); out["purchases"].append(pu)
+            out["receita"].append(pval)
             out["cpl"].append(round(sp/ld,2) if ld>0 else None)
             out["cpv"].append(round(sp/pu,2) if pu>0 else None)
             out["tx_checkout"].append(round(ck/pv*100,2) if pv>0 else None)
