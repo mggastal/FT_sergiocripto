@@ -17,8 +17,8 @@ NOME_CLIENTE     = "Sergio Cripto"
 LOGO_LETRA       = "SC"
 COR_ACENTO       = "#B8860B"
 
-LANCAMENTO_COD   = "IP02"        # filtra campanhas; "" = ver tudo
-USAR_PESQUISA    = True            # False = oculta aba Pesquisa
+LANCAMENTO_COD   = "VSL"         # filtra campanhas; "" = ver tudo
+USAR_PESQUISA    = False           # False = oculta aba Pesquisa
 USAR_VENDAS      = True            # False = oculta aba Vendas
 
 # ══ MOEDA ══════════════════════════════════════════════
@@ -29,14 +29,22 @@ USAR_VENDAS      = True            # False = oculta aba Vendas
 MOEDA            = "EUR"
 
 # Metas do funil — define cores (verde/amarelo/vermelho)
-CPL_BOM          = 9.06    # Custo por Lead ≤ 5 → verde | 5-10 → amarelo | acima → vermelho
+# ── Foco em VENDAS (VSL): CPV = custo por venda ──
+CPV_BOM          = 80.0   # Custo por Venda ≤ este → verde | até CPV_MEDIO → amarelo | acima → vermelho
+CPV_MEDIO        = 150.0
+CPL_BOM          = 9.06   # (mantido p/ retrocompat, não usado no foco vendas)
 CPL_MEDIO        = 12.0
 CTR_BOM          = 1.0    # CTR ≥ 1.2% → verde | 0.8-1.2% → amarelo | abaixo → vermelho
 CTR_MEDIO        = 0.8
 CR_BOM           = 65.0   # Connect Rate ≥ 40% → verde | 25-40% → amarelo | abaixo → vermelho
 CR_MEDIO         = 60.0
-TX_CONV_BOM      = 25.0   # Taxa Conversão (Lead/PV) ≥ 30% → verde | 15-30% → amarelo | abaixo → vermelho
+TX_CONV_BOM      = 25.0   # (retrocompat)
 TX_CONV_MEDIO    = 18.0
+# Funil VSL:
+CHECKOUT_BOM     = 8.0    # Taxa de Checkout (checkout/LPView) ≥ → verde
+CHECKOUT_MEDIO   = 4.0
+TXLP_BOM         = 3.0    # Taxa de Conversão LP (compra/LPView) ≥ → verde
+TXLP_MEDIO       = 1.5
 CPM_BOM          = 5.0    
 CPM_MEDIO        = 12.0
 
@@ -57,7 +65,8 @@ URL_META = sheet_url("meta-ads")
 URL_PES  = sheet_url("Pesquisa")
 URL_GA   = sheet_url("breakdown-gender-age")
 URL_PT   = sheet_url("breakdown-platform")
-URL_VENDAS = sheet_url("Vendas")
+ABA_VENDAS = "Vendas VSL"          # aba da planilha com as vendas
+URL_VENDAS = sheet_url(ABA_VENDAS)
 
 def to_num(s):
     if pd.api.types.is_numeric_dtype(s): return s.fillna(0)
@@ -94,11 +103,15 @@ def load_meta():
         "Impressions":"impressions",
         "Action Link Clicks":"link_clicks",
         "Action Landing Page View":"page_view",
-        "Action Leads":"leads"
+        "Action Leads":"leads",
+        "Action Omni Initiated Checkout":"checkout",
+        "Action Omni Purchase":"purchases",
+        "Action Value Omni Purchase":"purchase_value"
     })
     df["date"]=pd.to_datetime(df["date"],errors="coerce")
-    for c in ["spend","impressions","link_clicks","page_view","leads"]:
-        if c in df.columns: df[c]=to_num(df[c])
+    for c in ["spend","impressions","link_clicks","page_view","leads","checkout","purchases","purchase_value"]:
+        if c not in df.columns: df[c]=0
+        df[c]=to_num(df[c])
     if "status" in df.columns:
         df["status"]=df["status"].astype(str).str.strip().str.upper()
     df["is_lct"]=df["campaign"].str.contains(LANCAMENTO_COD,na=False,case=False) if LANCAMENTO_COD else True
@@ -110,14 +123,21 @@ def calc_kpis(p):
     sp=float(p["spend"].sum()); imp=float(p["impressions"].sum())
     lc=float(p["link_clicks"].sum()); pv=float(p["page_view"].sum())
     ld=float(p["leads"].sum())
+    ck=float(p["checkout"].sum()) if "checkout" in p.columns else 0.0
+    pu=float(p["purchases"].sum()) if "purchases" in p.columns else 0.0
+    pval=float(p["purchase_value"].sum()) if "purchase_value" in p.columns else 0.0
     return {
         "spend":round(sp,2),"impressions":int(imp),"link_clicks":int(lc),
         "page_view":int(pv),"leads":int(ld),
+        "checkout":int(ck),"purchases":int(pu),"purchase_value":round(pval,2),
         "ctr":   round(lc/imp*100,2) if imp>0 else None,
         "connect_rate":round(pv/lc*100,2) if lc>0 else None,
         "tx_conv":round(ld/pv*100,2) if pv>0 else None,
         "cpl":   round(sp/ld,2) if ld>0 else None,
-        "cpm":   round(sp/imp*1000,2) if imp>0 else None
+        "cpm":   round(sp/imp*1000,2) if imp>0 else None,
+        "tx_checkout":round(ck/pv*100,2) if pv>0 else None,
+        "tx_conv_lp": round(pu/pv*100,2) if pv>0 else None,
+        "cpv":       round(sp/pu,2) if pu>0 else None
     }
 
 def meta_kpis(df):
@@ -127,21 +147,31 @@ def build_daily(p):
     agg=p.groupby("date").agg(
         spend=("spend","sum"),impressions=("impressions","sum"),
         link_clicks=("link_clicks","sum"),page_view=("page_view","sum"),
-        leads=("leads","sum")
+        leads=("leads","sum"),checkout=("checkout","sum"),
+        purchases=("purchases","sum"),purchase_value=("purchase_value","sum")
     ).reset_index().sort_values("date")
-    out={k:[] for k in ["days","spend","impressions","link_clicks","page_view","leads","ctr","connect_rate","tx_conv","cpl","cpm"]}
+    out={k:[] for k in ["days","spend","impressions","link_clicks","page_view","leads",
+        "checkout","purchases","purchase_value","ctr","connect_rate","tx_conv","cpl","cpm",
+        "tx_checkout","tx_conv_lp","cpv","receita"]}
     for _,r in agg.iterrows():
         sp=float(r["spend"]); imp=float(r["impressions"]); lc=float(r["link_clicks"])
         pv=float(r["page_view"]); ld=float(r["leads"])
+        ck=float(r["checkout"]); pu=float(r["purchases"]); pval=float(r["purchase_value"])
         out["days"].append(r["date"].strftime("%d/%m"))
         out["spend"].append(round(sp,2)); out["impressions"].append(int(imp))
         out["link_clicks"].append(int(lc)); out["page_view"].append(int(pv))
-        out["leads"].append(int(ld))
+        out["leads"].append(int(ld)); out["checkout"].append(int(ck))
+        out["purchases"].append(int(pu)); out["purchase_value"].append(round(pval,2))
         out["ctr"].append(round(lc/imp*100,2) if imp>0 else None)
         out["connect_rate"].append(round(pv/lc*100,2) if lc>0 else None)
         out["tx_conv"].append(round(ld/pv*100,2) if pv>0 else None)
         out["cpl"].append(round(sp/ld,2) if ld>0 else None)
         out["cpm"].append(round(sp/imp*1000,2) if imp>0 else None)
+        # ── Funil VSL ──
+        out["tx_checkout"].append(round(ck/pv*100,2) if pv>0 else None)  # checkout / LPView
+        out["tx_conv_lp"].append(round(pu/pv*100,2) if pv>0 else None)   # compra / LPView
+        out["cpv"].append(round(sp/pu,2) if pu>0 else None)              # custo por venda
+        out["receita"].append(round(pval,2))
     return out
 
 def meta_daily(df):
@@ -199,25 +229,33 @@ def build_status_maps(df):
 
 def meta_tables_period(df, p, img_dir, camp_status=None, adset_status=None, ad_status=None):
     camp_status=camp_status or {}; adset_status=adset_status or {}; ad_status=ad_status or {}
-    def ag(sub,cols): return sub.groupby(cols).agg(spend=("spend","sum"),impressions=("impressions","sum"),link_clicks=("link_clicks","sum"),page_view=("page_view","sum"),leads=("leads","sum")).reset_index()
+    def ag(sub,cols): return sub.groupby(cols).agg(spend=("spend","sum"),impressions=("impressions","sum"),link_clicks=("link_clicks","sum"),page_view=("page_view","sum"),leads=("leads","sum"),checkout=("checkout","sum"),purchases=("purchases","sum"),purchase_value=("purchase_value","sum")).reset_index()
 
     def calc_row(r):
         sp=round(float(r["spend"]),2); imp=int(r["impressions"]); lc=int(r["link_clicks"])
         pv=int(r["page_view"]); ld=int(r["leads"])
+        ck=int(r["checkout"]) if "checkout" in r else 0
+        pu=int(r["purchases"]) if "purchases" in r else 0
+        pval=round(float(r["purchase_value"]),2) if "purchase_value" in r else 0.0
         return {"spend":sp,"imp":imp,"lc":lc,"pv":pv,"ld":ld,
+            "checkout":ck,"purchases":pu,"receita":pval,
             "ctr":round(lc/imp*100,2) if imp>0 else None,
             "cr":round(pv/lc*100,2) if lc>0 else None,
             "tx_cv":round(ld/pv*100,2) if pv>0 else None,
+            "tx_checkout":round(ck/pv*100,2) if pv>0 else None,
+            "tx_conv_lp":round(pu/pv*100,2) if pv>0 else None,
             "cpl":round(sp/ld,2) if ld>0 else None,
+            "cpv":round(sp/pu,2) if pu>0 else None,
+            "roas":round(pval/sp,2) if sp>0 else None,
             "cpm":round(sp/imp*1000,2) if imp>0 else None}
 
     camps_agg=ag(p,"campaign")
-    camps=[{"n":str(r["campaign"]),"status":camp_status.get(str(r["campaign"]),""),**calc_row(r)} for _,r in camps_agg.sort_values("leads",ascending=False).iterrows()]
+    camps=[{"n":str(r["campaign"]),"status":camp_status.get(str(r["campaign"]),""),**calc_row(r)} for _,r in camps_agg.sort_values(["purchases","leads"],ascending=False).iterrows()]
 
     adsets_agg=ag(p,["campaign","adset"])
     adsets=[{"n":str(r["adset"]),"camp":str(r["campaign"]),
              "status":adset_status.get((str(r["campaign"]),str(r["adset"])),""),
-             **calc_row(r)} for _,r in adsets_agg.sort_values("leads",ascending=False).iterrows()]
+             **calc_row(r)} for _,r in adsets_agg.sort_values(["purchases","leads"],ascending=False).iterrows()]
 
     df_full_thumb=df[df["thumb"].notna()&(df["thumb"].astype(str)!="nan")] if "thumb" in df.columns else pd.DataFrame()
     thumb_map={}
@@ -225,15 +263,23 @@ def meta_tables_period(df, p, img_dir, camp_status=None, adset_status=None, ad_s
         k=(str(r["ad"]),str(r["adset"]),str(r["campaign"]))
         if k not in thumb_map: thumb_map[k]=download_thumb(str(r["thumb"]),img_dir)
 
-    ads_agg=p.groupby(["ad","adset","campaign"]).agg(spend=("spend","sum"),impressions=("impressions","sum"),link_clicks=("link_clicks","sum"),leads=("leads","sum")).reset_index().sort_values("leads",ascending=False)
+    ads_agg=p.groupby(["ad","adset","campaign"]).agg(spend=("spend","sum"),impressions=("impressions","sum"),link_clicks=("link_clicks","sum"),page_view=("page_view","sum"),leads=("leads","sum"),checkout=("checkout","sum"),purchases=("purchases","sum"),purchase_value=("purchase_value","sum")).reset_index().sort_values(["purchases","leads"],ascending=False)
     ads=[]
     for _,r in ads_agg.iterrows():
-        sp=round(float(r["spend"]),2); imp=int(r["impressions"]); lc=int(r["link_clicks"]); ld=int(r["leads"])
+        sp=round(float(r["spend"]),2); imp=int(r["impressions"]); lc=int(r["link_clicks"])
+        pv=int(r["page_view"]); ld=int(r["leads"])
+        ck=int(r["checkout"]); pu=int(r["purchases"]); pval=round(float(r["purchase_value"]),2)
         k=(str(r["ad"]),str(r["adset"]),str(r["campaign"]))
         ads.append({"n":str(r["ad"]),"adset":str(r["adset"]),"camp":str(r["campaign"]),
             "status":ad_status.get((str(r["campaign"]),str(r["adset"]),str(r["ad"])),""),
-            "thumb":thumb_map.get(k,""),"spend":sp,"imp":imp,"lc":lc,"ld":ld,
+            "thumb":thumb_map.get(k,""),"spend":sp,"imp":imp,"lc":lc,"pv":pv,"ld":ld,
+            "checkout":ck,"purchases":pu,"receita":pval,
             "ctr":round(lc/imp*100,2) if imp>0 else None,
+            "cr":round(pv/lc*100,2) if lc>0 else None,
+            "tx_checkout":round(ck/pv*100,2) if pv>0 else None,
+            "tx_conv_lp":round(pu/pv*100,2) if pv>0 else None,
+            "cpv":round(sp/pu,2) if pu>0 else None,
+            "roas":round(pval/sp,2) if sp>0 else None,
             "cpl":round(sp/ld,2) if ld>0 else None})
     return {"camps":camps,"adsets":adsets,"ads":ads}
 
@@ -592,8 +638,11 @@ def build_lpv_data(df):
         lc   = float(row.get("link_clicks", 0) or 0)
         pv   = float(row.get("page_view",   0) or 0)
         ld   = float(row.get("leads",       0) or 0)
+        ck   = float(row.get("checkout",    0) or 0)
+        pu   = float(row.get("purchases",   0) or 0)
+        pval = float(row.get("purchase_value",0) or 0)
         all_days_set.add(d); camp_lpv[camp] = lv; lpv_seen.add(lv)
-        for k,v in [("sp",sp),("imp",imp),("lc",lc),("pv",pv),("ld",ld)]:
+        for k,v in [("sp",sp),("imp",imp),("lc",lc),("pv",pv),("ld",ld),("ck",ck),("pu",pu),("pval",pval)]:
             lpv_daily[lv][d][k] += v
             lpv_camps[camp][k]  += v
 
@@ -606,22 +655,34 @@ def build_lpv_data(df):
     def metrics(agg):
         sp=round(float(agg.get("sp",0)),2); imp=int(agg.get("imp",0))
         lc=int(agg.get("lc",0)); pv=int(agg.get("pv",0)); ld=int(agg.get("ld",0))
+        ck=int(agg.get("ck",0)); pu=int(agg.get("pu",0)); pval=round(float(agg.get("pval",0)),2)
         return {"spend":sp,"imp":imp,"lc":lc,"pv":pv,"leads":ld,
+                "checkout":ck,"purchases":pu,"receita":pval,
                 "cpm":  round(sp/imp*1000,2) if imp>0 else None,
                 "ctr":  round(lc/imp*100,2)  if imp>0 else None,
                 "cr":   round(pv/lc*100,2)   if lc>0  else None,
                 "cpl":  round(sp/ld,2)        if ld>0  else None,
+                "cpv":  round(sp/pu,2)        if pu>0  else None,
+                "tx_checkout":round(ck/pv*100,2) if pv>0 else None,
+                "tx_conv_lp": round(pu/pv*100,2)  if pv>0 else None,
+                "roas": round(pval/sp,2)      if sp>0  else None,
                 "tx_conv":round(ld/pv*100,2)  if pv>0  else None}
 
     def build_daily(lv):
-        out={"days":days,"spend":[],"imp":[],"lc":[],"pv":[],"leads":[],"cpl":[],"cr":[],"tx_conv":[]}
+        out={"days":days,"spend":[],"imp":[],"lc":[],"pv":[],"leads":[],"checkout":[],"purchases":[],
+             "cpl":[],"cpv":[],"cr":[],"tx_checkout":[],"tx_conv_lp":[],"tx_conv":[]}
         for d in days:
             v=lpv_daily[lv][d]
             sp=round(float(v.get("sp",0)),2); imp=int(v.get("imp",0))
             lc=int(v.get("lc",0)); pv=int(v.get("pv",0)); ld=int(v.get("ld",0))
+            ck=int(v.get("ck",0)); pu=int(v.get("pu",0))
             out["spend"].append(sp); out["imp"].append(imp); out["lc"].append(lc)
             out["pv"].append(pv);   out["leads"].append(ld)
+            out["checkout"].append(ck); out["purchases"].append(pu)
             out["cpl"].append(round(sp/ld,2) if ld>0 else None)
+            out["cpv"].append(round(sp/pu,2) if pu>0 else None)
+            out["tx_checkout"].append(round(ck/pv*100,2) if pv>0 else None)
+            out["tx_conv_lp"].append(round(pu/pv*100,2) if pv>0 else None)
             out["cr"].append(round(pv/lc*100,2) if lc>0 else None)
             out["tx_conv"].append(round(ld/pv*100,2) if pv>0 else None)
         return out
@@ -678,6 +739,13 @@ def inject_all(tpl, meta_k, meta_d, meta_dc, meta_raw_c, meta_t, meta_bd, pes, l
         ("TX_CONV_MEDIO",  str(TX_CONV_MEDIO)),
         ("CPM_BOM",        str(CPM_BOM)),
         ("CPM_MEDIO",      str(CPM_MEDIO)),
+        # Funil VSL (vendas)
+        ("CPV_BOM",        str(CPV_BOM)),
+        ("CPV_MEDIO",      str(CPV_MEDIO)),
+        ("CHECKOUT_BOM",   str(CHECKOUT_BOM)),
+        ("CHECKOUT_MEDIO", str(CHECKOUT_MEDIO)),
+        ("TXLP_BOM",       str(TXLP_BOM)),
+        ("TXLP_MEDIO",     str(TXLP_MEDIO)),
     ]:
         html=re.sub(rf"const {k}\s*=\s*[^;]+;", f"const {k}={v};", html, count=1)
 
