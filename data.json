@@ -2,13 +2,13 @@
   "cliente": "Sergio Cripto",
   "cor": "#B8860B",
   "letra": "SC",
-  "lancamento": "IP02",
+  "lancamento": "VSL",
   "moeda": "EUR",
   "moeda_simbolo": "€",
-  "atualizado": "05/08/2026",
+  "atualizado": "06/08/2026",
   "kpis": {
-    "spend": 5689.67,
-    "leads": 769,
-    "cpl": 7.4
+    "spend": 55.42,
+    "leads": 0,
+    "cpl": null
   }
 }
