@@ -122,7 +122,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 /* TABELAS */
 .tc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);overflow-x:auto;margin-bottom:14px;}
 .tc table{width:100%;border-collapse:collapse;min-width:700px;}
-.tc thead th{font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:700;padding:8px 10px;text-align:left;background:var(--surface2);border-bottom:1px solid var(--border);white-space:nowrap;}
+.tc thead th{font-size:9px;text-transform:uppercase;letter-spacing:.3px;color:var(--muted);font-weight:700;padding:8px 8px;text-align:left;background:var(--surface2);border-bottom:1px solid var(--border);white-space:nowrap;}
 .tc thead th.num{text-align:right;}
 .tc tbody td{padding:7px 10px;font-size:11px;border-bottom:1px solid var(--border);white-space:nowrap;}
 .tc tbody tr:last-child td{border-bottom:none;}
@@ -437,8 +437,8 @@ details.desk-only{display:block!important;}
       <div class="lp-hero" id="lpHero"></div>
       <div class="lp-lgd" id="lpLgd"></div>
       <div class="lp-charts">
-        <div class="cc"><div class="cc-t" data-i18n="lp_ch_leads">Leads</div><div class="cc-s" data-i18n="lp_ch_leads_s">por dia</div><div class="cw" style="height:180px"><canvas id="chLpLeads"></canvas></div></div>
-        <div class="cc"><div class="cc-t">CPL</div><div class="cc-s" data-i18n="lp_ch_cpl_s">Custo por lead</div><div class="cw" style="height:180px"><canvas id="chLpCpl"></canvas></div></div>
+        <div class="cc"><div class="cc-t" data-i18n="kpi_vendas">Vendas</div><div class="cc-s" data-i18n="lp_ch_leads_s">por dia</div><div class="cw" style="height:180px"><canvas id="chLpLeads"></canvas></div></div>
+        <div class="cc"><div class="cc-t" data-i18n="kpi_cpv">Custo por Venda</div><div class="cc-s" data-i18n="lp_ch_cpl_s">Custo por lead</div><div class="cw" style="height:180px"><canvas id="chLpCpl"></canvas></div></div>
         <div class="cc"><div class="cc-t">Connect Rate</div><div class="cc-s" data-i18n="lp_ch_cr_s">PV / Cliques</div><div class="cw" style="height:180px"><canvas id="chLpCr"></canvas></div></div>
         <div class="cc"><div class="cc-t" data-i18n="lp_ch_tx">Taxa Conv. LP</div><div class="cc-s">Leads / PV</div><div class="cw" style="height:180px"><canvas id="chLpTx"></canvas></div></div>
       </div>
@@ -520,6 +520,12 @@ const TX_CONV_BOM    = 30.0;
 const TX_CONV_MEDIO  = 15.0;
 const CPM_BOM        = 5.0;
 const CPM_MEDIO      = 12.0;
+    const CPV_BOM        = 80.0;
+    const CPV_MEDIO      = 150.0;
+    const CHECKOUT_BOM   = 8.0;
+    const CHECKOUT_MEDIO = 4.0;
+    const TXLP_BOM       = 3.0;
+    const TXLP_MEDIO     = 1.5;
 
 // ═══ I18N ═══════════════════════════════════════════════════
 const TRANSLATIONS = {
@@ -555,6 +561,16 @@ const TRANSLATIONS = {
     kpi_cpl:          'CPL',
     kpi_cap:          'captados no período',
     kpi_cpl_sub:      'Custo por Lead',
+    kpi_vendas:       'Vendas',
+    kpi_vendas_sub:   'compras no período',
+    kpi_cpv:          'Custo por Venda',
+    kpi_cpv_sub:      'investimento / vendas',
+    f_checkout:       'Checkout',
+    f_compras:        'Compras',
+    f_tx_checkout:    'Checkout',
+    f_tx_conv_lp:     'Conversão LP',
+    m_tx_checkout:    'Taxa de Checkout (%)',
+    m_tx_conv_lp:     'Taxa de Conversão LP (%)',
     // Tabela colunas
     col_camp:         'Campanha',
     col_invest:       'Invest.',
@@ -606,6 +622,9 @@ const TRANSLATIONS = {
     nav_lp:           'Comparar LPs',
     lp_sem_tel:       'sem telefone',
     lp_com_tel:       'com telefone',
+    lp_com_cad:       'com cadastro',
+    lp_sem_cad:       'sem cadastro',
+    m_tx_checkout_s:  'Taxa Checkout',
     lp_vencedor:      'Vencedor',
     lp_cmp_ttl:       'Comparação Detalhada',
     lp_metrica:       'Métrica',
@@ -699,6 +718,16 @@ const TRANSLATIONS = {
     kpi_cpl:          'CPL',
     kpi_cap:          'captados en el período',
     kpi_cpl_sub:      'Costo por Lead',
+    kpi_vendas:       'Ventas',
+    kpi_vendas_sub:   'compras en el período',
+    kpi_cpv:          'Costo por Venta',
+    kpi_cpv_sub:      'inversión / ventas',
+    f_checkout:       'Checkout',
+    f_compras:        'Compras',
+    f_tx_checkout:    'Checkout',
+    f_tx_conv_lp:     'Conversión LP',
+    m_tx_checkout:    'Tasa de Checkout (%)',
+    m_tx_conv_lp:     'Tasa de Conversión LP (%)',
     col_camp:         'Campaña',
     col_invest:       'Inversión',
     col_impr:         'Impr.',
@@ -741,6 +770,9 @@ const TRANSLATIONS = {
     nav_lp:           'Comparar LPs',
     lp_sem_tel:       'sin teléfono',
     lp_com_tel:       'con teléfono',
+    lp_com_cad:       'con registro',
+    lp_sem_cad:       'sin registro',
+    m_tx_checkout_s:  'Tasa Checkout',
     lp_vencedor:      'Ganador',
     lp_cmp_ttl:       'Comparación Detallada',
     lp_metrica:       'Métrica',
@@ -961,18 +993,20 @@ function buildFunnel(mk){
   if(!mk) return;
   const steps=[
     {lbl:t('f_impressoes'), val:mk.impressions,  color:hexA(FUNIL_COLOR,1.0)},
-    {lbl:t('f_link_clicks'),val:mk.link_clicks,  color:hexA(FUNIL_COLOR,0.75)},
-    {lbl:t('f_page_views'), val:mk.page_view,    color:hexA(FUNIL_COLOR,0.50)},
-    {lbl:t('f_leads'),      val:mk.leads,        color:FUNIL_GREEN},
+    {lbl:t('f_link_clicks'),val:mk.link_clicks,  color:hexA(FUNIL_COLOR,0.78)},
+    {lbl:t('f_page_views'), val:mk.page_view,    color:hexA(FUNIL_COLOR,0.56)},
+    {lbl:t('f_checkout'),   val:mk.checkout,     color:hexA(FUNIL_COLOR,0.34)},
+    {lbl:t('f_compras'),    val:mk.purchases,    color:FUNIL_GREEN},
   ];
   const rates=[
-    {lbl:t('f_ctr'),     val:mk.ctr,          bom:CTR_BOM,      medio:CTR_MEDIO},
-    {lbl:t('f_connect'), val:mk.connect_rate,  bom:CR_BOM,       medio:CR_MEDIO},
-    {lbl:t('f_conv'),    val:mk.tx_conv,       bom:TX_CONV_BOM,  medio:TX_CONV_MEDIO},
+    {lbl:t('f_ctr'),        val:mk.ctr,          bom:CTR_BOM,       medio:CTR_MEDIO},
+    {lbl:t('f_connect'),    val:mk.connect_rate, bom:CR_BOM,        medio:CR_MEDIO},
+    {lbl:t('f_tx_checkout'),val:mk.tx_checkout,  bom:CHECKOUT_BOM,  medio:CHECKOUT_MEDIO},
+    {lbl:t('f_tx_conv_lp'), val:mk.tx_conv_lp,   bom:TXLP_BOM,      medio:TXLP_MEDIO},
   ];
-  const maxOther=Math.max(mk.link_clicks||1,mk.page_view||1,mk.leads||1,1);
+  const maxOther=Math.max(mk.link_clicks||1,mk.page_view||1,mk.checkout||1,mk.purchases||1,1);
   const widths=steps.map((s,i)=>i===0?100:Math.max(12,Math.round((s.val||0)/maxOther*88)));
-  for(let i=3;i>=1;i--){ if(widths[i]>=widths[i-1]) widths[i]=Math.max(12, widths[i-1]-8); }
+  for(let i=steps.length-1;i>=1;i--){ if(widths[i]>=widths[i-1]) widths[i]=Math.max(12, widths[i-1]-8); }
   const el=document.getElementById('funnelSteps');
   let html='';
   steps.forEach((s,i)=>{
@@ -1004,41 +1038,45 @@ function renderMeta(){
   if(!mk||!md) return;
 
   const spMK=md?.spend?.reduce((a,b)=>a+(b||0),0)||0;
-  const ldMK=md?.leads?.reduce((a,b)=>a+(b||0),0)||0;
-  const cplMK=spMK>0&&ldMK>0?r2(spMK/ldMK):null;
-  const cplCor=cplMK!=null?(cplMK<=CPL_BOM?'#059669':cplMK<=CPL_MEDIO?'#d97706':'#dc2626'):'var(--muted)';
+  const puMK=md?.purchases?.reduce((a,b)=>a+(b||0),0)||0;
+  const recMK=md?.receita?.reduce((a,b)=>a+(b||0),0)||0;
+  const cpvMK=spMK>0&&puMK>0?r2(spMK/puMK):null;
+  const cpvCor=cpvMK!=null?(cpvMK<=CPV_BOM?'#059669':cpvMK<=CPV_MEDIO?'#d97706':'#dc2626'):'var(--muted)';
   document.getElementById('metaKpis').innerHTML=`
     <div class="kpi" style="--kc:#334155"><div class="kpi-lbl">${t('kpi_invest')}</div><div class="kpi-val" style="font-size:16px;color:var(--text)">${fR(spMK)}</div><div class="kpi-sub">Meta Ads</div></div>
-    <div class="kpi" style="--kc:#3b82f6"><div class="kpi-lbl">${t('kpi_leads')}</div><div class="kpi-val" style="color:var(--text)">${fN(ldMK)}</div><div class="kpi-sub">${t('kpi_cap')}</div></div>
-    <div class="kpi" style="--kc:${cplCor}"><div class="kpi-lbl">${t('kpi_cpl')}</div><div class="kpi-val" style="color:${cplCor}">${fR(cplMK)}</div><div class="kpi-sub">${t('kpi_cpl_sub')}</div></div>`;
+    <div class="kpi" style="--kc:#059669"><div class="kpi-lbl">${t('kpi_vendas')}</div><div class="kpi-val" style="color:#059669">${fN(puMK)}</div><div class="kpi-sub">${recMK>0?fR(recMK):t('kpi_vendas_sub')}</div></div>
+    <div class="kpi" style="--kc:${cpvCor}"><div class="kpi-lbl">${t('kpi_cpv')}</div><div class="kpi-val" style="color:${cpvCor}">${cpvMK!=null?fR(cpvMK):'—'}</div><div class="kpi-sub">${t('kpi_cpv_sub')}</div></div>`;
 
   const funnelKpis={
     impressions: md.impressions?.reduce((a,b)=>a+(b||0),0)||0,
     link_clicks: md.link_clicks?.reduce((a,b)=>a+(b||0),0)||0,
     page_view:   md.page_view?.reduce((a,b)=>a+(b||0),0)||0,
-    leads:       md.leads?.reduce((a,b)=>a+(b||0),0)||0,
+    checkout:    md.checkout?.reduce((a,b)=>a+(b||0),0)||0,
+    purchases:   md.purchases?.reduce((a,b)=>a+(b||0),0)||0,
     spend:       spMK,
   };
-  const imp2=funnelKpis.impressions,lc2=funnelKpis.link_clicks,pv2=funnelKpis.page_view,ld2=funnelKpis.leads;
+  const imp2=funnelKpis.impressions,lc2=funnelKpis.link_clicks,pv2=funnelKpis.page_view;
+  const ck2=funnelKpis.checkout,pu2=funnelKpis.purchases;
   funnelKpis.ctr=imp2>0?r2(lc2/imp2*100):null;
   funnelKpis.connect_rate=lc2>0?r2(pv2/lc2*100):null;
-  funnelKpis.tx_conv=pv2>0?r2(ld2/pv2*100):null;
-  funnelKpis.cpl=ld2>0?r2(spMK/ld2):null;
+  funnelKpis.tx_checkout=pv2>0?r2(ck2/pv2*100):null;
+  funnelKpis.tx_conv_lp=pv2>0?r2(pu2/pv2*100):null;
+  funnelKpis.cpv=pu2>0?r2(spMK/pu2):null;
   setTimeout(()=>buildFunnel(funnelKpis),30);
 
   dc('chMetaMain');
   CH['chMetaMain']=new Chart(document.getElementById('chMetaMain'),{
     data:{labels:md.days,datasets:[
-      {label:t('kpi_leads'),data:md.leads,backgroundColor:'rgba(59,130,246,.7)',borderRadius:3,type:'bar',yAxisID:'y1',
-       datalabels:{...makeDatalabels('#3b82f6','',v=>v!=null?fN(v):null),display:ctx=>showLabels}},
-      {label:t('kpi_invest'),data:md.spend,borderColor:'#059669',backgroundColor:'transparent',tension:.3,pointRadius:2,borderWidth:2,type:'line',spanGaps:true,datalabels:{display:false}},
-      {label:t('kpi_cpl'),data:md.cpl,borderColor:'#111',borderDash:[5,3],backgroundColor:'transparent',tension:.3,pointRadius:2,borderWidth:1.5,type:'line',yAxisID:'y2',spanGaps:true,
+      {label:t('kpi_vendas'),data:md.purchases,backgroundColor:'rgba(5,150,105,.75)',borderRadius:3,type:'bar',yAxisID:'y1',
+       datalabels:{...makeDatalabels('#059669','',v=>v!=null?fN(v):null),display:ctx=>showLabels}},
+      {label:t('kpi_invest'),data:md.spend,borderColor:'#7c3aed',backgroundColor:'transparent',tension:.3,pointRadius:2,borderWidth:2,type:'line',spanGaps:true,datalabels:{display:false}},
+      {label:t('kpi_cpv'),data:md.cpv,borderColor:'#111',borderDash:[5,3],backgroundColor:'transparent',tension:.3,pointRadius:2,borderWidth:1.5,type:'line',yAxisID:'y2',spanGaps:true,
        datalabels:{display:ctx=>showLabels,color:'#333',font:{size:labelSize,weight:'bold'},formatter:v=>v!=null?fR(v):null,anchor:'end',align:'top',offset:2,clip:false}},
     ]},
     options:{...bo(),scales:{
       x:{ticks:{color:TXT(),font:bf,maxTicksLimit:14},grid:{color:GRID()}},
       y:{ticks:{color:TXT(),font:bf,callback:v=>fR(v)},grid:{color:GRID()},min:0},
-      y1:{position:'right',ticks:{color:'#3b82f6',font:bf},grid:{display:false},grace:'20%'},
+      y1:{position:'right',ticks:{color:'#059669',font:bf,precision:0},grid:{display:false},grace:'20%'},
       y2:{position:'right',ticks:{color:'#555',font:bf,callback:v=>fR(v)},grid:{display:false},offset:true,min:0},
     }}
   });
@@ -1205,13 +1243,15 @@ function buildTable(elId,data,mainCol){
 
   const COLS=[
     {k:'spend',l:t('col_invest'),f:fR},
-    {k:'imp',l:t('col_impr'),cls:'cn'},{k:'lc',l:t('col_cliques'),cls:'cn'},{k:'pv',l:'PV',cls:'cn'},
-    {k:'ld',l:t('col_leads'),f:fN},
+    {k:'imp',l:t('col_impr'),cls:'cn'},{k:'lc',l:t('col_cliques'),cls:'cn'},
+    {k:'pv',l:'PV',cls:'cn'},
     {k:'ctr',l:'CTR',f:fP,cls2:v=>funnelCls(v,CTR_BOM,CTR_MEDIO).cls},
     {k:'cr',l:'C.Rate',f:fP,cls2:v=>funnelCls(v,CR_BOM,CR_MEDIO).cls},
-    {k:'tx_cv',l:'Tx.Conv',f:fP,cls2:v=>funnelCls(v,TX_CONV_BOM,TX_CONV_MEDIO).cls},
-    {k:'cpl',l:t('col_cpl'),f:fR,cls2:cplCls},
-    {k:'cpm',l:t('col_cpm'),f:fR},
+    {k:'checkout',l:'CO',f:fN,cls:'cn'},
+    {k:'tx_checkout',l:'Tx.CO',f:fP,cls2:v=>funnelCls(v,CHECKOUT_BOM,CHECKOUT_MEDIO).cls},
+    {k:'purchases',l:t('kpi_vendas'),f:fN},
+    {k:'cpv',l:'CPV',f:fR,cls2:v=>v==null?'':v<=CPV_BOM?'cg':v<=CPV_MEDIO?'cw2':'cr'},
+    {k:'roas',l:'ROAS',f:v=>v!=null?fN(v)+'x':'—'},
   ];
   const head='<tr><th></th><th>'+mainCol+'</th>'+COLS.map(c=>'<th class="num">'+c.l+'</th>').join('')+'</tr>';
 
@@ -1227,7 +1267,7 @@ function buildTable(elId,data,mainCol){
     }).join('');
     rows+=`<tr style="cursor:pointer" onclick="toggleCampRow('${cid}',this)">
       <td style="width:20px;text-align:center;color:var(--muted2);font-size:11px" id="arrow_${cid}">▶</td>
-      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;font-weight:600" title="${r.n}">${statusDot(r.status)}${r.n}</td>
+      <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;font-weight:600;padding-right:8px" title="${r.n}">${statusDot(r.status)}<span style="margin-left:4px">${r.n}</span></td>
       ${tds}
     </tr>`;
     rows+=`<tr id="${cid}" style="display:none"><td colspan="${COLS.length+2}" style="padding:0">
@@ -1240,12 +1280,13 @@ function buildTable(elId,data,mainCol){
 
   // colgroup compartilhado pra travar alinhamento entre tabela de campanhas e sub-tabela de conjuntos
   // larguras: seta=3%, nome=27%, e 10 métricas dividindo os 70% restantes (7% cada)
+  const _mw=Math.floor(72/COLS.length);
   const COLGROUP=`<colgroup>
-    <col style="width:3%">
-    <col style="width:27%">
-    ${COLS.map(()=>'<col style="width:7%">').join('')}
+    <col style="width:4%">
+    <col style="width:24%">
+    ${COLS.map(()=>'<col style="width:'+_mw+'%">').join('')}
   </colgroup>`;
-  document.getElementById(elId).innerHTML=`<table style="min-width:800px;table-layout:fixed;width:100%">
+  document.getElementById(elId).innerHTML=`<table style="min-width:920px;table-layout:fixed;width:100%">
     ${COLGROUP}
     <thead>${head}</thead><tbody>${rows}</tbody>
     <tfoot>
@@ -1253,23 +1294,24 @@ function buildTable(elId,data,mainCol){
         <td></td>
         <td style="font-size:10px;padding:6px 10px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.5px">${t('col_total')}</td>
         ${(()=>{
-          const tot={spend:0,imp:0,lc:0,pv:0,ld:0};
-          data.forEach(r=>{tot.spend+=r.spend||0;tot.imp+=r.imp||0;tot.lc+=r.lc||0;tot.pv+=r.pv||0;tot.ld+=r.ld||0;});
+          const tot={spend:0,imp:0,lc:0,pv:0,checkout:0,purchases:0,receita:0};
+          data.forEach(r=>{tot.spend+=r.spend||0;tot.imp+=r.imp||0;tot.lc+=r.lc||0;tot.pv+=r.pv||0;tot.checkout+=r.checkout||0;tot.purchases+=r.purchases||0;tot.receita+=r.receita||0;});
           const ctr=tot.imp>0?r2(tot.lc/tot.imp*100):null;
           const cr=tot.lc>0?r2(tot.pv/tot.lc*100):null;
-          const txcv=tot.pv>0?r2(tot.ld/tot.pv*100):null;
-          const cpl=tot.ld>0?r2(tot.spend/tot.ld):null;
-          const cpm=tot.imp>0?r2(tot.spend/tot.imp*1000):null;
-          return '<td class="num" style="padding:8px 10px">'+fR(tot.spend)+'</td>'+
-            '<td class="num" style="padding:8px 10px;color:var(--muted2)">'+fN(tot.imp)+'</td>'+
-            '<td class="num" style="padding:8px 10px;color:var(--muted2)">'+fN(tot.lc)+'</td>'+
-            '<td class="num" style="padding:8px 10px;color:var(--muted2)">'+fN(tot.pv)+'</td>'+
-            '<td class="num" style="padding:8px 10px;font-weight:700">'+fN(tot.ld)+'</td>'+
-            '<td class="num '+funnelCls(ctr,CTR_BOM,CTR_MEDIO).cls+'" style="padding:8px 10px">'+fP(ctr)+'</td>'+
-            '<td class="num '+funnelCls(cr,CR_BOM,CR_MEDIO).cls+'" style="padding:8px 10px">'+fP(cr)+'</td>'+
-            '<td class="num '+funnelCls(txcv,TX_CONV_BOM,TX_CONV_MEDIO).cls+'" style="padding:8px 10px">'+fP(txcv)+'</td>'+
-            '<td class="num '+cplCls(cpl)+'" style="padding:8px 10px">'+fR(cpl)+'</td>'+
-            '<td class="num" style="padding:8px 10px">'+fR(cpm)+'</td>';
+          const txck=tot.pv>0?r2(tot.checkout/tot.pv*100):null;
+          const cpv=tot.purchases>0?r2(tot.spend/tot.purchases):null;
+          const roas=tot.spend>0?r2(tot.receita/tot.spend):null;
+          return '<td class="num" style="padding:8px 8px">'+fR(tot.spend)+'</td>'+
+            '<td class="num" style="padding:8px 8px;color:var(--muted2)">'+fN(tot.imp)+'</td>'+
+            '<td class="num" style="padding:8px 8px;color:var(--muted2)">'+fN(tot.lc)+'</td>'+
+            '<td class="num" style="padding:8px 8px;color:var(--muted2)">'+fN(tot.pv)+'</td>'+
+            '<td class="num '+funnelCls(ctr,CTR_BOM,CTR_MEDIO).cls+'" style="padding:8px 8px">'+fP(ctr)+'</td>'+
+            '<td class="num '+funnelCls(cr,CR_BOM,CR_MEDIO).cls+'" style="padding:8px 8px">'+fP(cr)+'</td>'+
+            '<td class="num" style="padding:8px 8px;color:var(--muted2)">'+fN(tot.checkout)+'</td>'+
+            '<td class="num '+funnelCls(txck,CHECKOUT_BOM,CHECKOUT_MEDIO).cls+'" style="padding:8px 8px">'+fP(txck)+'</td>'+
+            '<td class="num" style="padding:8px 8px;font-weight:700">'+fN(tot.purchases)+'</td>'+
+            '<td class="num '+(cpv==null?'':cpv<=CPV_BOM?'cg':cpv<=CPV_MEDIO?'cw2':'cr')+'" style="padding:8px 8px">'+(cpv!=null?fR(cpv):'—')+'</td>'+
+            '<td class="num" style="padding:8px 8px">'+(roas!=null?fN(roas)+'x':'—')+'</td>';
         })()}
       </tr>
     </tfoot>
@@ -1292,8 +1334,8 @@ function toggleCampRow(id,rowEl){
     if(!adsets.length){tbl.innerHTML=`<tbody><tr><td style="padding:8px;color:var(--muted);font-size:11px">${t('st_sem_conj')}</td></tr></tbody>`;return;}
     tbl.style.tableLayout='fixed';
     tbl.innerHTML='<colgroup>'+
-      '<col style="width:30%">'+
-      Array(10).fill('<col style="width:7%">').join('')+
+      '<col style="width:26%">'+
+      Array(11).fill('<col style="width:'+Math.floor(74/11)+'%">').join('')+
       '</colgroup>'+
       '<thead><tr>'+
       `<th style="font-size:9px;padding:4px 8px;text-align:left;color:var(--muted2)">${t('st_conjuntos')}</th>`+
@@ -1301,28 +1343,30 @@ function toggleCampRow(id,rowEl){
       `<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">${t('col_impr')}</th>`+
       `<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">${t('col_cliques')}</th>`+
       '<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">PV</th>'+
-      `<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">${t('col_leads')}</th>`+
       '<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">CTR</th>'+
       '<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">C.Rate</th>'+
-      '<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">Tx.Conv</th>'+
-      `<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">${t('col_cpl')}</th>`+
-      `<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">${t('col_cpm')}</th>`+
+      '<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">CO</th>'+
+      '<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">Tx.CO</th>'+
+      `<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">${t('kpi_vendas')}</th>`+
+      '<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">CPV</th>'+
+      '<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">ROAS</th>'+
       '</tr></thead><tbody>'+
       adsets.map(a=>`<tr onclick="toggleAdsetRow('${id}','${a.n.replace(/'/g,"\'")}','${campName.replace(/'/g,"\'")}',this)" style="cursor:pointer">
-        <td style="font-size:10px;padding:5px 8px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${a.n}">▶ ${statusDot(a.status)}${a.n}</td>
+        <td style="font-size:10px;padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${a.n}">▶ ${statusDot(a.status)}${a.n}</td>
         <td class="num" style="font-size:10px;padding:5px 8px">${fR(a.spend)}</td>
         <td class="num cn" style="font-size:10px;padding:5px 8px;color:var(--muted2)">${fN(a.imp)}</td>
         <td class="num cn" style="font-size:10px;padding:5px 8px;color:var(--muted2)">${fN(a.lc)}</td>
         <td class="num cn" style="font-size:10px;padding:5px 8px;color:var(--muted2)">${fN(a.pv)}</td>
-        <td class="num" style="font-size:10px;padding:5px 8px">${fN(a.ld)}</td>
         <td class="num ${funnelCls(a.ctr,CTR_BOM,CTR_MEDIO).cls}" style="font-size:10px;padding:5px 8px">${fP(a.ctr)}</td>
         <td class="num ${funnelCls(a.cr,CR_BOM,CR_MEDIO).cls}" style="font-size:10px;padding:5px 8px">${fP(a.cr)}</td>
-        <td class="num ${funnelCls(a.tx_cv,TX_CONV_BOM,TX_CONV_MEDIO).cls}" style="font-size:10px;padding:5px 8px">${fP(a.tx_cv)}</td>
-        <td class="num ${cplCls(a.cpl)}" style="font-size:10px;padding:5px 8px">${fR(a.cpl)}</td>
-        <td class="num" style="font-size:10px;padding:5px 8px">${fR(a.cpm)}</td>
+        <td class="num cn" style="font-size:10px;padding:5px 8px;color:var(--muted2)">${fN(a.checkout)}</td>
+        <td class="num ${funnelCls(a.tx_checkout,CHECKOUT_BOM,CHECKOUT_MEDIO).cls}" style="font-size:10px;padding:5px 8px">${fP(a.tx_checkout)}</td>
+        <td class="num" style="font-size:10px;padding:5px 8px;font-weight:700">${fN(a.purchases)}</td>
+        <td class="num ${a.cpv==null?'':a.cpv<=CPV_BOM?'cg':a.cpv<=CPV_MEDIO?'cw2':'cr'}" style="font-size:10px;padding:5px 8px">${a.cpv!=null?fR(a.cpv):'—'}</td>
+        <td class="num" style="font-size:10px;padding:5px 8px">${a.roas!=null?fN(a.roas)+'x':'—'}</td>
       </tr>
       <tr id="ads_${id}_${a.n.replace(/[^a-zA-Z0-9]/g,'_')}" style="display:none">
-        <td colspan="11" style="padding:0 0 0 20px;background:var(--bg)">
+        <td colspan="12" style="padding:0 0 0 20px;background:var(--bg)">
           <div id="ads_inner_${id}_${a.n.replace(/[^a-zA-Z0-9]/g,'_')}"></div>
         </td>
       </tr>`).join('')+'</tbody>';
@@ -1352,20 +1396,20 @@ function toggleAdsetRow(campId,adsetName,campName,rowEl){
         '<thead><tr style="background:var(--surface2)">'+
         `<th style="font-size:9px;padding:4px 8px;text-align:left;color:var(--muted2)">${t('st_criativo')}</th>`+
         `<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">${t('col_invest')}</th>`+
-        `<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">${t('col_leads')}</th>`+
+        `<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">${t('kpi_vendas')}</th>`+
         '<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">CTR</th>'+
-        '<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">C.Rate</th>'+
-        '<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">Tx.Conv</th>'+
-        `<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">${t('col_cpl')}</th>`+
+        '<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">Tx.CO</th>'+
+        '<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">CPV</th>'+
+        '<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">ROAS</th>'+
         '</tr></thead><tbody>'+
         ads.map(ad=>`<tr>
           <td style="font-size:10px;padding:5px 8px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${ad.n}">${statusDot(ad.status)}${ad.n}</td>
           <td class="num" style="font-size:10px;padding:5px 8px">${fR(ad.spend)}</td>
-          <td class="num" style="font-size:10px;padding:5px 8px">${fN(ad.ld)}</td>
+          <td class="num" style="font-size:10px;padding:5px 8px;font-weight:700">${fN(ad.purchases)}</td>
           <td class="num ${funnelCls(ad.ctr,CTR_BOM,CTR_MEDIO).cls}" style="font-size:10px;padding:5px 8px">${fP(ad.ctr)}</td>
-          <td class="num" style="font-size:10px;padding:5px 8px;color:var(--muted2)">${fP(ad.cr||null)}</td>
-          <td class="num ${funnelCls(ad.tx_cv,TX_CONV_BOM,TX_CONV_MEDIO).cls}" style="font-size:10px;padding:5px 8px">${fP(ad.tx_cv||null)}</td>
-          <td class="num ${cplCls(ad.cpl)}" style="font-size:10px;padding:5px 8px">${fR(ad.cpl)}</td>
+          <td class="num ${funnelCls(ad.tx_checkout,CHECKOUT_BOM,CHECKOUT_MEDIO).cls}" style="font-size:10px;padding:5px 8px">${fP(ad.tx_checkout||null)}</td>
+          <td class="num ${ad.cpv==null?'':ad.cpv<=CPV_BOM?'cg':ad.cpv<=CPV_MEDIO?'cw2':'cr'}" style="font-size:10px;padding:5px 8px">${ad.cpv!=null?fR(ad.cpv):'—'}</td>
+          <td class="num" style="font-size:10px;padding:5px 8px">${ad.roas!=null?fN(ad.roas)+'x':'—'}</td>
         </tr>`).join('')+
         '</tbody></table></div>';
     } else {
@@ -1379,8 +1423,8 @@ function toggleAdsetRow(campId,adsetName,campName,rowEl){
             <div style="padding:6px 8px">
               <div style="font-size:9px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:4px" title="${ad.n}">${ad.n}</div>
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px">
-                <div><div style="font-size:7px;color:var(--muted2);text-transform:uppercase">${t('ad_leads')}</div><div style="font-size:10px;font-weight:700;font-family:monospace">${fN(ad.ld)}</div></div>
-                <div><div style="font-size:7px;color:var(--muted2);text-transform:uppercase">${t('ad_cpl')}</div><div class="${cplCls(ad.cpl)}" style="font-size:10px;font-weight:700;font-family:monospace">${fR(ad.cpl)}</div></div>
+                <div><div style="font-size:7px;color:var(--muted2);text-transform:uppercase">${t('kpi_vendas')}</div><div style="font-size:10px;font-weight:700;font-family:monospace">${fN(ad.purchases)}</div></div>
+                <div><div style="font-size:7px;color:var(--muted2);text-transform:uppercase">CPV</div><div class="${ad.cpv==null?'':ad.cpv<=CPV_BOM?'cg':ad.cpv<=CPV_MEDIO?'cw2':'cr'}" style="font-size:10px;font-weight:700;font-family:monospace">${ad.cpv!=null?fR(ad.cpv):'—'}</div></div>
                 <div><div style="font-size:7px;color:var(--muted2);text-transform:uppercase">${t('ad_ctr')}</div><div style="font-size:10px;font-weight:700;font-family:monospace">${fP(ad.ctr)}</div></div>
                 <div><div style="font-size:7px;color:var(--muted2);text-transform:uppercase">${t('ad_invest')}</div><div style="font-size:10px;font-weight:700;font-family:monospace">${fR(ad.spend)}</div></div>
               </div>
@@ -1577,19 +1621,25 @@ function renderDiarioCharts(){
   const totLc  = (md.link_clicks||[]).reduce((a,b)=>a+(b||0),0);
   const totPv  = (md.page_view||[]).reduce((a,b)=>a+(b||0),0);
   const totLd  = (md.leads||[]).reduce((a,b)=>a+(b||0),0);
+  const totCk  = (md.checkout||[]).reduce((a,b)=>a+(b||0),0);
+  const totPu  = (md.purchases||[]).reduce((a,b)=>a+(b||0),0);
   const totSp  = (md.spend||[]).reduce((a,b)=>a+(b||0),0);
   const avgCTR = totImp>0 ? r2(totLc/totImp*100)  : null;
   const avgCR  = totLc>0  ? r2(totPv/totLc*100)   : null;
+  const avgTxCK= totPv>0  ? r2(totCk/totPv*100)   : null;
+  const avgTxLP= totPv>0  ? r2(totPu/totPv*100)   : null;
+  const avgCPV = totPu>0  ? r2(totSp/totPu)       : null;
   const avgTxCV= totPv>0  ? r2(totLd/totPv*100)   : null;
   const avgCPL = totLd>0  ? r2(totSp/totLd)       : null;
   const avgCPM = totImp>0 ? r2(totSp/totImp*1000) : null;
 
   const METAS={
+    cpv:   {bom:CPV_BOM,    medio:CPV_MEDIO,    inv:true,  avgVal:avgCPV},
+    cr:    {bom:CR_BOM,     medio:CR_MEDIO,     inv:false, avgVal:avgCR},
+    tx_ck: {bom:CHECKOUT_BOM,medio:CHECKOUT_MEDIO,inv:false,avgVal:avgTxCK},
+    tx_lp: {bom:TXLP_BOM,   medio:TXLP_MEDIO,   inv:false, avgVal:avgTxLP},
     ctr:   {bom:CTR_BOM,    medio:CTR_MEDIO,    inv:false, avgVal:avgCTR},
     cpm:   {bom:null, medio:null, inv:true, avgVal:avgCPM},
-    cpl:   {bom:CPL_BOM,    medio:CPL_MEDIO,    inv:true,  avgVal:avgCPL},
-    cr:    {bom:CR_BOM,     medio:CR_MEDIO,     inv:false, avgVal:avgCR},
-    tx_cv: {bom:TX_CONV_BOM,medio:TX_CONV_MEDIO,inv:false, avgVal:avgTxCV},
   };
 
   function getMetricColor(id, val){
@@ -1602,11 +1652,12 @@ function renderDiarioCharts(){
 
   // Labels traduzidos para o eixo Y dos gráficos
   const METRICS=[
-    {id:'ctr',  ttl:'CTR (%)',                                suffix:'%', data:()=>md.ctr},
-    {id:'cpm',  ttl:`CPM (${MOEDA_SIMBOLO})`,                suffix:'',  fmt:v=>v!=null?fR(v):null, data:()=>md.cpm},
-    {id:'cpl',  ttl:`${t('kpi_cpl_sub')} (${MOEDA_SIMBOLO})`,suffix:'',  fmt:v=>v!=null?fR(v):null, data:()=>md.cpl},
+    {id:'cpv',  ttl:`${t('kpi_cpv')} (${MOEDA_SIMBOLO})`,     suffix:'',  fmt:v=>v!=null?fR(v):null, data:()=>md.cpv},
     {id:'cr',   ttl:'Connect Rate (%)',                       suffix:'%', data:()=>md.connect_rate},
-    {id:'tx_cv',ttl:(currentLang==='ES'?'Tasa Conversión (%)':'Taxa Conversão (%)'), suffix:'%', data:()=>md.tx_conv},
+    {id:'tx_ck',ttl:t('m_tx_checkout'),                       suffix:'%', data:()=>md.tx_checkout},
+    {id:'tx_lp',ttl:t('m_tx_conv_lp'),                        suffix:'%', data:()=>md.tx_conv_lp},
+    {id:'ctr',  ttl:'CTR (%)',                                suffix:'%', data:()=>md.ctr},
+    {id:'cpm',  ttl:`CPM (${MOEDA_SIMBOLO})`,                 suffix:'',  fmt:v=>v!=null?fR(v):null, data:()=>md.cpm},
   ];
 
   const el=document.getElementById('dailyCharts');
@@ -2001,8 +2052,9 @@ function renderLp(){
   LPS.forEach(function(lp,i){ lp.color=PALETTE[i%PALETTE.length]; lp.num='①②③④⑤⑥'.charAt(i)||('('+(i+1)+')'); });
 
   const lblSem=t('lp_sem_tel'), lblCom=t('lp_com_tel');
-  // sub-rótulo por LP: LPV02 é "com telefone", as demais "sem telefone"
-  function subFor(key){ return key==='LPV02'?lblCom:lblSem; }
+  const lblComCad=t('lp_com_cad'), lblSemCad=t('lp_sem_cad');
+  // sub-rótulo por LP: LPV00 tem cadastro, LPV02 não tem cadastro
+  function subFor(key){ return key==='LPV02'?lblSemCad:(key==='LPV00'?lblComCad:''); }
 
   // vencedor de uma métrica (menor CPL, etc). hib=true → maior é melhor
   function winnerIdx(key,hib){
@@ -2020,21 +2072,21 @@ function renderLp(){
   }
 
   // ─ Cards hero ─
-  var wCplIdx=winnerIdx('cpl',false);
+  var wCplIdx=winnerIdx('cpv',false);
   document.getElementById('lpHero').innerHTML=LPS.map(function(lp,i){
     var c=lp.color, tt=lp.t;
     var venc=(i===wCplIdx)?' <span style="font-size:9px;color:#059669;font-weight:800">✓ '+t('lp_vencedor')+'</span>':'';
-    var cplCls2=tt.cpl==null?'':tt.cpl<=CPL_BOM?'cg':tt.cpl<=CPL_MEDIO?'cw2':'cr';
+    var cplCls2=tt.cpv==null?'':tt.cpv<=CPV_BOM?'cg':tt.cpv<=CPV_MEDIO?'cw2':'cr';
     return '<div class="lp-card">'
       +'<div class="lp-badge" style="background:'+c+'18;color:'+c+';border:1px solid '+c+'33">'+lp.num+' '+lp.key+' — '+subFor(lp.key)+'</div>'
       +'<div style="font-size:10px;color:var(--muted);margin-bottom:8px">'+(lp.d.camps||[]).map(function(x){return x.n;}).join(' · ')+'</div>'
       +'<div class="lp-kpis">'
       +'<div class="lp-kpi"><div class="lp-kpi-lbl">'+t('kpi_invest')+'</div><div class="lp-kpi-val" style="color:'+c+'">'+fR(tt.spend)+'</div></div>'
-      +'<div class="lp-kpi"><div class="lp-kpi-lbl">Leads</div><div class="lp-kpi-val" style="color:'+c+'">'+fN(tt.leads)+'</div></div>'
+      +'<div class="lp-kpi"><div class="lp-kpi-lbl">'+t('kpi_vendas')+'</div><div class="lp-kpi-val" style="color:'+c+'">'+fN(tt.purchases)+'</div></div>'
       +'<div class="lp-kpi" style="grid-column:span 2">'
-      +'<div class="lp-kpi-lbl">CPL'+venc+'</div>'
-      +'<div class="lp-kpi-val '+cplCls2+'">'+fR(tt.cpl)+'</div>'
-      +'<div class="lp-kpi-sub">CTR '+fP(tt.ctr)+' · CR '+fP(tt.cr)+' · TxConv '+fP(tt.tx_conv)+'</div>'
+      +'<div class="lp-kpi-lbl">'+t('kpi_cpv')+venc+'</div>'
+      +'<div class="lp-kpi-val '+cplCls2+'">'+(tt.cpv!=null?fR(tt.cpv):'—')+'</div>'
+      +'<div class="lp-kpi-sub">CTR '+fP(tt.ctr)+' · CR '+fP(tt.cr)+' · '+t('lp_txconv')+' '+fP(tt.tx_conv_lp)+'</div>'
       +'</div></div></div>';
   }).join('');
 
@@ -2064,23 +2116,26 @@ function renderLp(){
       })},
       options:opts(yCb,fmt)});
   }
-  mkChart('chLpLeads','leads',null,function(v){return String(Math.round(v));});
+  mkChart('chLpLeads','purchases',null,function(v){return String(Math.round(v));});
   mkChart('chLpCpl','cpl',function(v){return fR(v);},function(v){return fR(v);});
   mkChart('chLpCr','cr',function(v){return v+'%';},function(v){return v!=null?v.toFixed(1)+'%':null;});
-  mkChart('chLpTx','tx_conv',function(v){return v+'%';},function(v){return v!=null?v.toFixed(1)+'%':null;});
+  mkChart('chLpTx','tx_conv_lp',function(v){return v+'%';},function(v){return v!=null?v.toFixed(1)+'%':null;});
 
   // ─ Tabela comparativa (N colunas) ─
   const ROWS=[
-    [t('lp_invest'), 'spend',   fR, false, true],
-    [t('lp_imp'),    'imp',     fN, true,  false],
-    ['CPM',          'cpm',     fR, false, false],
-    [t('lp_lc'),     'lc',      fN, true,  false],
-    ['CTR',          'ctr',     fP, true,  false],
-    ['Page Views',   'pv',      fN, true,  false],
-    ['Connect Rate', 'cr',      fP, true,  false],
-    ['Leads',        'leads',   fN, true,  false],
-    [t('lp_cpl'),    'cpl',     fR, false, false],
-    [t('lp_txconv'), 'tx_conv', fP, true,  false],
+    [t('lp_invest'),  'spend',       fR, false, true],
+    [t('lp_imp'),     'imp',         fN, true,  false],
+    ['CPM',           'cpm',         fR, false, false],
+    [t('lp_lc'),      'lc',          fN, true,  false],
+    ['CTR',           'ctr',         fP, true,  false],
+    ['Page Views',    'pv',          fN, true,  false],
+    ['Connect Rate',  'cr',          fP, true,  false],
+    [t('f_checkout'), 'checkout',    fN, true,  false],
+    [t('m_tx_checkout_s'),'tx_checkout',fP,true, false],
+    [t('kpi_vendas'), 'purchases',   fN, true,  false],
+    [t('lp_txconv'),  'tx_conv_lp',  fP, true,  false],
+    [t('kpi_cpv'),    'cpv',         fR, false, false],
+    ['ROAS',          'roas',        v=>v!=null?fN(v)+'x':'—', true, false],
   ];
   var rowsHtml=ROWS.map(function(r){
     var lbl=r[0],key=r[1],fmt=r[2],hib=r[3],skip=r[4];
@@ -2105,7 +2160,7 @@ function renderLp(){
   function campRows(camps){
     if(!camps||!camps.length) return '<tr><td colspan="9" style="padding:14px;text-align:center;color:var(--muted);font-size:11px">'+t('lp_sem_dados')+'</td></tr>';
     return camps.map(function(c){
-      var cc=c.cpl==null?'':c.cpl<=CPL_BOM?'cg':c.cpl<=CPL_MEDIO?'cw2':'cr';
+      var cc=c.cpv==null?'':c.cpv<=CPV_BOM?'cg':c.cpv<=CPV_MEDIO?'cw2':'cr';
       return '<tr>'
         +'<td style="font-size:9px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+c.n+'">'+c.n+'</td>'
         +'<td style="font-size:10px;font-family:monospace">'+fR(c.spend)+'</td>'
@@ -2113,13 +2168,14 @@ function renderLp(){
         +'<td style="font-size:10px;font-family:monospace">'+fP(c.ctr)+'</td>'
         +'<td style="font-size:10px;font-family:monospace">'+fN(c.pv)+'</td>'
         +'<td style="font-size:10px;font-family:monospace">'+fP(c.cr)+'</td>'
-        +'<td style="font-size:10px;font-family:monospace">'+fN(c.leads)+'</td>'
-        +'<td class="'+cc+'" style="font-size:10px;font-family:monospace">'+fR(c.cpl)+'</td>'
-        +'<td style="font-size:10px;font-family:monospace">'+fP(c.tx_conv)+'</td>'
+        +'<td style="font-size:10px;font-family:monospace">'+fP(c.tx_checkout)+'</td>'
+        +'<td style="font-size:10px;font-family:monospace">'+fN(c.purchases)+'</td>'
+        +'<td class="'+cc+'" style="font-size:10px;font-family:monospace">'+fR(c.cpv)+'</td>'
+        +'<td style="font-size:10px;font-family:monospace">'+fP(c.tx_conv_lp)+'</td>'
         +'</tr>';
     }).join('');
   }
-  var hdr='<tr><th>'+t('col_camp')+'</th><th>'+t('col_invest')+'</th><th>'+t('col_impr')+'</th><th>CTR</th><th>PV</th><th>CR</th><th>Leads</th><th>CPL</th><th>TxConv</th></tr>';
+  var hdr='<tr><th>'+t('col_camp')+'</th><th>'+t('col_invest')+'</th><th>'+t('col_impr')+'</th><th>CTR</th><th>PV</th><th>CR</th><th>Tx.CO</th><th>'+t('kpi_vendas')+'</th><th>CPV</th><th>Tx.LP</th></tr>';
   document.getElementById('lpCampPair').innerHTML=LPS.map(function(lp){
     return '<div><div class="lp-camp-lbl"><span class="lp-badge" style="background:'+lp.color+'18;color:'+lp.color+';border:1px solid '+lp.color+'33;margin-bottom:0">'+lp.key+'</span> '+t('campanhas')+'</div>'
       +'<div class="lp-camp-box"><table><thead>'+hdr+'</thead><tbody>'+campRows(lp.d.camps)+'</tbody></table></div></div>';
