@@ -28,7 +28,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 /* SIDEBAR */
 .sb{background:#0f1523;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
 .sb-logo{display:flex;align-items:center;gap:10px;padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,.07);}
-.logo-box{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:#fff;flex-shrink:0;}
+.logo-box{min-width:34px;height:34px;padding:0 8px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:#fff;flex-shrink:0;white-space:nowrap;}
 .logo-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#fff;}
 .logo-sub{font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1.5px;}
 .sb-nav{padding:10px 8px;flex:1;}
@@ -58,7 +58,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 .date-range input{border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;outline:none;width:88px;}
 .date-range span{font-size:11px;color:var(--muted2);}
 .dr-clear{padding:2px 6px;border-radius:5px;border:none;background:transparent;color:var(--muted2);font-size:13px;cursor:pointer;}
-.lct-bar{display:none;gap:2px;background:var(--bg);padding:3px;border-radius:8px;border:1px solid var(--border);}
+.lct-bar{display:none;gap:2px;background:var(--bg);padding:3px;border-radius:8px;border:1px solid var(--border);flex-wrap:wrap;}
 .label-toggle{display:flex;align-items:center;gap:5px;padding:4px 9px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;font-size:11px;font-weight:600;color:var(--muted);user-select:none;}
 .label-toggle.on{background:var(--accent);color:#fff;border-color:var(--accent);}
 .theme-btn{padding:4px 10px;border-radius:7px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;font-size:11px;font-weight:600;color:var(--muted);font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:4px;}
@@ -313,7 +313,7 @@ details.desk-only{display:block!important;}
 <aside class="sb" id="sidebar">
   <div class="sb-logo">
     <div class="logo-box" id="logoBox">C</div>
-    <div><div class="logo-name" id="sbNome">Dashboard</div><div class="logo-sub" data-i18n="launch">Lançamento</div></div>
+    <div><div class="logo-name" id="sbNome">Dashboard</div></div>
   </div>
   <nav class="sb-nav">
     <button class="sb-item active" onclick="goPage('meta',this)"><span class="ico">🎯</span><span data-i18n="nav_meta">Meta Ads</span></button>
@@ -322,7 +322,7 @@ details.desk-only{display:block!important;}
     <button class="sb-item" id="sbPesquisa" onclick="goPage('pesquisa',this)"><span class="ico">🔍</span><span data-i18n="nav_pesquisa">Pesquisa</span></button>
     <button class="sb-item" id="sbVendas" onclick="goPage('vendas',this)"><span class="ico">💰</span><span data-i18n="nav_vendas">Vendas</span></button>
   </nav>
-  <div class="sb-lct"><div class="sb-lct-lbl" data-i18n="launch">Lançamento</div><div class="sb-lct-val" id="sbLct">—</div></div>
+  <div class="sb-lct-val" id="sbLct">—</div></div>
   <div class="sb-footer"><span id="sbAtual">--/--/---- · via planilha</span></div>
 </aside>
 
@@ -356,10 +356,7 @@ details.desk-only{display:block!important;}
         <input type="date" id="dtI"><span>→</span><input type="date" id="dtF">
         <button class="dr-clear" onclick="clearDates()">✕</button>
       </div>
-      <div class="lct-bar" id="lctBar">
-        <button class="pb active" id="btnLctOn" onclick="setLct(true,this)">VSE02</button>
-        <button class="pb" id="btnLctOff" onclick="setLct(false,this)" data-i18n="lct_tudo">Tudo</button>
-      </div>
+      <div class="lct-bar" id="lctBar"></div>
       <div class="label-toggle on" id="labelToggle" onclick="toggleLabels(this)" data-i18n="rotulos">Rótulos</div>
       <button class="theme-btn" onclick="toggleTheme()"><span id="themeIcon">🌙</span><span id="themeLabel" data-i18n="escuro">Escuro</span></button>
     </div>
@@ -508,7 +505,7 @@ const LPV_DATA          = null;
 const VENDAS_DATA       = null;
 
 // ═══ CONFIG (injetados pelo gerador) ═══
-const LANCAMENTO_COD = 'RDC01';
+const LANCAMENTO_CODS = [];
 const NOME_CLIENTE   = 'Cliente';
 const LOGO_LETRA     = 'C';
 const COR_ACENTO     = '#e11d48';
@@ -856,6 +853,9 @@ function applyI18n(){
   const titles={meta:t('nav_meta'),diario:t('nav_diario'),pesquisa:t('nav_pesquisa'),lp:t('nav_lp'),vendas:t('nav_vendas')};
   const activeP=document.querySelector('.page-section.active')?.id?.replace('page-','');
   if(activeP && titles[activeP]) document.getElementById('pageTitle').textContent=titles[activeP];
+  // Atualiza o botão 'Tudo' da lct-bar (texto traduzido)
+  const lctTudoBtn=document.getElementById('btnLctAll');
+  if(lctTudoBtn) lctTudoBtn.textContent=t('lct_tudo');
   // Atualiza themeLabel baseado no tema atual
   const isDark=DARK();
   const themeLbl=document.getElementById('themeLabel');
@@ -882,7 +882,8 @@ function fR(v){
 }
 
 // ═══ ESTADO ═══
-let filtroLct=true, periodDays=30, dateI=null, dateF=null, showLabels=true, labelSize=8;
+let filtroAtivo=(LANCAMENTO_CODS&&LANCAMENTO_CODS.length)?LANCAMENTO_CODS[0]:'all';
+let  periodDays=30, dateI=null, dateF=null, showLabels=true, labelSize=8;
 let pesFilters={};
 
 // ═══ UTILS ═══
@@ -911,8 +912,8 @@ const GRID=()=>DARK()?'rgba(255,255,255,.05)':'rgba(0,0,0,.05)';
 const bf={family:"'DM Sans',sans-serif",size:10};
 
 // ═══ FILTROS DE DADOS ═══
-function getMK(){return filtroLct?META_KPIS?.lct:META_KPIS?.all;}
-function getMDraw(){return filtroLct?META_DAILY?.lct:META_DAILY?.all;}
+function getMK(){return META_KPIS?.[filtroAtivo];}
+function getMDraw(){return META_DAILY?.[filtroAtivo];}
 
 function getHoje(){
   if(DATA_GERACAO && DATA_GERACAO !== 'null'){
@@ -923,13 +924,17 @@ function getHoje(){
 }
 
 function parseDayStr(s){
-  const[dd,mm]=s.split('/');
+  const parts=s.split('/');
+  const dd=parseInt(parts[0]),mm=parseInt(parts[1]);
+  if(parts.length>=3){
+    const yy=parseInt(parts[2]);
+    const year=yy<70?2000+yy:1900+yy;
+    return new Date(year,mm-1,dd);
+  }
   const hoje=getHoje();
   let year=hoje.getFullYear();
-  const mesStr=parseInt(mm);
-  const mesHoje=hoje.getMonth()+1;
-  if(mesStr > mesHoje + 1) year--;
-  return new Date(year, mesStr-1, parseInt(dd));
+  if(mm>hoje.getMonth()+2) year--;
+  return new Date(year,mm-1,dd);
 }
 
 function applyPeriod(daily){
@@ -1108,7 +1113,7 @@ function calcTableFromRaw(){
   if(periodDays===1) fimRaw.setDate(fimRaw.getDate()-1);
   fimRaw.setHours(23,59,59,999);
   const filtered=META_RAW_CAMP.filter(r=>{
-    if(filtroLct && !r.lct) return false;
+    if(filtroAtivo!=='all' && !(r.codes||[]).includes(filtroAtivo)) return false;
     const dt=parseDayStr(r.d);
     if(periodDays>0){
       const ini=new Date(fimRaw); ini.setDate(ini.getDate()-(periodDays===1?0:periodDays-1)); ini.setHours(0,0,0,0);
@@ -1142,9 +1147,9 @@ function calcTableFromRaw(){
   const adsets=Object.values(adsetMap).map(calcRow).sort((a,b)=>b.ld-a.ld);
   const campNamesInPeriod=new Set(camps.map(c=>c.n));
   const adsetPairs=new Set(adsets.map(a=>a.camp+'|||'+a.n));
-  const allAds=((filtroLct?META_TABLES?.lct:META_TABLES?.all)||{})['all']?.ads||[];
+  const allAds=(META_TABLES?.[filtroAtivo]||{})['all']?.ads||[];
   const adsetTotalMap={};
-  ((filtroLct?META_TABLES?.lct:META_TABLES?.all)||{})['all']?.adsets?.forEach(a=>{
+  (META_TABLES?.[filtroAtivo]||{})['all']?.adsets?.forEach(a=>{
     adsetTotalMap[a.camp+'|||'+a.n]={spend:a.spend||0,pur:a.pur||0,imp:a.imp||0,lc:a.lc||0};
   });
   const adsetPeriodMap={};
@@ -1174,11 +1179,11 @@ let base_mt=null;
 function getMT(){
   const key=getPeriodKey();
   if(key && key!=='1'){
-    const base=filtroLct?META_TABLES?.lct:META_TABLES?.all;
+    const base=META_TABLES?.[filtroAtivo];
     if(!base) return null;
     base_mt=base[key]||base['all']||null;
   } else {
-    if(_calcRawRunning) return ((filtroLct?META_TABLES?.lct:META_TABLES?.all)||{})['all']||null;
+    if(_calcRawRunning) return (META_TABLES?.[filtroAtivo]||{})['all']||null;
     _calcRawRunning=true;
     const result=calcTableFromRaw();
     _calcRawRunning=false;
@@ -1197,7 +1202,7 @@ function getMT(){
 function filterBdRaw(rawArr, keyFn){
   const hoje=getHoje();
   const filtered=(rawArr||[]).filter(r=>{
-    if(filtroLct && !r.lct) return false;
+    if(filtroAtivo!=='all' && !(r.codes||[]).includes(filtroAtivo)) return false;
     if(metaCampSel?.size>0 && r.camp && !metaCampSel.has(r.camp)) return false;
     const dt=parseDayStr(r.d);
     if(periodDays>0){
@@ -1235,11 +1240,11 @@ function getMBD(){
   }
   const key=getPeriodKey();
   if(key){
-    const base=filtroLct?META_BD?.lct:META_BD?.all;
+    const base=META_BD?.[filtroAtivo];
     if(base) return base[key]||base['all']||null;
     return META_BD[key]||META_BD['all']||null;
   }
-  const base=filtroLct?META_BD?.lct:META_BD?.all;
+  const base=META_BD?.[filtroAtivo];
   return base?.['all']||META_BD['all']||null;
 }
 
@@ -1491,7 +1496,7 @@ let metaCampSel=new Set();
 function buildMetaCampFilter(){
   const el=document.getElementById('metaCampFilter');
   if(!el) return;
-  const dcBase=filtroLct?META_DAILY_CAMPS?.lct:META_DAILY_CAMPS?.all;
+  const dcBase=META_DAILY_CAMPS?.[filtroAtivo];
   let camps=[];
   if(dcBase){
     camps=Object.keys(dcBase).filter(camp=>{
@@ -1531,7 +1536,7 @@ function onMetaCampCheck(){
 function getMDforMeta(){
   const md=getMD(); if(!md) return md;
   if(!META_DAILY_CAMPS||metaCampSel.size===0) return md;
-  const base=filtroLct?META_DAILY_CAMPS?.lct:META_DAILY_CAMPS?.all;
+  const base=META_DAILY_CAMPS?.[filtroAtivo];
   if(!base) return md;
   const selected=[...metaCampSel].map(c=>applyPeriod(base[c])).filter(Boolean);
   if(!selected.length) return md;
@@ -1552,7 +1557,7 @@ function getMDforMeta(){
 function buildCampFilter(){
   const el=document.getElementById('campFilter');
   if(!el) return;
-  const dcBase=filtroLct?META_DAILY_CAMPS?.lct:META_DAILY_CAMPS?.all;
+  const dcBase=META_DAILY_CAMPS?.[filtroAtivo];
   let camps=[];
   if(dcBase){
     camps=Object.keys(dcBase).filter(camp=>{
@@ -1592,7 +1597,7 @@ function onCampCheck(){
 function getDailyForCamp(){
   const md=getMD(); if(!md) return md;
   if(!META_DAILY_CAMPS||campFilterSel.size===0) return md;
-  const base=filtroLct?META_DAILY_CAMPS?.lct:META_DAILY_CAMPS?.all;
+  const base=META_DAILY_CAMPS?.[filtroAtivo];
   if(!base) return md;
   const selected=[...campFilterSel].map(c=>applyPeriod(base[c])).filter(Boolean);
   if(!selected.length) return md;
@@ -1988,6 +1993,18 @@ function __MAXROW__(rows,p,utm,vals){
 }
 
 // ═══ CONTROLES ═══
+function buildLctBar(){
+  const bar=document.getElementById('lctBar');
+  if(!bar) return;
+  if(!LANCAMENTO_CODS||LANCAMENTO_CODS.length===0){
+    bar.style.display='none'; bar.innerHTML=''; filtroAtivo='all'; return;
+  }
+  bar.style.display='flex';
+  bar.innerHTML=LANCAMENTO_CODS.map(cod=>
+    `<button class="pb${filtroAtivo===cod?' active':''}" onclick="setFiltroAtivo('${cod.replace(/'/g,"\\'")}',this)">${cod}</button>`
+  ).join('')+`<button class="pb${filtroAtivo==='all'?' active':''}" id="btnLctAll" onclick="setFiltroAtivo('all',this)">${t('lct_tudo')}</button>`;
+}
+
 function setPeriod(days,btn){
   periodDays=days; dateI=null; dateF=null;
   document.getElementById('dtI').value=''; document.getElementById('dtF').value='';
@@ -2020,10 +2037,11 @@ function clearDates(){
   dateI=null; dateF=null;
   document.getElementById('dtI').value=''; document.getElementById('dtF').value=''; rerenderActive();
 }
-function setLct(on,btn){
-  filtroLct=on;
+function setFiltroAtivo(grupo,btn){
+  filtroAtivo=grupo;
   document.querySelectorAll('#lctBar .pb').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active'); rerenderActive();
+  if(btn) btn.classList.add('active');
+  rerenderActive();
 }
 function toggleLabels(el){
   showLabels=!showLabels;
@@ -2369,7 +2387,7 @@ window.addEventListener('resize', ajustarPaddingContent);
   if(lb){lb.textContent=LOGO_LETRA;lb.style.background=`linear-gradient(135deg,${COR_ACENTO},${COR_ACENTO}cc)`;}
   document.getElementById('sbNome').textContent=NOME_CLIENTE;
   document.getElementById('pageTab').textContent=`${NOME_CLIENTE} — Dashboard`;
-  document.getElementById('sbLct').textContent=LANCAMENTO_COD||t('lct_tudo');
+  
   document.documentElement.style.setProperty('--accent',COR_ACENTO);
   const badge=document.getElementById('liveBadge');
   badge.style.cssText=`background:${COR_ACENTO}15;border:1px solid ${COR_ACENTO}44;color:${COR_ACENTO};`;
@@ -2380,7 +2398,7 @@ window.addEventListener('resize', ajustarPaddingContent);
     const sfEl=document.getElementById('sbAtual');
     if(sfEl&&sfEl.textContent.includes('--')) sfEl.textContent='Atualizado '+d[d.length-1];
   }
-  if(LANCAMENTO_COD){const lb2=document.getElementById('lctBar');if(lb2)lb2.style.display='flex';document.getElementById('btnLctOn').textContent=LANCAMENTO_COD;}
+  buildLctBar();
   if(PESQUISA===false||PESQUISA===null){
     const sbP=document.getElementById('sbPesquisa');
     if(sbP) sbP.style.display='none';
