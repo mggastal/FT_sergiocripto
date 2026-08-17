@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Gerador Dashboard Lançamento Gratuito v2"""
+"""Gerador Dashboard Lançamento Gratuito v3 — SC
+   leads = Action FB Pixel Custom (Offsite Conversion) + Action Omni Purchase
+   Multi-lançamento com botões (label, termo_busca)
+"""
 
 import pandas as pd, json, re, hashlib, requests
 from datetime import date
@@ -17,7 +20,17 @@ NOME_CLIENTE     = "Sergio Cripto"
 LOGO_LETRA       = "SC"
 COR_ACENTO       = "#B8860B"
 
-LANCAMENTO_COD   = "VSL"         # filtra campanhas; "" = ver tudo
+# Lista de lançamentos. Cada item pode ser:
+#   "TERMO"             → botão e busca idênticos
+#   ("LABEL","TERMO")   → botão mostra LABEL, busca "contém TERMO" no nome da campanha
+# Primeiro item = selecionado por padrão ao abrir o dashboard.
+LANCAMENTO_CODS  = [
+    ("VSL",    "VSL"),
+    ("IP01",   "iP01"),
+    ("IP02",   "IP02"),
+    ("TLC01",  "TLC01"),
+    ("TLC02",  "TLC02"),
+]
 USAR_PESQUISA    = False           # False = oculta aba Pesquisa
 USAR_VENDAS      = True            # False = oculta aba Vendas
 
@@ -58,6 +71,25 @@ MOEDA_MAP = {
 _moeda_cfg = MOEDA_MAP.get(MOEDA, MOEDA_MAP["BRL"])
 MOEDA_SIMBOLO = _moeda_cfg["simbolo"]
 MOEDA_LABEL   = _moeda_cfg["label"]
+
+# Normaliza LANCAMENTO_CODS → _LCT_PAIRS (label, termo) e LANCAMENTO_CODS → só labels
+def _norm(item):
+    if isinstance(item,(tuple,list)) and len(item)==2:
+        return (str(item[0]).strip(), str(item[1]).strip())
+    return (str(item).strip(), str(item).strip())
+_LCT_PAIRS   = [_norm(c) for c in LANCAMENTO_CODS if c and (c[0] if isinstance(c,(tuple,list)) else c)]
+_LCT_PAIRS   = [(lb,tr) for lb,tr in _LCT_PAIRS if lb and tr]
+LANCAMENTO_CODS = [lb for lb,_ in _LCT_PAIRS]
+_LCT_TERMO_POR_LABEL = {lb:tr for lb,tr in _LCT_PAIRS}
+
+def matched_codes(campaign_name):
+    """Retorna labels cujo termo aparece no nome da campanha."""
+    if not _LCT_PAIRS: return []
+    name = str(campaign_name).lower()
+    return [lb for lb,tr in _LCT_PAIRS if tr.lower() in name]
+
+def filter_groups():
+    return list(LANCAMENTO_CODS) + ["all"]
 
 # ══════════════════════════════════════════════════════
 def sheet_url(t): return f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv&sheet={t}"
@@ -103,18 +135,20 @@ def load_meta():
         "Impressions":"impressions",
         "Action Link Clicks":"link_clicks",
         "Action Landing Page View":"page_view",
-        "Action Leads":"leads",
+        "Action FB Pixel Custom (Offsite Conversion)":"leads_pixel",
         "Action Omni Initiated Checkout":"checkout",
         "Action Omni Purchase":"purchases",
         "Action Value Omni Purchase":"purchase_value"
     })
     df["date"]=pd.to_datetime(df["date"],errors="coerce")
-    for c in ["spend","impressions","link_clicks","page_view","leads","checkout","purchases","purchase_value"]:
+    for c in ["spend","impressions","link_clicks","page_view","leads_pixel","checkout","purchases","purchase_value"]:
         if c not in df.columns: df[c]=0
         df[c]=to_num(df[c])
+    # leads = Action FB Pixel Custom + Action Omni Purchase (purchase configurado como lead tbm)
+    df["leads"] = df["leads_pixel"] + df["purchases"]
     if "status" in df.columns:
         df["status"]=df["status"].astype(str).str.strip().str.upper()
-    df["is_lct"]=df["campaign"].str.contains(LANCAMENTO_COD,na=False,case=False) if LANCAMENTO_COD else True
+    df["lct_codes"]=df["campaign"].apply(matched_codes)
     df=df.dropna(subset=["date"])
     print(f"     {len(df)} linhas | {df['date'].min().date()} → {df['date'].max().date()}")
     return df
@@ -141,7 +175,7 @@ def calc_kpis(p):
     }
 
 def meta_kpis(df):
-    return {"lct":calc_kpis(df[df["is_lct"]]),"all":calc_kpis(df)}
+    return {g: calc_kpis(df[df["lct_codes"].apply(lambda c: g in c)] if g!="all" else df) for g in filter_groups()}
 
 def build_daily(p):
     agg=p.groupby("date").agg(
@@ -157,7 +191,7 @@ def build_daily(p):
         sp=float(r["spend"]); imp=float(r["impressions"]); lc=float(r["link_clicks"])
         pv=float(r["page_view"]); ld=float(r["leads"])
         ck=float(r["checkout"]); pu=float(r["purchases"]); pval=float(r["purchase_value"])
-        out["days"].append(r["date"].strftime("%d/%m"))
+        out["days"].append(r["date"].strftime("%d/%m/%y"))
         out["spend"].append(round(sp,2)); out["impressions"].append(int(imp))
         out["link_clicks"].append(int(lc)); out["page_view"].append(int(pv))
         out["leads"].append(int(ld)); out["checkout"].append(int(ck))
@@ -174,27 +208,33 @@ def build_daily(p):
         out["receita"].append(round(pval,2))
     return out
 
+def subset_for_group(df, g):
+    return df if g=="all" else df[df["lct_codes"].apply(lambda c: g in c)]
+
 def meta_daily(df):
-    return {"lct":build_daily(df[df["is_lct"]]),"all":build_daily(df)}
+    return {g: build_daily(subset_for_group(df, g)) for g in filter_groups()}
 
 def meta_daily_camps(df):
-    result={"lct":{},"all":{}}
-    for key,subset in [("lct",df[df["is_lct"]]),("all",df)]:
-        for camp in subset["campaign"].unique():
-            result[key][camp]=build_daily(subset[subset["campaign"]==camp])
+    result={}
+    for g in filter_groups():
+        subset=subset_for_group(df,g)
+        result[g]={camp: build_daily(subset[subset["campaign"]==camp]) for camp in subset["campaign"].unique()}
     return result
 
 def meta_raw(df):
     rows=[]
-    agg=df.groupby(["date","campaign","adset","is_lct"]).agg(
+    agg=df.groupby(["date","campaign","adset"]).agg(
         spend=("spend","sum"),leads=("leads","sum"),
         impressions=("impressions","sum"),link_clicks=("link_clicks","sum"),
         page_view=("page_view","sum")
     ).reset_index()
+    codes_map=df.groupby(["date","campaign","adset"])["lct_codes"].first()
     for _,r in agg.iterrows():
+        key=(r["date"],r["campaign"],r["adset"])
+        codes=codes_map.get(key,[])
         rows.append({
-            "d":r["date"].strftime("%d/%m"),"c":str(r["campaign"]),"a":str(r["adset"]),
-            "lct":bool(r["is_lct"]),"sp":round(float(r["spend"]),2),
+            "d":r["date"].strftime("%d/%m/%y"),"c":str(r["campaign"]),"a":str(r["adset"]),
+            "codes":codes,"sp":round(float(r["spend"]),2),
             "ld":int(r["leads"]),"imp":int(r["impressions"]),
             "lc":int(r["link_clicks"]),"pv":int(r["page_view"])
         })
@@ -286,12 +326,14 @@ def meta_tables_period(df, p, img_dir, camp_status=None, adset_status=None, ad_s
 def meta_tables(df, img_dir):
     hoje=pd.Timestamp(date.today())
     camp_status, adset_status, ad_status = build_status_maps(df)
-    result={"lct":{},"all":{}}
-    for key,subset in [("lct",df[df["is_lct"]]),("all",df)]:
+    result={}
+    for g in filter_groups():
+        subset=subset_for_group(df,g)
+        result[g]={}
         for pname,n in [("1",1),("7",7),("14",14),("30",30),("all",0)]:
             p=subset[subset["date"]>=hoje-pd.Timedelta(days=n-1)] if n>0 else subset
-            result[key][pname]=meta_tables_period(df,p,img_dir,camp_status,adset_status,ad_status)
-            print(f"     [{key}][{pname}]: {len(result[key][pname]['camps'])} camps | {len(result[key][pname]['ads'])} ads")
+            result[g][pname]=meta_tables_period(df,p,img_dir,camp_status,adset_status,ad_status)
+            print(f"     [{g}][{pname}]: {len(result[g][pname]['camps'])} camps | {len(result[g][pname]['ads'])} ads")
     return result
 
 def meta_breakdowns(df):
@@ -306,38 +348,40 @@ def meta_breakdowns(df):
         df_ga=pd.read_csv(URL_GA)
         df_ga["date"]=pd.to_datetime(df_ga["Date"],errors="coerce")
         df_ga["spend"]=to_num(df_ga["Spend (Cost, Amount Spent)"])
-        df_ga["leads"]=to_num(df_ga["Action Leads"])
+        leads_col_ga="Action FB Pixel Custom (Offsite Conversion)" if "Action FB Pixel Custom (Offsite Conversion)" in df_ga.columns else "Action Leads"
+        df_ga["leads"]=to_num(df_ga[leads_col_ga])+to_num(df_ga["Action Omni Purchase"]) if "Action Omni Purchase" in df_ga.columns else to_num(df_ga[leads_col_ga])
         df_ga["age"]=df_ga["Age (Breakdown)"].astype(str)
         df_ga["gender"]=df_ga["Gender (Breakdown)"].astype(str)
-        if "Campaign Name" in df_ga.columns and LANCAMENTO_COD:
-            df_ga["is_lct"]=df_ga["Campaign Name"].str.contains(LANCAMENTO_COD,na=False,case=False)
+        if "Campaign Name" in df_ga.columns:
+            df_ga["lct_codes"]=df_ga["Campaign Name"].apply(matched_codes)
         else:
-            df_ga["is_lct"]=True
+            df_ga["lct_codes"]=[[] for _ in range(len(df_ga))]
         df_ga=df_ga.dropna(subset=["date"])
     except Exception as e: print(f"  Aviso GA: {e}"); df_ga=pd.DataFrame()
     try:
         df_pt=pd.read_csv(URL_PT)
         df_pt["date"]=pd.to_datetime(df_pt["Date"],errors="coerce")
         df_pt["spend"]=to_num(df_pt["Spend (Cost, Amount Spent)"])
-        df_pt["leads"]=to_num(df_pt["Action Leads"])
+        leads_col_pt="Action FB Pixel Custom (Offsite Conversion)" if "Action FB Pixel Custom (Offsite Conversion)" in df_pt.columns else "Action Leads"
+        df_pt["leads"]=to_num(df_pt[leads_col_pt])+to_num(df_pt["Action Omni Purchase"]) if "Action Omni Purchase" in df_pt.columns else to_num(df_pt[leads_col_pt])
         df_pt["platform"]=df_pt["Platform Position (Breakdown)"].astype(str)
-        if "Campaign Name" in df_pt.columns and LANCAMENTO_COD:
-            df_pt["is_lct"]=df_pt["Campaign Name"].str.contains(LANCAMENTO_COD,na=False,case=False)
+        if "Campaign Name" in df_pt.columns:
+            df_pt["lct_codes"]=df_pt["Campaign Name"].apply(matched_codes)
         else:
-            df_pt["is_lct"]=True
+            df_pt["lct_codes"]=[[] for _ in range(len(df_pt))]
         df_pt=df_pt.dropna(subset=["date"])
     except Exception as e: print(f"  Aviso PT: {e}"); df_pt=pd.DataFrame()
 
     result={}
     for pname,n in [("1",1),("7",7),("14",14),("30",30),("all",0)]:
         start=hoje_bd-pd.Timedelta(days=n-1) if n>0 else None
-        for lname,lct_filter in [("lct",True),("all",None)]:
+        for g in filter_groups():
             if len(df_ga)>0:
-                pga=df_ga if lct_filter is None else df_ga[df_ga["is_lct"]]
+                pga=df_ga if g=="all" else df_ga[df_ga["lct_codes"].apply(lambda c: g in c)]
                 pga=pga[(pga["date"]>=start)&(pga["date"]<=hoje_bd)] if n>0 else pga
             else: pga=df_ga
             if len(df_pt)>0:
-                ppt=df_pt if lct_filter is None else df_pt[df_pt["is_lct"]]
+                ppt=df_pt if g=="all" else df_pt[df_pt["lct_codes"].apply(lambda c: g in c)]
                 ppt=ppt[(ppt["date"]>=start)&(ppt["date"]<=hoje_bd)] if n>0 else ppt
             else: ppt=df_pt
             age_d=[]; gen_d=[]; plat_d=[]
@@ -350,19 +394,19 @@ def meta_breakdowns(df):
             if len(ppt)>0:
                 ag_pt=ppt.groupby("platform").agg(spend=("spend","sum"),leads=("leads","sum")).reset_index().sort_values("leads",ascending=False).head(8)
                 plat_d=seg(ag_pt,"platform")
-            if lname not in result: result[lname]={}
-            result[lname][pname]={"age":age_d,"gender":gen_d,"platform":plat_d}
+            if g not in result: result[g]={}
+            result[g][pname]={"age":age_d,"gender":gen_d,"platform":plat_d}
 
     raw_ga=[]
     if len(df_ga)>0:
         for _,r in df_ga.iterrows():
             if pd.isna(r['date']): continue
-            raw_ga.append({'d':r['date'].strftime('%d/%m'),'age':str(r['age']),'gen':str(r['gender']),'sp':round(float(r['spend']),2),'ld':int(r['leads']),'lct':bool(r['is_lct']),'camp':str(r['Campaign Name']) if 'Campaign Name' in r.index else ''})
+            raw_ga.append({'d':r['date'].strftime('%d/%m/%y'),'age':str(r['age']),'gen':str(r['gender']),'sp':round(float(r['spend']),2),'ld':int(r['leads']),'codes':r['lct_codes'],'camp':str(r['Campaign Name']) if 'Campaign Name' in r.index else ''})
     raw_pt=[]
     if len(df_pt)>0:
         for _,r in df_pt.iterrows():
             if pd.isna(r['date']): continue
-            raw_pt.append({'d':r['date'].strftime('%d/%m'),'plat':str(r['platform']),'sp':round(float(r['spend']),2),'ld':int(r['leads']),'lct':bool(r['is_lct']),'camp':str(r['Campaign Name']) if 'Campaign Name' in r.index else ''})
+            raw_pt.append({'d':r['date'].strftime('%d/%m/%y'),'plat':str(r['platform']),'sp':round(float(r['spend']),2),'ld':int(r['leads']),'codes':r['lct_codes'],'camp':str(r['Campaign Name']) if 'Campaign Name' in r.index else ''})
     result['_raw_ga']=raw_ga; result['_raw_pt']=raw_pt
     return result
 
@@ -442,13 +486,13 @@ def pesquisa_process(df, total_leads):
             _date_col=c; break
     if _date_col is not None:
         _dt=pd.to_datetime(df[_date_col], errors="coerce", dayfirst=True)
-        _por_dia=_dt.dropna().dt.strftime("%d/%m").value_counts()
+        _por_dia=_dt.dropna().dt.strftime("%d/%m/%y").value_counts()
         def _dk(s):
             dd,mm=s.split("/"); return int(mm)*100+int(dd)
         for d in sorted(_por_dia.index, key=_dk):
             resp_por_dia.append({"d":d,"n":int(_por_dia[d])})
         # rows recebem a data para permitir filtro por período no front
-        _dt_fmt=_dt.dt.strftime("%d/%m")
+        _dt_fmt=_dt.dt.strftime("%d/%m/%y")
         for i,(_,r) in enumerate(df.iterrows()):
             if i<len(rows):
                 v=_dt_fmt.iloc[i] if i<len(_dt_fmt) else None
@@ -494,7 +538,8 @@ def build_vendas_data(df_v, df_meta):
         df_v[c] = df_v[c].fillna("").astype(str).str.strip()
 
     # ── Investimento do lançamento, por nível ──
-    m = df_meta[df_meta["is_lct"]] if LANCAMENTO_COD else df_meta
+    _lct_f = LANCAMENTO_CODS[0] if LANCAMENTO_CODS else None
+    m = df_meta[df_meta["lct_codes"].apply(lambda c: _lct_f in c)] if _lct_f else df_meta
     inv_total = float(m["spend"].sum())
     inv_camp  = m.groupby("campaign")["spend"].sum().to_dict()
     inv_conj  = m.groupby("adset")["spend"].sum().to_dict()
@@ -510,7 +555,8 @@ def build_vendas_data(df_v, df_meta):
     # ── Totais ──
     receita = float(df_v["valor"].sum())
     n_vendas = int(len(df_v))
-    atrib   = df_v[df_v["campanha"].str.contains(LANCAMENTO_COD, na=False, case=False)] if LANCAMENTO_COD else df_v
+    _termo_f = _LCT_TERMO_POR_LABEL.get(_lct_f, _lct_f) if _lct_f else None
+    atrib   = df_v[df_v["campanha"].str.contains(_termo_f, na=False, case=False)] if _termo_f else df_v
     outras  = df_v.drop(atrib.index)
 
     totals = {
@@ -616,7 +662,8 @@ def replace_js_const(html, name, value):
 def build_lpv_data(df):
     import re as _re
     from collections import defaultdict
-    sub = df[df["campaign"].str.contains(LANCAMENTO_COD, na=False)] if LANCAMENTO_COD else df
+    _lct_filter = LANCAMENTO_CODS[0] if LANCAMENTO_CODS else None
+    sub = df[df["lct_codes"].apply(lambda c: _lct_filter in c)] if _lct_filter else df
 
     lpv_daily = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
     lpv_camps = defaultdict(lambda: defaultdict(float))
@@ -632,7 +679,7 @@ def build_lpv_data(df):
         camp = str(row.get("campaign", ""))
         lv   = detect_lpv(camp)
         if lv is None: continue
-        d    = row["date"].strftime("%d/%m")
+        d    = row["date"].strftime("%d/%m/%y")
         sp   = float(row.get("spend",       0) or 0)
         imp  = float(row.get("impressions", 0) or 0)
         lc   = float(row.get("link_clicks", 0) or 0)
@@ -716,13 +763,13 @@ def inject_all(tpl, meta_k, meta_d, meta_dc, meta_raw_c, meta_t, meta_bd, pes, l
     if lpv_data is not None:
         html=replace_js_const(html,"LPV_DATA", lpv_data)
     html=replace_js_const(html,"VENDAS_DATA", vendas_data if (USAR_VENDAS and vendas_data) else False)
+    html=replace_js_const(html,"LANCAMENTO_CODS",  LANCAMENTO_CODS)
     html=replace_js_const(html,"DATA_GERACAO",     date.today().strftime("%Y-%m-%d"))
 
     _cpl_bom   = globals().get("CPL_BOM",   globals().get("CPA_BOM",   5.0))
     _cpl_medio = globals().get("CPL_MEDIO", globals().get("CPA_MEDIO", 10.0))
 
     for k,v in [
-        ("LANCAMENTO_COD", f"'{LANCAMENTO_COD}'"),
         ("NOME_CLIENTE",   f"'{NOME_CLIENTE}'"),
         ("LOGO_LETRA",     f"'{LOGO_LETRA}'"),
         ("COR_ACENTO",     f"'{COR_ACENTO}'"),
@@ -756,7 +803,7 @@ def inject_all(tpl, meta_k, meta_d, meta_dc, meta_raw_c, meta_t, meta_bd, pes, l
 # ══ MAIN ═══════════════════════════════════════════════
 def main():
     print("="*60)
-    print(f"Dashboard Lançamento Gratuito — {NOME_CLIENTE} / {LANCAMENTO_COD or 'Todos'}")
+    print(f"Dashboard — {NOME_CLIENTE} / {chr(44).join(LANCAMENTO_CODS) or 'Todos'}")
     print(f"Moeda: {MOEDA} ({MOEDA_SIMBOLO})")
     print("="*60)
     img_dir=Path("imgs"); img_dir.mkdir(exist_ok=True)
@@ -769,8 +816,9 @@ def main():
     m_raw=meta_raw(df_meta)
     m_t=meta_tables(df_meta,img_dir)
     m_bd=meta_breakdowns(df_meta)
-    total_leads=m_k["lct"]["leads"] if LANCAMENTO_COD else m_k["all"]["leads"]
-    print(f"  ✓ {total_leads} leads | {MOEDA_SIMBOLO} {m_k['lct']['spend']:,.2f} invest.")
+    _g0 = LANCAMENTO_CODS[0] if LANCAMENTO_CODS else "all"
+    total_leads=m_k[_g0]["leads"]
+    print(f"  ✓ {total_leads} leads [{_g0}] | {MOEDA_SIMBOLO} {m_k[_g0]['spend']:,.2f} invest.")
 
     print("\n[PESQUISA]")
     if USAR_PESQUISA:
@@ -815,12 +863,12 @@ def main():
 
     data_json={
         "cliente":NOME_CLIENTE,"cor":COR_ACENTO,"letra":LOGO_LETRA,
-        "lancamento":LANCAMENTO_COD,"moeda":MOEDA,"moeda_simbolo":MOEDA_SIMBOLO,
+        "lancamentos":LANCAMENTO_CODS,"moeda":MOEDA,"moeda_simbolo":MOEDA_SIMBOLO,
         "atualizado":date.today().strftime("%d/%m/%Y"),
         "kpis":{
-            "spend":m_k["lct"].get("spend"),
-            "leads":m_k["lct"].get("leads"),
-            "cpl":m_k["lct"].get("cpl")
+            "spend":m_k[_g0].get("spend"),
+            "leads":m_k[_g0].get("leads"),
+            "cpl":m_k[_g0].get("cpl")
         }
     }
     Path("data.json").write_text(json.dumps(data_json,ensure_ascii=False,indent=2),encoding="utf-8")
