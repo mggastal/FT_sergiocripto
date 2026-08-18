@@ -10,7 +10,7 @@
 <style>
 :root{--bg:#f0f2f7;--surface:#fff;--surface2:#f7f8fc;--border:rgba(0,0,0,.07);--text:#0f1523;--muted:#6b7280;--muted2:#9ca3af;--accent:#e11d48;--sh:0 1px 4px rgba(0,0,0,.06);--r:12px;}
 [data-theme="dark"]{--bg:#0a0f1e;--surface:#111827;--surface2:#1a2236;--border:rgba(255,255,255,.08);--text:#f0f4ff;--muted:#8b95a9;--muted2:#5a6478;--sh:0 1px 4px rgba(0,0,0,.3);}
-[data-theme="dark"] .sb{background:#060b14;}
+[data-theme="dark"] 
 [data-theme="dark"] .tc thead th{background:#1a2236;}
 [data-theme="dark"] .f-rate-txt{background:rgba(255,255,255,.12);color:#fff;}
 /* STATUS DOT + tooltip custom (sem delay, sem cursor help) */
@@ -43,14 +43,15 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 .sb-footer span{font-size:10px;color:rgba(255,255,255,.25);}
 
 /* TOPBAR */
-.main{display:flex;flex-direction:column;overflow-x:hidden;}
-.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:9px 20px;display:flex;align-items:center;justify-content:space-between;position:fixed;top:0;left:210px;right:0;z-index:9000;box-shadow:0 2px 8px rgba(0,0,0,.12);gap:8px;flex-wrap:wrap;}
+.main{display:flex;flex-direction:column;min-width:0;}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;position:sticky;top:0;z-index:300;box-shadow:0 2px 8px rgba(0,0,0,.12);gap:8px;overflow:hidden;}
 .topbar-l{display:flex;align-items:center;gap:8px;flex-shrink:0;}
 .page-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;}
 .live-badge{display:flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;}
 .pulse{width:5px;height:5px;border-radius:50%;animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.topbar-r{display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
+.topbar-r{display:flex;align-items:center;gap:5px;flex-shrink:0;overflow-x:auto;scrollbar-width:none;}
+.topbar-r::-webkit-scrollbar{display:none;}
 .period-bar{display:flex;gap:2px;background:var(--bg);padding:3px;border-radius:8px;border:1px solid var(--border);}
 .pb{padding:4px 10px;border-radius:6px;border:none;background:transparent;cursor:pointer;font-size:11px;font-weight:600;color:var(--muted);transition:all .15s;font-family:'DM Sans',sans-serif;white-space:nowrap;}
 .pb.active{background:var(--surface);color:var(--text);box-shadow:var(--sh);}
@@ -58,7 +59,13 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 .date-range input{border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;outline:none;width:88px;}
 .date-range span{font-size:11px;color:var(--muted2);}
 .dr-clear{padding:2px 6px;border-radius:5px;border:none;background:transparent;color:var(--muted2);font-size:13px;cursor:pointer;}
-.lct-bar{display:none;gap:2px;background:var(--bg);padding:3px;border-radius:8px;border:1px solid var(--border);flex-wrap:wrap;}
+.lct-bar{display:none;gap:2px;background:var(--bg);padding:3px;border-radius:8px;border:1px solid var(--border);flex-wrap:nowrap;overflow-x:auto;max-width:340px;scrollbar-width:none;}
+.lct-btn{border:1px solid var(--border);background:var(--surface2,#eef1f6);color:var(--text);
+  font-size:10px;font-weight:700;letter-spacing:.3px;padding:5px 14px;border-radius:20px;
+  cursor:pointer;transition:all .15s;font-family:inherit;line-height:1.4;}
+.lct-btn:hover{border-color:#059669;color:#059669;}
+.lct-btn.active{background:#059669;border-color:#059669;color:#fff;}
+.lct-bar::-webkit-scrollbar{display:none;}
 .label-toggle{display:flex;align-items:center;gap:5px;padding:4px 9px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;font-size:11px;font-weight:600;color:var(--muted);user-select:none;}
 .label-toggle.on{background:var(--accent);color:#fff;border-color:var(--accent);}
 .theme-btn{padding:4px 10px;border-radius:7px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;font-size:11px;font-weight:600;color:var(--muted);font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:4px;}
@@ -67,7 +74,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 .lang-bar .pb{min-width:32px;text-align:center;}
 
 /* CONTENT */
-.content{padding:115px 22px 18px 22px;flex:1;overflow-x:hidden;}
+.content{padding:14px 22px 18px;flex:1;overflow-x:hidden;}
 .page-section{display:none;}
 .page-section.active{display:block;}
 
@@ -187,20 +194,20 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 .desk-only{display:block!important;}
 details.desk-only{display:block!important;}
 @media(max-width:768px){.desk-only{display:none!important;}details.desk-only{display:none!important;}}
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:250;}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:350;}
 .overlay.open{display:block;}
 @media(max-width:768px){
   .topbar{left:0;right:0;z-index:299!important;}
   .ov-bottom{grid-template-columns:1fr!important;}
-  .content{padding-top:185px!important;}
+  
   .pz-cw canvas{max-width:100%!important;}
   .pz-card{width:100%;box-sizing:border-box;}
   .app{grid-template-columns:1fr;}
   .sb{display:none;position:fixed;top:0;left:0;width:240px;height:100vh;z-index:400!important;}
   .sb.open{display:flex;}
   .mob-menu{display:flex;}
-  .content{padding:12px;overflow-x:hidden;}
-  .main{overflow-x:hidden;max-width:100vw;}
+  .content{padding:12px;}
+  .main{max-width:100vw;}
   .k5,.k4,.k3{grid-template-columns:repeat(2,1fr);}
   .g2,.g3,.g73{grid-template-columns:1fr;}
   .pizza-grid{grid-template-columns:1fr;}
@@ -318,19 +325,19 @@ details.desk-only{display:block!important;}
   <nav class="sb-nav">
     <button class="sb-item active" onclick="goPage('meta',this)"><span class="ico">🎯</span><span data-i18n="nav_meta">Meta Ads</span></button>
     <button class="sb-item" onclick="goPage('diario',this)"><span class="ico">📈</span><span data-i18n="nav_diario">Métricas Diárias</span></button>
-    <button class="sb-item" onclick="goPage('lp',this)"><span class="ico">⚖️</span><span data-i18n="nav_lp">Comparar LPs</span></button>
     <button class="sb-item" id="sbPesquisa" onclick="goPage('pesquisa',this)"><span class="ico">🔍</span><span data-i18n="nav_pesquisa">Pesquisa</span></button>
     <button class="sb-item" id="sbVendas" onclick="goPage('vendas',this)"><span class="ico">💰</span><span data-i18n="nav_vendas">Vendas</span></button>
   </nav>
-  <div class="sb-lct-val" id="sbLct">—</div></div>
-  <div class="sb-footer"><span id="sbAtual">--/--/---- · via planilha</span></div>
+  <div class="sb-lct-val" id="sbLct">—</div>
+  
 </aside>
 
 <main class="main">
   <div class="topbar">
+    <div style="display:flex;align-items:center;justify-content:space-between;width:100%;gap:8px;padding:9px 20px;">
     <div class="topbar-l">
       <button class="mob-menu" onclick="toggleSb()">☰</button>
-      <div class="page-title" id="pageTitle">Overview</div>
+      <!-- build sobe v21 --><div class="page-title" id="pageTitle">Overview</div>
       <div class="live-badge" id="liveBadge"><div class="pulse" id="livePulse"></div><span id="liveTxt">—</span></div>
       <div class="desk-only" style="display:flex;align-items:center;gap:5px;margin-left:2px;">
         <span style="font-size:9px;color:var(--muted2);font-weight:600">Aa</span>
@@ -356,10 +363,11 @@ details.desk-only{display:block!important;}
         <input type="date" id="dtI"><span>→</span><input type="date" id="dtF">
         <button class="dr-clear" onclick="clearDates()">✕</button>
       </div>
-      <div class="lct-bar" id="lctBar"></div>
       <div class="label-toggle on" id="labelToggle" onclick="toggleLabels(this)" data-i18n="rotulos">Rótulos</div>
       <button class="theme-btn" onclick="toggleTheme()"><span id="themeIcon">🌙</span><span id="themeLabel" data-i18n="escuro">Escuro</span></button>
     </div>
+    </div>
+    <div id="lctBar" style="display:none;gap:6px;flex-wrap:wrap;padding:0 20px 8px;"></div>
   </div>
 
   <div class="content">
@@ -434,22 +442,6 @@ details.desk-only{display:block!important;}
     <!-- /VENDAS -->
 
     <!-- COMPARAÇÃO LP -->
-    <div class="page-section" id="page-lp">
-      <div class="lp-hero" id="lpHero"></div>
-      <div class="lp-lgd" id="lpLgd"></div>
-      <div class="lp-charts">
-        <div class="cc"><div class="cc-t" data-i18n="kpi_vendas">Vendas</div><div class="cc-s" data-i18n="lp_ch_leads_s">por dia</div><div class="cw" style="height:180px"><canvas id="chLpLeads"></canvas></div></div>
-        <div class="cc"><div class="cc-t" data-i18n="kpi_cpv">Custo por Venda</div><div class="cc-s" data-i18n="lp_ch_cpl_s">Custo por venda</div><div class="cw" style="height:180px"><canvas id="chLpCpl"></canvas></div></div>
-        <div class="cc"><div class="cc-t">Connect Rate</div><div class="cc-s" data-i18n="lp_ch_cr_s">PV / Cliques</div><div class="cw" style="height:180px"><canvas id="chLpCr"></canvas></div></div>
-        <div class="cc"><div class="cc-t" data-i18n="lp_ch_tx">Taxa Conv. LP</div><div class="cc-s">Compras / PV</div><div class="cw" style="height:180px"><canvas id="chLpTx"></canvas></div></div>
-      </div>
-      <div class="sec-hd" data-i18n="lp_cmp_ttl">Comparação Detalhada</div>
-      <div class="lp-cmp-tbl mb14" id="lpCmpTbl"></div>
-      <div class="lp-camp-pair" id="lpCampPair"></div>
-    </div>
-    <!-- /COMPARAÇÃO LP -->
-
-    <!-- MÉTRICAS DIÁRIAS -->
     <div class="page-section" id="page-diario">
       <details style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:0;margin-bottom:14px;box-shadow:var(--sh);" id="campFilterDetails">
         <summary style="padding:10px 14px;cursor:pointer;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;list-style:none;display:flex;align-items:center;justify-content:space-between;user-select:none;">
@@ -493,40 +485,40 @@ details.desk-only{display:block!important;}
 Chart.register(ChartDataLabels);
 
 // ═══ DADOS ═══
-const META_KPIS         = null;
-const META_DAILY        = null;
-const META_DAILY_CAMPS  = null;
-const META_RAW_CAMP     = null;
-const META_TABLES       = null;
-const DATA_GERACAO      = null;
-const META_BD           = null;
-const PESQUISA          = null;
-const LPV_DATA          = null;
-const VENDAS_DATA       = null;
+const META_KPIS = null;
+const META_DAILY = null;
+const META_DAILY_CAMPS = null;
+const META_RAW_CAMP = null;
+const META_TABLES = null;
+const DATA_GERACAO = null;
+const META_BD = null;
+const PESQUISA = null;
+const LPV_DATA = null;
+const VENDAS_DATA = null;
 
 // ═══ CONFIG (injetados pelo gerador) ═══
-const LANCAMENTO_CODS = [];
-const NOME_CLIENTE   = 'Cliente';
-const LOGO_LETRA     = 'C';
-const COR_ACENTO     = '#e11d48';
-const MOEDA_SIMBOLO  = 'R$';
-const MOEDA_COD      = 'BRL';
-const CPL_BOM        = 5.0;
-const CPL_MEDIO      = 10.0;
-const CTR_BOM        = 1.2;
-const CTR_MEDIO      = 0.8;
-const CR_BOM         = 40.0;
-const CR_MEDIO       = 25.0;
-const TX_CONV_BOM    = 30.0;
-const TX_CONV_MEDIO  = 15.0;
-const CPM_BOM        = 5.0;
-const CPM_MEDIO      = 12.0;
-    const CPV_BOM        = 80.0;
-    const CPV_MEDIO      = 150.0;
-    const CHECKOUT_BOM   = 8.0;
-    const CHECKOUT_MEDIO = 4.0;
-    const TXLP_BOM       = 3.0;
-    const TXLP_MEDIO     = 1.5;
+const LANCAMENTO_CODS = null;
+const NOME_CLIENTE='Sergio Cripto';
+const LOGO_LETRA='SC';
+const COR_ACENTO='#B8860B';
+const MOEDA_SIMBOLO='€';
+const MOEDA_COD='EUR';
+const CPL_BOM=9.06;
+const CPL_MEDIO=12.0;
+const CTR_BOM=1.0;
+const CTR_MEDIO=0.8;
+const CR_BOM=65.0;
+const CR_MEDIO=60.0;
+const TX_CONV_BOM=25.0;
+const TX_CONV_MEDIO=18.0;
+const CPM_BOM=5.0;
+const CPM_MEDIO=12.0;
+    const CPV_BOM=80.0;
+    const CPV_MEDIO=150.0;
+    const CHECKOUT_BOM=8.0;
+    const CHECKOUT_MEDIO=4.0;
+    const TXLP_BOM=3.0;
+    const TXLP_MEDIO=1.5;
 
 // ═══ I18N ═══════════════════════════════════════════════════
 const TRANSLATIONS = {
@@ -1004,18 +996,16 @@ function buildFunnel(mk){
   if(!mk) return;
   const steps=[
     {lbl:t('f_impressoes'), val:mk.impressions,  color:hexA(FUNIL_COLOR,1.0)},
-    {lbl:t('f_link_clicks'),val:mk.link_clicks,  color:hexA(FUNIL_COLOR,0.78)},
-    {lbl:t('f_page_views'), val:mk.page_view,    color:hexA(FUNIL_COLOR,0.56)},
-    {lbl:t('f_checkout'),   val:mk.checkout,     color:hexA(FUNIL_COLOR,0.34)},
-    {lbl:t('f_compras'),    val:mk.purchases,    color:FUNIL_GREEN},
+    {lbl:t('f_link_clicks'),val:mk.link_clicks,  color:hexA(FUNIL_COLOR,0.75)},
+    {lbl:t('f_page_views'), val:mk.page_view,    color:hexA(FUNIL_COLOR,0.50)},
+    {lbl:t('f_leads'),      val:mk.leads,        color:FUNIL_GREEN},
   ];
   const rates=[
-    {lbl:t('f_ctr'),        val:mk.ctr,          bom:CTR_BOM,       medio:CTR_MEDIO},
-    {lbl:t('f_connect'),    val:mk.connect_rate, bom:CR_BOM,        medio:CR_MEDIO},
-    {lbl:t('f_tx_checkout'),val:mk.tx_checkout,  bom:CHECKOUT_BOM,  medio:CHECKOUT_MEDIO},
-    {lbl:t('f_tx_conv_lp'), val:mk.tx_conv_lp,   bom:TXLP_BOM,      medio:TXLP_MEDIO},
+    {lbl:t('f_ctr'),     val:mk.ctr,          bom:CTR_BOM,      medio:CTR_MEDIO},
+    {lbl:t('f_connect'), val:mk.connect_rate,  bom:CR_BOM,       medio:CR_MEDIO},
+    {lbl:t('f_conv'),    val:mk.tx_conv,       bom:TX_CONV_BOM,  medio:TX_CONV_MEDIO},
   ];
-  const maxOther=Math.max(mk.link_clicks||1,mk.page_view||1,mk.checkout||1,mk.purchases||1,1);
+  const maxOther=Math.max(mk.link_clicks||1,mk.page_view||1,mk.leads||1,1);
   const widths=steps.map((s,i)=>i===0?100:Math.max(12,Math.round((s.val||0)/maxOther*88)));
   for(let i=steps.length-1;i>=1;i--){ if(widths[i]>=widths[i-1]) widths[i]=Math.max(12, widths[i-1]-8); }
   const el=document.getElementById('funnelSteps');
@@ -1049,45 +1039,41 @@ function renderMeta(){
   if(!mk||!md) return;
 
   const spMK=md?.spend?.reduce((a,b)=>a+(b||0),0)||0;
-  const puMK=md?.purchases?.reduce((a,b)=>a+(b||0),0)||0;
-  const recMK=md?.receita?.reduce((a,b)=>a+(b||0),0)||0;
-  const cpvMK=spMK>0&&puMK>0?r2(spMK/puMK):null;
-  const cpvCor=cpvMK!=null?(cpvMK<=CPV_BOM?'#059669':cpvMK<=CPV_MEDIO?'#d97706':'#dc2626'):'var(--muted)';
+  const ldMK=md?.leads?.reduce((a,b)=>a+(b||0),0)||0;
+  const cplMK=spMK>0&&ldMK>0?r2(spMK/ldMK):null;
+  const cplCor=cplMK!=null?(cplMK<=CPL_BOM?'#059669':cplMK<=CPL_MEDIO?'#d97706':'#dc2626'):'var(--muted)';
   document.getElementById('metaKpis').innerHTML=`
     <div class="kpi" style="--kc:#334155"><div class="kpi-lbl">${t('kpi_invest')}</div><div class="kpi-val" style="font-size:16px;color:var(--text)">${fR(spMK)}</div><div class="kpi-sub">Meta Ads</div></div>
-    <div class="kpi" style="--kc:#059669"><div class="kpi-lbl">${t('kpi_vendas')}</div><div class="kpi-val" style="color:#059669">${fN(puMK)}</div><div class="kpi-sub">${recMK>0?fR(recMK):t('kpi_vendas_sub')}</div></div>
-    <div class="kpi" style="--kc:${cpvCor}"><div class="kpi-lbl">${t('kpi_cpv')}</div><div class="kpi-val" style="color:${cpvCor}">${cpvMK!=null?fR(cpvMK):'—'}</div><div class="kpi-sub">${t('kpi_cpv_sub')}</div></div>`;
+    <div class="kpi" style="--kc:#3b82f6"><div class="kpi-lbl">${t('kpi_leads')}</div><div class="kpi-val" style="color:var(--text)">${fN(ldMK)}</div><div class="kpi-sub">${t('kpi_cap')}</div></div>
+    <div class="kpi" style="--kc:${cplCor}"><div class="kpi-lbl">${t('kpi_cpl')}</div><div class="kpi-val" style="color:${cplCor}">${cplMK!=null?fR(cplMK):'—'}</div><div class="kpi-sub">${t('kpi_cpl_sub')}</div></div>`;
 
   const funnelKpis={
     impressions: md.impressions?.reduce((a,b)=>a+(b||0),0)||0,
     link_clicks: md.link_clicks?.reduce((a,b)=>a+(b||0),0)||0,
     page_view:   md.page_view?.reduce((a,b)=>a+(b||0),0)||0,
-    checkout:    md.checkout?.reduce((a,b)=>a+(b||0),0)||0,
-    purchases:   md.purchases?.reduce((a,b)=>a+(b||0),0)||0,
+    leads:       md.leads?.reduce((a,b)=>a+(b||0),0)||0,
     spend:       spMK,
   };
-  const imp2=funnelKpis.impressions,lc2=funnelKpis.link_clicks,pv2=funnelKpis.page_view;
-  const ck2=funnelKpis.checkout,pu2=funnelKpis.purchases;
+  const imp2=funnelKpis.impressions,lc2=funnelKpis.link_clicks,pv2=funnelKpis.page_view,ld2=funnelKpis.leads;
   funnelKpis.ctr=imp2>0?r2(lc2/imp2*100):null;
   funnelKpis.connect_rate=lc2>0?r2(pv2/lc2*100):null;
-  funnelKpis.tx_checkout=pv2>0?r2(ck2/pv2*100):null;
-  funnelKpis.tx_conv_lp=pv2>0?r2(pu2/pv2*100):null;
-  funnelKpis.cpv=pu2>0?r2(spMK/pu2):null;
+  funnelKpis.tx_conv=pv2>0?r2(ld2/pv2*100):null;
+  funnelKpis.cpl=ld2>0?r2(spMK/ld2):null;
   setTimeout(()=>buildFunnel(funnelKpis),30);
 
   dc('chMetaMain');
   CH['chMetaMain']=new Chart(document.getElementById('chMetaMain'),{
     data:{labels:md.days,datasets:[
-      {label:t('kpi_vendas'),data:md.purchases,backgroundColor:'rgba(5,150,105,.75)',borderRadius:3,type:'bar',yAxisID:'y1',
-       datalabels:{...makeDatalabels('#059669','',v=>v!=null?fN(v):null),display:ctx=>showLabels}},
-      {label:t('kpi_invest'),data:md.spend,borderColor:'#7c3aed',backgroundColor:'transparent',tension:.3,pointRadius:2,borderWidth:2,type:'line',spanGaps:true,datalabels:{display:false}},
-      {label:t('kpi_cpv'),data:md.cpv,borderColor:'#111',borderDash:[5,3],backgroundColor:'transparent',tension:.3,pointRadius:2,borderWidth:1.5,type:'line',yAxisID:'y2',spanGaps:true,
+      {label:t('kpi_leads'),data:md.leads,backgroundColor:'rgba(59,130,246,.7)',borderRadius:3,type:'bar',yAxisID:'y1',
+       datalabels:{...makeDatalabels('#3b82f6','',v=>v!=null?fN(v):null),display:ctx=>showLabels}},
+      {label:t('kpi_invest'),data:md.spend,borderColor:'#059669',backgroundColor:'transparent',tension:.3,pointRadius:2,borderWidth:2,type:'line',spanGaps:true,datalabels:{display:false}},
+      {label:t('kpi_cpl'),data:md.cpl,borderColor:'#111',borderDash:[5,3],backgroundColor:'transparent',tension:.3,pointRadius:2,borderWidth:1.5,type:'line',yAxisID:'y2',spanGaps:true,
        datalabels:{display:ctx=>showLabels,color:'#333',font:{size:labelSize,weight:'bold'},formatter:v=>v!=null?fR(v):null,anchor:'end',align:'top',offset:2,clip:false}},
     ]},
     options:{...bo(),scales:{
       x:{ticks:{color:TXT(),font:bf,maxTicksLimit:14},grid:{color:GRID()}},
       y:{ticks:{color:TXT(),font:bf,callback:v=>fR(v)},grid:{color:GRID()},min:0},
-      y1:{position:'right',ticks:{color:'#059669',font:bf,precision:0},grid:{display:false},grace:'20%'},
+      y1:{position:'right',ticks:{color:'#3b82f6',font:bf},grid:{display:false},grace:'20%'},
       y2:{position:'right',ticks:{color:'#555',font:bf,callback:v=>fR(v)},grid:{display:false},offset:true,min:0},
     }}
   });
@@ -1256,13 +1242,12 @@ function buildTable(elId,data,mainCol){
     {k:'spend',l:t('col_invest'),f:fR},
     {k:'imp',l:t('col_impr'),cls:'cn'},{k:'lc',l:t('col_cliques'),cls:'cn'},
     {k:'pv',l:'PV',cls:'cn'},
+    {k:'ld',l:t('col_leads'),f:fN},
     {k:'ctr',l:'CTR',f:fP,cls2:v=>funnelCls(v,CTR_BOM,CTR_MEDIO).cls},
     {k:'cr',l:'C.Rate',f:fP,cls2:v=>funnelCls(v,CR_BOM,CR_MEDIO).cls},
-    {k:'checkout',l:'CO',f:fN,cls:'cn'},
-    {k:'tx_checkout',l:'Tx.CO',f:fP,cls2:v=>funnelCls(v,CHECKOUT_BOM,CHECKOUT_MEDIO).cls},
-    {k:'purchases',l:t('kpi_vendas'),f:fN},
-    {k:'cpv',l:'CPV',f:fR,cls2:v=>v==null?'':v<=CPV_BOM?'cg':v<=CPV_MEDIO?'cw2':'cr'},
-    {k:'roas',l:'ROAS',f:v=>v!=null?fN(v)+'x':'—'},
+    {k:'tx_cv',l:'Tx.Conv',f:fP,cls2:v=>funnelCls(v,TX_CONV_BOM,TX_CONV_MEDIO).cls},
+    {k:'cpl',l:t('col_cpl'),f:fR,cls2:cplCls},
+    {k:'cpm',l:t('col_cpm'),f:fR},
   ];
   const head='<tr><th></th><th>'+mainCol+'</th>'+COLS.map(c=>'<th class="num">'+c.l+'</th>').join('')+'</tr>';
 
@@ -1305,24 +1290,23 @@ function buildTable(elId,data,mainCol){
         <td></td>
         <td style="font-size:10px;padding:6px 10px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.5px">${t('col_total')}</td>
         ${(()=>{
-          const tot={spend:0,imp:0,lc:0,pv:0,checkout:0,purchases:0,receita:0};
-          data.forEach(r=>{tot.spend+=r.spend||0;tot.imp+=r.imp||0;tot.lc+=r.lc||0;tot.pv+=r.pv||0;tot.checkout+=r.checkout||0;tot.purchases+=r.purchases||0;tot.receita+=r.receita||0;});
+          const tot={spend:0,imp:0,lc:0,pv:0,ld:0};
+          data.forEach(r=>{tot.spend+=r.spend||0;tot.imp+=r.imp||0;tot.lc+=r.lc||0;tot.pv+=r.pv||0;tot.ld+=r.ld||0;});
           const ctr=tot.imp>0?r2(tot.lc/tot.imp*100):null;
           const cr=tot.lc>0?r2(tot.pv/tot.lc*100):null;
-          const txck=tot.pv>0?r2(tot.checkout/tot.pv*100):null;
-          const cpv=tot.purchases>0?r2(tot.spend/tot.purchases):null;
-          const roas=tot.spend>0?r2(tot.receita/tot.spend):null;
+          const txcv=tot.pv>0?r2(tot.ld/tot.pv*100):null;
+          const cpl=tot.ld>0?r2(tot.spend/tot.ld):null;
+          const cpm=tot.imp>0?r2(tot.spend/tot.imp*1000):null;
           return '<td class="num" style="padding:8px 8px">'+fR(tot.spend)+'</td>'+
             '<td class="num" style="padding:8px 8px;color:var(--muted2)">'+fN(tot.imp)+'</td>'+
             '<td class="num" style="padding:8px 8px;color:var(--muted2)">'+fN(tot.lc)+'</td>'+
             '<td class="num" style="padding:8px 8px;color:var(--muted2)">'+fN(tot.pv)+'</td>'+
+            '<td class="num" style="padding:8px 8px;font-weight:700">'+fN(tot.ld)+'</td>'+
             '<td class="num '+funnelCls(ctr,CTR_BOM,CTR_MEDIO).cls+'" style="padding:8px 8px">'+fP(ctr)+'</td>'+
             '<td class="num '+funnelCls(cr,CR_BOM,CR_MEDIO).cls+'" style="padding:8px 8px">'+fP(cr)+'</td>'+
-            '<td class="num" style="padding:8px 8px;color:var(--muted2)">'+fN(tot.checkout)+'</td>'+
-            '<td class="num '+funnelCls(txck,CHECKOUT_BOM,CHECKOUT_MEDIO).cls+'" style="padding:8px 8px">'+fP(txck)+'</td>'+
-            '<td class="num" style="padding:8px 8px;font-weight:700">'+fN(tot.purchases)+'</td>'+
-            '<td class="num '+(cpv==null?'':cpv<=CPV_BOM?'cg':cpv<=CPV_MEDIO?'cw2':'cr')+'" style="padding:8px 8px">'+(cpv!=null?fR(cpv):'—')+'</td>'+
-            '<td class="num" style="padding:8px 8px">'+(roas!=null?fN(roas)+'x':'—')+'</td>';
+            '<td class="num '+funnelCls(txcv,TX_CONV_BOM,TX_CONV_MEDIO).cls+'" style="padding:8px 8px">'+fP(txcv)+'</td>'+
+            '<td class="num '+cplCls(cpl)+'" style="padding:8px 8px">'+fR(cpl)+'</td>'+
+            '<td class="num" style="padding:8px 8px">'+fR(cpm)+'</td>';
         })()}
       </tr>
     </tfoot>
@@ -1356,11 +1340,9 @@ function toggleCampRow(id,rowEl){
       '<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">PV</th>'+
       '<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">CTR</th>'+
       '<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">C.Rate</th>'+
-      '<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">CO</th>'+
-      '<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">Tx.CO</th>'+
-      `<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">${t('kpi_vendas')}</th>`+
-      '<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">CPV</th>'+
-      '<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">ROAS</th>'+
+      `<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">Tx.Conv</th>`+
+      `<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">${t('col_leads')}</th>`+
+      `<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">${t('col_cpl')}</th>`+
       '</tr></thead><tbody>'+
       adsets.map(a=>`<tr onclick="toggleAdsetRow('${id}','${a.n.replace(/'/g,"\'")}','${campName.replace(/'/g,"\'")}',this)" style="cursor:pointer">
         <td style="font-size:10px;padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${a.n}">▶ ${statusDot(a.status)}${a.n}</td>
@@ -1370,14 +1352,12 @@ function toggleCampRow(id,rowEl){
         <td class="num cn" style="font-size:10px;padding:5px 8px;color:var(--muted2)">${fN(a.pv)}</td>
         <td class="num ${funnelCls(a.ctr,CTR_BOM,CTR_MEDIO).cls}" style="font-size:10px;padding:5px 8px">${fP(a.ctr)}</td>
         <td class="num ${funnelCls(a.cr,CR_BOM,CR_MEDIO).cls}" style="font-size:10px;padding:5px 8px">${fP(a.cr)}</td>
-        <td class="num cn" style="font-size:10px;padding:5px 8px;color:var(--muted2)">${fN(a.checkout)}</td>
-        <td class="num ${funnelCls(a.tx_checkout,CHECKOUT_BOM,CHECKOUT_MEDIO).cls}" style="font-size:10px;padding:5px 8px">${fP(a.tx_checkout)}</td>
-        <td class="num" style="font-size:10px;padding:5px 8px;font-weight:700">${fN(a.purchases)}</td>
-        <td class="num ${a.cpv==null?'':a.cpv<=CPV_BOM?'cg':a.cpv<=CPV_MEDIO?'cw2':'cr'}" style="font-size:10px;padding:5px 8px">${a.cpv!=null?fR(a.cpv):'—'}</td>
-        <td class="num" style="font-size:10px;padding:5px 8px">${a.roas!=null?fN(a.roas)+'x':'—'}</td>
+        <td class="num ${funnelCls(a.tx_cv,TX_CONV_BOM,TX_CONV_MEDIO).cls}" style="font-size:10px;padding:5px 8px">${fP(a.tx_cv)}</td>
+        <td class="num" style="font-size:10px;padding:5px 8px;font-weight:700">${fN(a.ld)}</td>
+        <td class="num ${cplCls(a.cpl)}" style="font-size:10px;padding:5px 8px">${fR(a.cpl)}</td>
       </tr>
       <tr id="ads_${id}_${a.n.replace(/[^a-zA-Z0-9]/g,'_')}" style="display:none">
-        <td colspan="12" style="padding:0 0 0 20px;background:var(--bg)">
+        <td colspan="9" style="padding:0 0 0 20px;background:var(--bg)">
           <div id="ads_inner_${id}_${a.n.replace(/[^a-zA-Z0-9]/g,'_')}"></div>
         </td>
       </tr>`).join('')+'</tbody>';
@@ -1407,20 +1387,16 @@ function toggleAdsetRow(campId,adsetName,campName,rowEl){
         '<thead><tr style="background:var(--surface2)">'+
         `<th style="font-size:9px;padding:4px 8px;text-align:left;color:var(--muted2)">${t('st_criativo')}</th>`+
         `<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">${t('col_invest')}</th>`+
-        `<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">${t('kpi_vendas')}</th>`+
+        `<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">${t('col_leads')}</th>`+
         '<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">CTR</th>'+
-        '<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">Tx.CO</th>'+
-        '<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">CPV</th>'+
-        '<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">ROAS</th>'+
+        `<th class="num" style="font-size:9px;padding:4px 8px;color:var(--muted2)">${t('col_cpl')}</th>`+
         '</tr></thead><tbody>'+
         ads.map(ad=>`<tr>
           <td style="font-size:10px;padding:5px 8px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${ad.n}">${statusDot(ad.status)}${ad.n}</td>
           <td class="num" style="font-size:10px;padding:5px 8px">${fR(ad.spend)}</td>
-          <td class="num" style="font-size:10px;padding:5px 8px;font-weight:700">${fN(ad.purchases)}</td>
+          <td class="num" style="font-size:10px;padding:5px 8px">${fN(ad.ld)}</td>
           <td class="num ${funnelCls(ad.ctr,CTR_BOM,CTR_MEDIO).cls}" style="font-size:10px;padding:5px 8px">${fP(ad.ctr)}</td>
-          <td class="num ${funnelCls(ad.tx_checkout,CHECKOUT_BOM,CHECKOUT_MEDIO).cls}" style="font-size:10px;padding:5px 8px">${fP(ad.tx_checkout||null)}</td>
-          <td class="num ${ad.cpv==null?'':ad.cpv<=CPV_BOM?'cg':ad.cpv<=CPV_MEDIO?'cw2':'cr'}" style="font-size:10px;padding:5px 8px">${ad.cpv!=null?fR(ad.cpv):'—'}</td>
-          <td class="num" style="font-size:10px;padding:5px 8px">${ad.roas!=null?fN(ad.roas)+'x':'—'}</td>
+          <td class="num ${cplCls(ad.cpl)}" style="font-size:10px;padding:5px 8px">${fR(ad.cpl)}</td>
         </tr>`).join('')+
         '</tbody></table></div>';
     } else {
@@ -1434,8 +1410,8 @@ function toggleAdsetRow(campId,adsetName,campName,rowEl){
             <div style="padding:6px 8px">
               <div style="font-size:9px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:4px" title="${ad.n}">${ad.n}</div>
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px">
-                <div><div style="font-size:7px;color:var(--muted2);text-transform:uppercase">${t('kpi_vendas')}</div><div style="font-size:10px;font-weight:700;font-family:monospace">${fN(ad.purchases)}</div></div>
-                <div><div style="font-size:7px;color:var(--muted2);text-transform:uppercase">CPV</div><div class="${ad.cpv==null?'':ad.cpv<=CPV_BOM?'cg':ad.cpv<=CPV_MEDIO?'cw2':'cr'}" style="font-size:10px;font-weight:700;font-family:monospace">${ad.cpv!=null?fR(ad.cpv):'—'}</div></div>
+                <div><div style="font-size:7px;color:var(--muted2);text-transform:uppercase">${t('ad_leads')}</div><div style="font-size:10px;font-weight:700;font-family:monospace">${fN(ad.ld)}</div></div>
+                <div><div style="font-size:7px;color:var(--muted2);text-transform:uppercase">${t('ad_cpl')}</div><div class="${cplCls(ad.cpl)}" style="font-size:10px;font-weight:700;font-family:monospace">${fR(ad.cpl)}</div></div>
                 <div><div style="font-size:7px;color:var(--muted2);text-transform:uppercase">${t('ad_ctr')}</div><div style="font-size:10px;font-weight:700;font-family:monospace">${fP(ad.ctr)}</div></div>
                 <div><div style="font-size:7px;color:var(--muted2);text-transform:uppercase">${t('ad_invest')}</div><div style="font-size:10px;font-weight:700;font-family:monospace">${fR(ad.spend)}</div></div>
               </div>
@@ -1459,8 +1435,8 @@ function renderAds(ads){
         <div style="font-size:9px;color:var(--muted2);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${ad.camp||''}">${ad.camp?'📁 '+ad.camp.split('-').slice(-2).join('-'):''}</div>
         <div style="font-size:8px;color:var(--muted2);opacity:.75;margin-bottom:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${ad.adset||''}">${ad.adset?'↳ '+ad.adset:''}</div>
         <div class="ad-stats">
-          <div><div class="as-l">${t('kpi_vendas')}</div><div class="as-v">${fN(ad.purchases)}</div></div>
-          <div><div class="as-l">CPV</div><div class="as-v ${ad.cpv==null?'':ad.cpv<=CPV_BOM?'cg':ad.cpv<=CPV_MEDIO?'cw2':'cr'}">${ad.cpv!=null?fR(ad.cpv):'—'}</div></div>
+          <div><div class="as-l">${t('ad_leads')}</div><div class="as-v">${fN(ad.ld)}</div></div>
+          <div><div class="as-l">${t('ad_cpl')}</div><div class="as-v ${cplCls(ad.cpl)}">${fR(ad.cpl)}</div></div>
           <div><div class="as-l">${t('ad_ctr')}</div><div class="as-v">${fP(ad.ctr)}</div></div>
           <div><div class="as-l">${t('ad_invest')}</div><div class="as-v">${fR(ad.spend)}</div></div>
         </div>
@@ -1634,25 +1610,19 @@ function renderDiarioCharts(){
   const totLc  = (md.link_clicks||[]).reduce((a,b)=>a+(b||0),0);
   const totPv  = (md.page_view||[]).reduce((a,b)=>a+(b||0),0);
   const totLd  = (md.leads||[]).reduce((a,b)=>a+(b||0),0);
-  const totCk  = (md.checkout||[]).reduce((a,b)=>a+(b||0),0);
-  const totPu  = (md.purchases||[]).reduce((a,b)=>a+(b||0),0);
   const totSp  = (md.spend||[]).reduce((a,b)=>a+(b||0),0);
   const avgCTR = totImp>0 ? r2(totLc/totImp*100)  : null;
   const avgCR  = totLc>0  ? r2(totPv/totLc*100)   : null;
-  const avgTxCK= totPv>0  ? r2(totCk/totPv*100)   : null;
-  const avgTxLP= totPv>0  ? r2(totPu/totPv*100)   : null;
-  const avgCPV = totPu>0  ? r2(totSp/totPu)       : null;
   const avgTxCV= totPv>0  ? r2(totLd/totPv*100)   : null;
   const avgCPL = totLd>0  ? r2(totSp/totLd)       : null;
   const avgCPM = totImp>0 ? r2(totSp/totImp*1000) : null;
 
   const METAS={
-    cpv:   {bom:CPV_BOM,    medio:CPV_MEDIO,    inv:true,  avgVal:avgCPV},
-    cr:    {bom:CR_BOM,     medio:CR_MEDIO,     inv:false, avgVal:avgCR},
-    tx_ck: {bom:CHECKOUT_BOM,medio:CHECKOUT_MEDIO,inv:false,avgVal:avgTxCK},
-    tx_lp: {bom:TXLP_BOM,   medio:TXLP_MEDIO,   inv:false, avgVal:avgTxLP},
     ctr:   {bom:CTR_BOM,    medio:CTR_MEDIO,    inv:false, avgVal:avgCTR},
-    cpm:   {bom:null, medio:null, inv:true, avgVal:avgCPM},
+    cpm:   {bom:null,       medio:null,         inv:true,  avgVal:avgCPM},
+    cpl:   {bom:CPL_BOM,    medio:CPL_MEDIO,    inv:true,  avgVal:avgCPL},
+    cr:    {bom:CR_BOM,     medio:CR_MEDIO,     inv:false, avgVal:avgCR},
+    tx_cv: {bom:TX_CONV_BOM,medio:TX_CONV_MEDIO,inv:false, avgVal:avgTxCV},
   };
 
   function getMetricColor(id, val){
@@ -1665,12 +1635,11 @@ function renderDiarioCharts(){
 
   // Labels traduzidos para o eixo Y dos gráficos
   const METRICS=[
-    {id:'cpv',  ttl:`${t('kpi_cpv')} (${MOEDA_SIMBOLO})`,     suffix:'',  fmt:v=>v!=null?fR(v):null, data:()=>md.cpv},
-    {id:'cr',   ttl:'Connect Rate (%)',                       suffix:'%', data:()=>md.connect_rate},
-    {id:'tx_ck',ttl:t('m_tx_checkout'),                       suffix:'%', data:()=>md.tx_checkout},
-    {id:'tx_lp',ttl:t('m_tx_conv_lp'),                        suffix:'%', data:()=>md.tx_conv_lp},
-    {id:'ctr',  ttl:'CTR (%)',                                suffix:'%', data:()=>md.ctr},
-    {id:'cpm',  ttl:`CPM (${MOEDA_SIMBOLO})`,                 suffix:'',  fmt:v=>v!=null?fR(v):null, data:()=>md.cpm},
+    {id:'ctr',  ttl:'CTR (%)',                                 suffix:'%', data:()=>md.ctr},
+    {id:'cpm',  ttl:`CPM (${MOEDA_SIMBOLO})`,                  suffix:'',  fmt:v=>v!=null?fR(v):null, data:()=>md.cpm},
+    {id:'cpl',  ttl:`${t('kpi_cpl_sub')} (${MOEDA_SIMBOLO})`,  suffix:'',  fmt:v=>v!=null?fR(v):null, data:()=>md.cpl},
+    {id:'cr',   ttl:'Connect Rate (%)',                        suffix:'%', data:()=>md.connect_rate},
+    {id:'tx_cv',ttl:(currentLang==='ES'?'Tasa Conversión (%)':'Taxa Conversão (%)'), suffix:'%', data:()=>md.tx_conv},
   ];
 
   const el=document.getElementById('dailyCharts');
@@ -1993,6 +1962,7 @@ function __MAXROW__(rows,p,utm,vals){
 }
 
 // ═══ CONTROLES ═══
+const MOSTRAR_VENDAS = true;
 function buildLctBar(){
   const bar=document.getElementById('lctBar');
   if(!bar) return;
@@ -2001,8 +1971,8 @@ function buildLctBar(){
   }
   bar.style.display='flex';
   bar.innerHTML=LANCAMENTO_CODS.map(cod=>
-    `<button class="pb${filtroAtivo===cod?' active':''}" onclick="setFiltroAtivo('${cod.replace(/'/g,"\\'")}',this)">${cod}</button>`
-  ).join('')+`<button class="pb${filtroAtivo==='all'?' active':''}" id="btnLctAll" onclick="setFiltroAtivo('all',this)">${t('lct_tudo')}</button>`;
+    `<button class="lct-btn${filtroAtivo===cod?' active':''}" onclick="setFiltroAtivo('${cod.replace(/'/g,"\\'")}',this)">${cod}</button>`
+  ).join('')+`<button class="lct-btn${filtroAtivo==='all'?' active':''}" id="btnLctAll" onclick="setFiltroAtivo('all',this)">${t('lct_tudo')}</button>`;
 }
 
 function setPeriod(days,btn){
@@ -2039,7 +2009,7 @@ function clearDates(){
 }
 function setFiltroAtivo(grupo,btn){
   filtroAtivo=grupo;
-  document.querySelectorAll('#lctBar .pb').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('#lctBar button').forEach(b=>b.classList.remove('active'));
   if(btn) btn.classList.add('active');
   rerenderActive();
 }
@@ -2359,18 +2329,8 @@ function toggleSb(){document.getElementById('sidebar').classList.toggle('open');
 function closeSb(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('open');}
 
 // ═══ TOPBAR OFFSET ═══
-function ajustarPaddingContent(){
-  const tb=document.querySelector('.topbar');
-  const ct=document.querySelector('.content');
-  if(tb&&ct){
-    const h=tb.getBoundingClientRect().height;
-    if(h>0) ct.style.paddingTop=(h+10)+'px';
-  }
-}
-ajustarPaddingContent();
-document.addEventListener('DOMContentLoaded', ajustarPaddingContent);
-window.addEventListener('load', ajustarPaddingContent);
-window.addEventListener('resize', ajustarPaddingContent);
+
+
 
 // ═══ INIT ═══
 (function(){
@@ -2406,10 +2366,13 @@ window.addEventListener('resize', ajustarPaddingContent);
     if(pgP) pgP.style.display='none';
   }
   applyI18n();
-  document.getElementById('sbVendas').style.display=(VENDAS_DATA&&VENDAS_DATA!==false)?'':'none';
+  document.getElementById('sbVendas').style.display=((typeof MOSTRAR_VENDAS==='undefined'||MOSTRAR_VENDAS)&&VENDAS_DATA&&VENDAS_DATA!==false)?'':'none';
   renderMeta();
-  ajustarPaddingContent();
 })();
+
+// Ajusta padding-top do content baseado na altura real da topbar
+/* topbar sticky: compensação de padding desnecessária */
+
 </script>
 
   <!-- MODAL DRILL-DOWN PESQUISA -->
