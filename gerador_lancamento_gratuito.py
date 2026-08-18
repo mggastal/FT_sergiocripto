@@ -98,6 +98,10 @@ URL_PES  = sheet_url("Pesquisa")
 URL_GA   = sheet_url("breakdown-gender-age")
 URL_PT   = sheet_url("breakdown-platform")
 ABA_VENDAS = "Vendas VSL"          # aba da planilha com as vendas
+MOSTRAR_VENDAS = False       # True para exibir a página/menu "Vendas" quando as vendas começarem
+DATA_MINIMA = "01/01/2026"   # ignora linhas ANTES desta data. A planilha tem histórico desde set/2025;
+                             # como o dashboard usa datas dd/mm, a partir de 22/09/2026 os dias de 2025
+                             # colidiriam com os de 2026 e inflariam os filtros (mesmo bug já visto na Rafa).
 URL_VENDAS = sheet_url(ABA_VENDAS)
 
 def to_num(s):
@@ -136,16 +140,25 @@ def load_meta():
         "Action Link Clicks":"link_clicks",
         "Action Landing Page View":"page_view",
         "Action FB Pixel Custom (Offsite Conversion)":"leads_pixel",
+        "Action Leads":"leads_native",
         "Action Omni Initiated Checkout":"checkout",
         "Action Omni Purchase":"purchases",
         "Action Value Omni Purchase":"purchase_value"
     })
     df["date"]=pd.to_datetime(df["date"],errors="coerce")
-    for c in ["spend","impressions","link_clicks","page_view","leads_pixel","checkout","purchases","purchase_value"]:
+    df=df.dropna(subset=["date"])
+    if DATA_MINIMA:
+        _lim=pd.to_datetime(DATA_MINIMA,dayfirst=True)
+        _antes=int((df["date"]<_lim).sum())
+        if _antes:
+            df=df[df["date"]>=_lim]
+            print(f"     ⚠ {_antes} linha(s) antes de {DATA_MINIMA} ignorada(s)")
+    for c in ["spend","impressions","link_clicks","page_view","leads_pixel","leads_native","checkout","purchases","purchase_value"]:
         if c not in df.columns: df[c]=0
         df[c]=to_num(df[c])
     # leads = Action FB Pixel Custom + Action Omni Purchase (purchase configurado como lead tbm)
-    df["leads"] = df["leads_pixel"] + df["purchases"]
+    # leads = soma de todas as métricas de lead/conversão (cada lançamento usa uma diferente)
+    df["leads"] = df["leads_pixel"] + df["leads_native"] + df["purchases"]
     if "status" in df.columns:
         df["status"]=df["status"].astype(str).str.strip().str.upper()
     df["lct_codes"]=df["campaign"].apply(matched_codes)
@@ -348,8 +361,11 @@ def meta_breakdowns(df):
         df_ga=pd.read_csv(URL_GA)
         df_ga["date"]=pd.to_datetime(df_ga["Date"],errors="coerce")
         df_ga["spend"]=to_num(df_ga["Spend (Cost, Amount Spent)"])
-        leads_col_ga="Action FB Pixel Custom (Offsite Conversion)" if "Action FB Pixel Custom (Offsite Conversion)" in df_ga.columns else "Action Leads"
-        df_ga["leads"]=to_num(df_ga[leads_col_ga])+to_num(df_ga["Action Omni Purchase"]) if "Action Omni Purchase" in df_ga.columns else to_num(df_ga[leads_col_ga])
+        # soma todas as métricas de lead disponíveis no breakdown
+        leads_ga = pd.Series([0.0]*len(df_ga))
+        for _lc in ["Action FB Pixel Custom (Offsite Conversion)","Action Leads","Action Omni Purchase"]:
+            if _lc in df_ga.columns: leads_ga = leads_ga + to_num(df_ga[_lc])
+        df_ga["leads"] = leads_ga
         df_ga["age"]=df_ga["Age (Breakdown)"].astype(str)
         df_ga["gender"]=df_ga["Gender (Breakdown)"].astype(str)
         if "Campaign Name" in df_ga.columns:
@@ -362,8 +378,10 @@ def meta_breakdowns(df):
         df_pt=pd.read_csv(URL_PT)
         df_pt["date"]=pd.to_datetime(df_pt["Date"],errors="coerce")
         df_pt["spend"]=to_num(df_pt["Spend (Cost, Amount Spent)"])
-        leads_col_pt="Action FB Pixel Custom (Offsite Conversion)" if "Action FB Pixel Custom (Offsite Conversion)" in df_pt.columns else "Action Leads"
-        df_pt["leads"]=to_num(df_pt[leads_col_pt])+to_num(df_pt["Action Omni Purchase"]) if "Action Omni Purchase" in df_pt.columns else to_num(df_pt[leads_col_pt])
+        leads_pt = pd.Series([0.0]*len(df_pt))
+        for _lc in ["Action FB Pixel Custom (Offsite Conversion)","Action Leads","Action Omni Purchase"]:
+            if _lc in df_pt.columns: leads_pt = leads_pt + to_num(df_pt[_lc])
+        df_pt["leads"] = leads_pt
         df_pt["platform"]=df_pt["Platform Position (Breakdown)"].astype(str)
         if "Campaign Name" in df_pt.columns:
             df_pt["lct_codes"]=df_pt["Campaign Name"].apply(matched_codes)
@@ -764,6 +782,7 @@ def inject_all(tpl, meta_k, meta_d, meta_dc, meta_raw_c, meta_t, meta_bd, pes, l
         html=replace_js_const(html,"LPV_DATA", lpv_data)
     html=replace_js_const(html,"VENDAS_DATA", vendas_data if (USAR_VENDAS and vendas_data) else False)
     html=replace_js_const(html,"LANCAMENTO_CODS",  LANCAMENTO_CODS)
+    html=replace_js_const(html,"MOSTRAR_VENDAS",  MOSTRAR_VENDAS)
     html=replace_js_const(html,"DATA_GERACAO",     date.today().strftime("%Y-%m-%d"))
 
     _cpl_bom   = globals().get("CPL_BOM",   globals().get("CPA_BOM",   5.0))
