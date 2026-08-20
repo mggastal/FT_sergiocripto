@@ -3,6 +3,7 @@
   "cor": "#B8860B",
   "letra": "SC",
   "lancamentos": [
+    "IP03",
     "VSL",
     "IP01",
     "IP02",
@@ -13,8 +14,8 @@
   "moeda_simbolo": "€",
   "atualizado": "20/08/2026",
   "kpis": {
-    "spend": 418.69,
-    "leads": 29,
-    "cpl": 14.44
+    "spend": 291.64,
+    "leads": 32,
+    "cpl": 9.11
   }
 }
