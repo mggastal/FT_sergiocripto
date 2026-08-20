@@ -25,6 +25,7 @@ COR_ACENTO       = "#B8860B"
 #   ("LABEL","TERMO")   → botão mostra LABEL, busca "contém TERMO" no nome da campanha
 # Primeiro item = selecionado por padrão ao abrir o dashboard.
 LANCAMENTO_CODS  = [
+    ("IP03",    "IP03"),
     ("VSL",    "VSL"),
     ("IP01",   "iP01"),
     ("IP02",   "IP02"),
