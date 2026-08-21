@@ -34,6 +34,7 @@ LANCAMENTO_CODS  = [
 ]
 USAR_PESQUISA    = False           # False = oculta aba Pesquisa
 USAR_VENDAS      = True            # False = oculta aba Vendas
+LPV_LANCAMENTO   = "IP03"         # Lançamento com comparativo de LPs; None = desativa aba
 
 # ══ MOEDA ══════════════════════════════════════════════
 # Escolha a moeda do cliente:
@@ -188,8 +189,23 @@ def calc_kpis(p):
         "cpv":       round(sp/pu,2) if pu>0 else None
     }
 
+def calc_temp(p):
+    """Calcula métricas por temperatura de público: TT=quente, TF=frio."""
+    def t_kpi(sub):
+        sp = float(sub["spend"].sum()); ld = float(sub["leads"].sum())
+        return {"spend": round(sp,2), "leads": int(ld), "cpl": round(sp/ld,2) if ld>0 else None}
+    q = p[p["campaign"].str.contains("-TT-", na=False)]
+    f = p[p["campaign"].str.contains("-TF-", na=False)]
+    return {"quente": t_kpi(q), "frio": t_kpi(f)}
+
 def meta_kpis(df):
-    return {g: calc_kpis(df[df["lct_codes"].apply(lambda c: g in c)] if g!="all" else df) for g in filter_groups()}
+    result = {}
+    for g in filter_groups():
+        sub = df[df["lct_codes"].apply(lambda c: g in c)] if g!="all" else df
+        kpis = calc_kpis(sub)
+        kpis["temp"] = calc_temp(sub)
+        result[g] = kpis
+    return result
 
 def build_daily(p):
     agg=p.groupby("date").agg(
@@ -681,7 +697,8 @@ def replace_js_const(html, name, value):
 def build_lpv_data(df):
     import re as _re
     from collections import defaultdict
-    _lct_filter = LANCAMENTO_CODS[0] if LANCAMENTO_CODS else None
+    # Usa LPV_LANCAMENTO se definido, senão primeiro da lista
+    _lct_filter = globals().get("LPV_LANCAMENTO") or (LANCAMENTO_CODS[0] if LANCAMENTO_CODS else None)
     sub = df[df["lct_codes"].apply(lambda c: _lct_filter in c)] if _lct_filter else df
 
     lpv_daily = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
@@ -713,7 +730,8 @@ def build_lpv_data(df):
             lpv_camps[camp][k]  += v
 
     def day_key(s):
-        dd,mm=s.split("/"); return int(mm)*100+int(dd)
+        parts=s.split("/"); dd=parts[0]; mm=parts[1]; yy=int(parts[2]) if len(parts)>2 else 0
+        return yy*10000+int(mm)*100+int(dd)
     days = sorted(all_days_set, key=day_key)
     # ordena LPV01, LPV02, LPV03... numericamente
     lpv_list = sorted(lpv_seen, key=lambda x: int(x.replace("LPV","")))
@@ -781,6 +799,9 @@ def inject_all(tpl, meta_k, meta_d, meta_dc, meta_raw_c, meta_t, meta_bd, pes, l
     html=replace_js_const(html,"PESQUISA",         pes if USAR_PESQUISA else False)
     if lpv_data is not None:
         html=replace_js_const(html,"LPV_DATA", lpv_data)
+        # LPV_MODO: 'leads' para lançamentos de captação, 'vendas' para VSL/venda direta
+        _lpv_modo = "leads"  # IP03 é captação
+        html=re.sub(r"const LPV_MODO\s*=\s*[^;]+;", f"const LPV_MODO='{_lpv_modo}';", html, count=1)
     html=replace_js_const(html,"VENDAS_DATA", vendas_data if (USAR_VENDAS and vendas_data) else False)
     html=replace_js_const(html,"LANCAMENTO_CODS",  LANCAMENTO_CODS)
     html=replace_js_const(html,"MOSTRAR_VENDAS",  MOSTRAR_VENDAS)
@@ -850,13 +871,19 @@ def main():
         print("  (desativada)")
 
     print("\n[COMPARAÇÃO LP]")
-    try:
-        lpv_data = build_lpv_data(df_meta)
-        l1=lpv_data["LPV01"]["totals"]; l2=lpv_data["LPV02"]["totals"]
-        print(f"  LPV01: {l1['leads']} leads | CPL {MOEDA_SIMBOLO}{l1['cpl']} | invest {MOEDA_SIMBOLO}{l1['spend']:.2f}")
-        print(f"  LPV02: {l2['leads']} leads | CPL {MOEDA_SIMBOLO}{l2['cpl']} | invest {MOEDA_SIMBOLO}{l2['spend']:.2f}")
-    except Exception as e:
-        print(f"  ⚠ {e}"); lpv_data = None
+    _lpv_lancamento = globals().get("LPV_LANCAMENTO")
+    if _lpv_lancamento:
+        try:
+            lpv_data = build_lpv_data(df_meta)
+            lpv_list = lpv_data.get("order", [])
+            for lv in lpv_list:
+                t = lpv_data[lv]["totals"]
+                print(f"  {lv}: {t['leads']} leads | CPL {MOEDA_SIMBOLO}{t['cpl']} | invest {MOEDA_SIMBOLO}{t['spend']:.2f}")
+        except Exception as e:
+            print(f"  ⚠ {e}"); lpv_data = None
+    else:
+        lpv_data = None
+        print("  (desativada)")
 
     print("\n[VENDAS]")
     vendas_data = None
