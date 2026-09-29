@@ -25,6 +25,7 @@ COR_ACENTO       = "#B8860B"
 #   ("LABEL","TERMO")   → botão mostra LABEL, busca "contém TERMO" no nome da campanha
 # Primeiro item = selecionado por padrão ao abrir o dashboard.
 LANCAMENTO_CODS  = [
+    ("IP04",    "IP04"),
     ("IP03",    "IP03"),
     ("VSL",    "VSL"),
     ("IP01",   "iP01"),
@@ -34,7 +35,7 @@ LANCAMENTO_CODS  = [
 ]
 USAR_PESQUISA    = False           # False = oculta aba Pesquisa
 USAR_VENDAS      = True            # False = oculta aba Vendas
-LPV_LANCAMENTO   = "IP03"         # Lançamento com comparativo de LPs; None = desativa aba
+LPV_LANCAMENTO   = "IP04"         # Lançamento com comparativo de LPs; None = desativa aba
 
 # ══ MOEDA ══════════════════════════════════════════════
 # Escolha a moeda do cliente:
@@ -47,8 +48,8 @@ MOEDA            = "EUR"
 # ── Foco em VENDAS (VSL): CPV = custo por venda ──
 CPV_BOM          = 80.0   # Custo por Venda ≤ este → verde | até CPV_MEDIO → amarelo | acima → vermelho
 CPV_MEDIO        = 150.0
-CPL_BOM          = 9.06   # (mantido p/ retrocompat, não usado no foco vendas)
-CPL_MEDIO        = 12.0
+CPL_BOM          = 10.0   # (mantido p/ retrocompat, não usado no foco vendas)
+CPL_MEDIO        = 14.0
 CTR_BOM          = 1.0    # CTR ≥ 1.2% → verde | 0.8-1.2% → amarelo | abaixo → vermelho
 CTR_MEDIO        = 0.8
 CR_BOM           = 65.0   # Connect Rate ≥ 40% → verde | 25-40% → amarelo | abaixo → vermelho
