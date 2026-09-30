@@ -13,10 +13,10 @@
   ],
   "moeda": "EUR",
   "moeda_simbolo": "€",
-  "atualizado": "29/09/2026",
+  "atualizado": "30/09/2026",
   "kpis": {
-    "spend": 1738.23,
+    "spend": 1744.61,
     "leads": 144,
-    "cpl": 12.07
+    "cpl": 12.12
   }
 }
