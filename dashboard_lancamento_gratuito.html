@@ -478,8 +478,8 @@ details.desk-only{display:block!important;}
     <div class="page-section" id="page-cmp">
       <div class="cp-bar">
         <div class="cp-toggle" id="cmpToggle">
-          <button class="on" data-v="same" onclick="setCmpModo('same')" id="cmpSameLbl">Mesmos dias</button>
-          <button data-v="full" onclick="setCmpModo('full')" data-i18n="cmp_completo">Lançamento completo</button>
+          <button class="on" data-v="full" onclick="setCmpModo('full')" data-i18n="cmp_completo">Lançamento completo</button>
+          <button data-v="same" onclick="setCmpModo('same')" id="cmpSameLbl">Mesmos dias</button>
         </div>
         <span class="cp-sub" data-i18n="cmp_nota">Compara os lançamentos inteiros; não usa o filtro de período. Dia 1 = primeiro dia com investimento.</span>
       </div>
@@ -2822,7 +2822,7 @@ function cpToggleRow(i){
 // ═══ COMPARAR LANÇAMENTOS (ex.: TLC01 × TLC02 × TLC03) ═══
 // Usa META_DAILY de cada código. Ignora o filtro de período: compara lançamentos inteiros
 // ou os N primeiros dias de captação (N = dias do lançamento mais recente).
-let cmpModo='same';
+let cmpModo='full';
 const CMP_CORES=['#94a3b8','#3b82f6','#B8860B','#059669','#9333ea','#dc2626'];
 function cmpSeries(code){
   const d=COMPARATIVO?.daily?.[code]||META_DAILY?.[code]; if(!d?.days?.length) return null;

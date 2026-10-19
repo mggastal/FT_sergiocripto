@@ -123,11 +123,16 @@ def safe(v):
     if v is None or (isinstance(v,float) and pd.isna(v)): return None
     return round(float(v),2) if float(v)!=0 else None
 
-def download_thumb(url, d):
+_IMGS_USADAS=set()
+def download_thumb(url, d, key=None):
+    """Nome do arquivo vem de uma chave estável (campanha|conjunto|anúncio), não da URL:
+    a Meta troca a URL da miniatura todo dia e, com hash da URL, a pasta imgs/ crescia
+    sem parar (cada rodada baixava tudo de novo). Arquivo existente é reaproveitado."""
     if not url or str(url)=="nan": return ""
     try:
         ext=".png" if ".png" in url.lower() else ".jpg"
-        fname=hashlib.md5(url.encode()).hexdigest()[:16]+ext
+        fname=hashlib.md5((key or url).encode()).hexdigest()[:16]+ext
+        _IMGS_USADAS.add(fname)
         fp=d/fname
         if not fp.exists():
             r=requests.get(url,timeout=10,headers={"User-Agent":"Mozilla/5.0"})
@@ -302,7 +307,7 @@ def build_cripub(df, img_dir):
         if k not in combo_idx:
             combo_idx[k]=len(combos)
             combos.append([ci[k[0]],ai[k[1]],di[k[2]],
-                           download_thumb(thumb_url.get(k,""),img_dir),ad_status.get(k,"")])
+                           download_thumb(thumb_url.get(k,""),img_dir,"|".join(k)),ad_status.get(k,"")])
         d=r["date"].strftime("%d/%m/%y")
         if d not in day_idx: day_idx[d]=len(days); days.append(d)
         sp=round(float(r["spend"]),2); imp=int(r["impressions"]); lc=int(r["link_clicks"])
@@ -373,7 +378,7 @@ def meta_tables_period(df, p, img_dir, camp_status=None, adset_status=None, ad_s
     thumb_map={}
     for _,r in df_full_thumb.iterrows():
         k=(str(r["ad"]),str(r["adset"]),str(r["campaign"]))
-        if k not in thumb_map: thumb_map[k]=download_thumb(str(r["thumb"]),img_dir)
+        if k not in thumb_map: thumb_map[k]=download_thumb(str(r["thumb"]),img_dir,"|".join((k[2],k[1],k[0])))
 
     ads_agg=p.groupby(["ad","adset","campaign"]).agg(spend=("spend","sum"),impressions=("impressions","sum"),link_clicks=("link_clicks","sum"),page_view=("page_view","sum"),leads=("leads","sum"),checkout=("checkout","sum"),purchases=("purchases","sum"),purchase_value=("purchase_value","sum")).reset_index().sort_values(["purchases","leads"],ascending=False)
     ads=[]
@@ -972,6 +977,13 @@ def main():
         }
     }
     Path("data.json").write_text(json.dumps(data_json,ensure_ascii=False,indent=2),encoding="utf-8")
+    # Limpa miniaturas que nenhum anúncio usa mais (mantém a pasta imgs/ pequena)
+    _apagadas=0
+    if _IMGS_USADAS:
+        for f in img_dir.iterdir():
+            if f.is_file() and f.name not in _IMGS_USADAS:
+                f.unlink(); _apagadas+=1
+    print(f"  ✓ imgs/: {len(_IMGS_USADAS)} em uso | {_apagadas} antigas apagadas")
     print(f"  ✓ data.json\n{'='*60}")
 
 if __name__=="__main__":
