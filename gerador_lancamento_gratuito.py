@@ -53,21 +53,21 @@ MOEDA            = "EUR"
 # ── Foco em VENDAS (VSL): CPV = custo por venda ──
 CPV_BOM          = 80.0   # Custo por Venda ≤ este → verde | até CPV_MEDIO → amarelo | acima → vermelho
 CPV_MEDIO        = 150.0
-CPL_BOM          = 10.0   # (mantido p/ retrocompat, não usado no foco vendas)
-CPL_MEDIO        = 14.0
-CTR_BOM          = 1.0    # CTR ≥ 1.2% → verde | 0.8-1.2% → amarelo | abaixo → vermelho
-CTR_MEDIO        = 0.8
+CPL_BOM          = 13.0   # (mantido p/ retrocompat, não usado no foco vendas)
+CPL_MEDIO        = 18.0
+CTR_BOM          = 1.5    # CTR ≥ 1.2% → verde | 0.8-1.2% → amarelo | abaixo → vermelho
+CTR_MEDIO        = 1.0
 CR_BOM           = 65.0   # Connect Rate ≥ 40% → verde | 25-40% → amarelo | abaixo → vermelho
 CR_MEDIO         = 60.0
-TX_CONV_BOM      = 25.0   # (retrocompat)
-TX_CONV_MEDIO    = 18.0
+TX_CONV_BOM      = 20.0   # (retrocompat)
+TX_CONV_MEDIO    = 13.0
 # Funil VSL:
 CHECKOUT_BOM     = 8.0    # Taxa de Checkout (checkout/LPView) ≥ → verde
 CHECKOUT_MEDIO   = 4.0
 TXLP_BOM         = 3.0    # Taxa de Conversão LP (compra/LPView) ≥ → verde
 TXLP_MEDIO       = 1.5
-CPM_BOM          = 5.0    
-CPM_MEDIO        = 12.0
+CPM_BOM          = 20.0    
+CPM_MEDIO        = 25.0
 
 # ══════════════════════════════════════════════════════
 # Mapeamento de moeda → símbolo e label
