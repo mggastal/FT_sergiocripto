@@ -25,6 +25,7 @@ COR_ACENTO       = "#B8860B"
 #   ("LABEL","TERMO")   → botão mostra LABEL, busca "contém TERMO" no nome da campanha
 # Primeiro item = selecionado por padrão ao abrir o dashboard.
 LANCAMENTO_CODS  = [
+    ("TLC03",   "TLC03"),
     ("IP04",    "IP04"),
     ("IP03",    "IP03"),
     ("VSL",    "VSL"),
@@ -36,7 +37,10 @@ LANCAMENTO_CODS  = [
 USAR_PESQUISA    = False           # False = oculta aba Pesquisa
 USAR_VENDAS      = True            # False = oculta aba Vendas
 USAR_CRIPUB      = True            # aba "Criativos & Públicos" (soma por nome entre campanhas)
-LPV_LANCAMENTO   = "IP04"         # Lançamento com comparativo de LPs; None = desativa aba
+# Aba "Comparar": lançamentos da mesma série lado a lado (labels de LANCAMENTO_CODS). None = oculta
+COMPARATIVO      = {"label": "TLCs", "codes": ["TLC01", "TLC02", "TLC03"]}
+COMPARATIVO_EXCLUIR = r"RETARGETING|REMARKETING|RMKT"   # campanhas fora da comparação (regex no nome)
+LPV_LANCAMENTO   = "TLC03"         # Lançamento com comparativo de LPs; None = desativa aba
 
 # ══ MOEDA ══════════════════════════════════════════════
 # Escolha a moeda do cliente:
@@ -826,7 +830,14 @@ def build_lpv_data(df):
     return result
 
 
-def inject_all(tpl, meta_k, meta_d, meta_dc, meta_raw_c, meta_t, meta_bd, pes, lpv_data=None, vendas_data=None, cripub=None):
+def build_comparativo(df):
+    """Série diária por lançamento para a aba Comparar, sem retargeting."""
+    if not COMPARATIVO: return None
+    sub=df[~df["campaign"].astype(str).str.contains(COMPARATIVO_EXCLUIR,case=False,regex=True,na=False)] if COMPARATIVO_EXCLUIR else df
+    daily={c: build_daily(subset_for_group(sub,c)) for c in COMPARATIVO["codes"] if c in LANCAMENTO_CODS}
+    return {**COMPARATIVO,"daily":daily}
+
+def inject_all(tpl, meta_k, meta_d, meta_dc, meta_raw_c, meta_t, meta_bd, pes, lpv_data=None, vendas_data=None, cripub=None, cmp_data=None):
     html=Path(tpl).read_text(encoding="utf-8")
     html=replace_js_const(html,"META_KPIS",       meta_k)
     html=replace_js_const(html,"META_DAILY",       meta_d)
@@ -835,6 +846,7 @@ def inject_all(tpl, meta_k, meta_d, meta_dc, meta_raw_c, meta_t, meta_bd, pes, l
     html=replace_js_const(html,"META_TABLES",      meta_t)
     html=replace_js_const(html,"META_BD",          meta_bd)
     html=replace_js_const(html,"PESQUISA",         pes if USAR_PESQUISA else False)
+    html=replace_js_const(html,"COMPARATIVO",      cmp_data if cmp_data else False)
     html=replace_js_const(html,"CRIPUB",           cripub if (USAR_CRIPUB and cripub) else False)
     if lpv_data is not None:
         html=replace_js_const(html,"LPV_DATA", lpv_data)
@@ -945,7 +957,7 @@ def main():
     print("\n[HTML]")
     if not Path(TEMPLATE_FILE).exists():
         print(f"  ERRO: {TEMPLATE_FILE} não encontrado"); return
-    html=inject_all(TEMPLATE_FILE,m_k,m_d,m_dc,m_raw,m_t,m_bd,pes,lpv_data,vendas_data,cripub)
+    html=inject_all(TEMPLATE_FILE,m_k,m_d,m_dc,m_raw,m_t,m_bd,pes,lpv_data,vendas_data,cripub,build_comparativo(df_meta))
     Path(OUTPUT_FILE).write_text(html,encoding="utf-8")
     print(f"  ✓ {OUTPUT_FILE} ({len(html)//1024}KB)")
 
