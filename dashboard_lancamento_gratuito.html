@@ -1344,7 +1344,7 @@ function renderMeta(){
   funnelKpis.tx_conv=pv2>0?r2(ld2/pv2*100):null;
   funnelKpis.cpl=ld2>0?r2(spMK/ld2):null;
   setTimeout(()=>buildFunnel(funnelKpis),30);
-  setTimeout(()=>buildTemp(getMK()?.temp),30);
+  setTimeout(()=>buildTemp(calcTempFromRaw()||getMK()?.temp),30);
 
   dc('chMetaMain');
   CH['chMetaMain']=new Chart(document.getElementById('chMetaMain'),{
@@ -1375,6 +1375,29 @@ function getPeriodKey(){
   if(periodDays===14) return '14';
   if(periodDays===30) return '30';
   return 'all';
+}
+
+// Temperatura (Quente = -TT-, Frio = -TF- no nome da campanha) recalculada pelo
+// META_RAW_CAMP, respeitando lançamento, período, datas e filtro de campanha.
+function calcTempFromRaw(){
+  if(!META_RAW_CAMP?.length) return null;
+  const hoje=getHoje();
+  const fim=new Date(hoje); if(periodDays===1) fim.setDate(fim.getDate()-1); fim.setHours(23,59,59,999);
+  const ini=new Date(fim); ini.setDate(ini.getDate()-(periodDays===1?0:periodDays-1)); ini.setHours(0,0,0,0);
+  const t={quente:{spend:0,leads:0},frio:{spend:0,leads:0}};
+  META_RAW_CAMP.forEach(r=>{
+    if(filtroAtivo!=='all' && !(r.codes||[]).includes(filtroAtivo)) return;
+    if(metaCampSel?.size>0 && !metaCampSel.has(r.c)) return;
+    const dt=parseDayStr(r.d);
+    if(periodDays>0 && (dt<ini||dt>fim)) return;
+    if(dateI&&dt<dateI) return;
+    if(dateF&&dt>dateF) return;
+    const k=r.c.includes('-TT-')?'quente':(r.c.includes('-TF-')?'frio':null);
+    if(!k) return;
+    t[k].spend+=r.sp||0; t[k].leads+=r.ld||0;
+  });
+  ['quente','frio'].forEach(k=>{const o=t[k]; o.spend=r2(o.spend); o.cpl=o.leads>0?r2(o.spend/o.leads):null;});
+  return t;
 }
 
 function calcTableFromRaw(){
